@@ -109,6 +109,7 @@ public final class Logger {
             return "r_o:null";
         } else {
             final String _tmp;
+
             if (o instanceof String) {
                 _tmp = "r_s:";
             } else if (o instanceof Throwable) {
@@ -135,7 +136,7 @@ public final class Logger {
                 } catch (final Throwable _e) {
                     throw new RuntimeException(_e);
                 }
-            }
+                }
         });
     }
 
@@ -145,7 +146,7 @@ public final class Logger {
         super.finalize();
     }
 
-    synchronized void cleanup() {
+    private synchronized void cleanup() {
         if (!this.clean) {
             logWriter.flush();
             logWriter.close();
@@ -160,6 +161,7 @@ public final class Logger {
             if (msgFreq > 1) {
                 logWriter.println(String.format("%d,%s", msgFreq, prevMsg));
             }
+
             logWriter.println(String.format("1,%s", msg));
             prevMsg = msg;
             msgFreq = 1;

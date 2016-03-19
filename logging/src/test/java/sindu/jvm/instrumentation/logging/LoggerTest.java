@@ -85,7 +85,7 @@ public final class LoggerTest {
     public void testLogFieldForStaticField() throws Exception {
         final String _fieldValue = "test";
         final String _fieldName = "message";
-        final Logger.Action _action = Logger.Action.GET;
+        final Logger.Action _action = Logger.Action.PUT;
         Logger.logField(null, _fieldValue, _fieldName, _action);
 
         final String _expected = MessageFormat.format("1,{0},{1},{2},,{3}",
