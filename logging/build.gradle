@@ -1,6 +1,9 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 // In this section you declare where to find the dependencies of your project
 repositories {
     jcenter()
@@ -15,7 +18,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "2.11"
+    gradleVersion = "2.12"
 }
 
 compileJava {
