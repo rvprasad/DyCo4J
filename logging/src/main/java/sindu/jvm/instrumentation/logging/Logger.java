@@ -124,8 +124,7 @@ public final class Logger {
         }
     }
 
-    static void initialize(final PrintWriter logWriter)
-            throws IOException {
+    static void initialize(final PrintWriter logWriter) throws IOException {
         Logger = new Logger(logWriter);
 
         java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -136,7 +135,7 @@ public final class Logger {
                 } catch (final Throwable _e) {
                     throw new RuntimeException(_e);
                 }
-                }
+            }
         });
     }
 
