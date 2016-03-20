@@ -4,19 +4,18 @@ import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
 public final class LoggerInitializer {
-    public final static int forceClassLoading;
-
     static {
         try {
-            final File _profileFile = File.createTempFile("trace_", ".gz",
-                    new File("."));
+            final File _profileFile = File.createTempFile("trace_", ".gz", new File("."));
             final OutputStream _stream = new FileOutputStream(_profileFile, true);
-            final PrintWriter _logWriter = new PrintWriter(new BufferedOutputStream(
-                    new GZIPOutputStream(_stream), 10000000));
+            final PrintWriter _logWriter =
+                    new PrintWriter(new BufferedOutputStream(new GZIPOutputStream(_stream), 10000000));
             Logger.initialize(_logWriter);
-            forceClassLoading = 42;
         } catch (final IOException _e) {
             throw new RuntimeException(_e);
         }
+    }
+
+    public static void initialize() {
     }
 }

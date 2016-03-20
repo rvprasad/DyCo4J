@@ -27,8 +27,7 @@ public final class Logger {
     }
 
     public static void log(final String msg) {
-        final String _sb = String.valueOf(Thread.currentThread().getId()) +
-                "," + msg;
+        final String _sb = String.valueOf(Thread.currentThread().getId()) + "," + msg;
         Logger.writeLog(_sb);
     }
 
@@ -40,20 +39,17 @@ public final class Logger {
         log("arg", Byte.toString(index), val);
     }
 
-    public static void logArray(final Object array, final int index,
-                                final String value, final Action action) {
-        log(action.toString().concat("A"), Integer.toString(index),
-                toString(array), value);
+    public static void logArray(final Object array, final int index, final String value, final Action action) {
+        log(action.toString().concat("A"), Integer.toString(index), toString(array), value);
     }
 
     public static void logException(final Throwable exception) {
         log("exception", toString(exception), exception.getClass().getName());
     }
 
-    public static void logField(final Object receiver, final String fieldValue,
-                                final String fieldName, final Action action) {
-        log(action.toString().concat("F"), fieldName,
-                (receiver == null) ? "" : toString(receiver), fieldValue);
+    public static void logField(final Object receiver, final String fieldValue, final String fieldName,
+                                final Action action) {
+        log(action.toString().concat("F"), fieldName, (receiver == null) ? "" : toString(receiver), fieldValue);
     }
 
     public static void logMethodEntry(final String methodId) {

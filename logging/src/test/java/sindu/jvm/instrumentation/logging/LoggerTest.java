@@ -16,6 +16,8 @@ import java.io.StringWriter;
 import java.text.MessageFormat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public final class LoggerTest {
     private StringWriter logStore;
@@ -37,8 +39,7 @@ public final class LoggerTest {
         final byte _idx = 1;
         Logger.logArgument(_idx, _msg);
 
-        final String _expected = MessageFormat.format("1,{0},arg,{1},{2}",
-                Thread.currentThread().getId(), _idx, _msg);
+        final String _expected = MessageFormat.format("1,{0},arg,{1},{2}", Thread.currentThread().getId(), _idx, _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -50,9 +51,9 @@ public final class LoggerTest {
         final Logger.Action _action = Logger.Action.GET;
         Logger.logArray(_array, _idx, _value, _action);
 
-        final String _expected = MessageFormat.format("1,{0},{1},{2},{3},{4}",
-                Thread.currentThread().getId(), _action + "A", _idx,
-                Logger.toString(_array), _value);
+        final String _expected = MessageFormat
+                .format("1,{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action + "A", _idx,
+                        Logger.toString(_array), _value);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -61,9 +62,9 @@ public final class LoggerTest {
         final Exception _tmp = new RuntimeException();
         Logger.logException(_tmp);
 
-        final String _expected = MessageFormat.format("1,{0},exception,{1},{2}",
-                Thread.currentThread().getId(), Logger.toString(_tmp),
-                _tmp.getClass().getName());
+        final String _expected = MessageFormat
+                .format("1,{0},exception,{1},{2}", Thread.currentThread().getId(), Logger.toString(_tmp),
+                        _tmp.getClass().getName());
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -75,9 +76,9 @@ public final class LoggerTest {
         final Logger.Action _action = Logger.Action.GET;
         Logger.logField(_object, _fieldValue, _fieldName, _action);
 
-        final String _expected = MessageFormat.format("1,{0},{1},{2},{3},{4}",
-                Thread.currentThread().getId(), _action + "F", _fieldName,
-                Logger.toString(_object), _fieldValue);
+        final String _expected = MessageFormat
+                .format("1,{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action + "F", _fieldName,
+                        Logger.toString(_object), _fieldValue);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -88,9 +89,8 @@ public final class LoggerTest {
         final Logger.Action _action = Logger.Action.PUT;
         Logger.logField(null, _fieldValue, _fieldName, _action);
 
-        final String _expected = MessageFormat.format("1,{0},{1},{2},,{3}",
-                Thread.currentThread().getId(), _action + "F", _fieldName,
-                _fieldValue);
+        final String _expected = MessageFormat
+                .format("1,{0},{1},{2},,{3}", Thread.currentThread().getId(), _action + "F", _fieldName, _fieldValue);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -99,8 +99,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.logMethodEntry(_msg);
 
-        final String _expected = MessageFormat.format("1,{0},entry,{1}",
-                Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("1,{0},entry,{1}", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -109,8 +108,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.logMethodExit(_msg, "N");
 
-        final String _expected = MessageFormat.format("1,{0},exit,{1},N",
-                Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("1,{0},exit,{1},N", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -119,8 +117,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.logReturn(_msg);
 
-        final String _expected = MessageFormat.format("1,{0},return,{1}",
-                Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("1,{0},return,{1}", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -128,8 +125,7 @@ public final class LoggerTest {
     public void testLogReturnForVoidValue() throws Exception {
         Logger.logReturn(null);
 
-        final String _expected = MessageFormat.format("1,{0},return",
-                Thread.currentThread().getId());
+        final String _expected = MessageFormat.format("1,{0},return", Thread.currentThread().getId());
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -141,12 +137,10 @@ public final class LoggerTest {
         Logger.log(_msg2);
 
         final String[] _tmp = getContent();
-        final String _expected1 = MessageFormat.format("1,{0},{1}",
-                Thread.currentThread().getId(), _msg1);
+        final String _expected1 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg1);
         assertEquals(_expected1, _tmp[1]);
 
-        final String _expected2 = MessageFormat.format("1,{0},{1}",
-                Thread.currentThread().getId(), _msg2);
+        final String _expected2 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg2);
         assertEquals(_expected2, _tmp[2]);
     }
 
@@ -155,8 +149,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.log(_msg);
 
-        final String _expected = MessageFormat.format("1,{0},{1}",
-                Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -169,12 +162,12 @@ public final class LoggerTest {
         Logger.log(_msg2);
 
         final String[] _tmp = getContent();
-        final String _expected1 = MessageFormat.format("1,{0},{1}",
-                Thread.currentThread().getId(), String.join(",", _msg1));
+        final String _expected1 =
+                MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg1));
         assertEquals(_expected1, _tmp[1]);
 
-        final String _expected2 = MessageFormat.format("1,{0},{1}",
-                Thread.currentThread().getId(), String.join(",", _msg2));
+        final String _expected2 =
+                MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg2));
         assertEquals(_expected2, _tmp[2]);
     }
 
@@ -183,83 +176,116 @@ public final class LoggerTest {
         final String[] _msg = new String[]{"test", "message"};
         Logger.log(_msg);
 
-        final String _expected = MessageFormat.format("1,{0},{1}",
-                Thread.currentThread().getId(), String.join(",", _msg));
+        final String _expected =
+                MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg));
         assertEquals(_expected, getContent()[1]);
     }
 
     @Test
     public void testToStringWithBoolean() throws Exception {
-        assertEquals("p_b:1", Logger.toString(true));
-        assertEquals("p_b:0", Logger.toString(false));
+        final boolean _tmp1 = true;
+        assertTrue(Logger.toString(_tmp1).matches("^p_b:.*"));
+        assertEquals(Logger.toString(_tmp1), Logger.toString(_tmp1));
+
+        final boolean _tmp2 = false;
+        assertTrue(Logger.toString(_tmp2).matches("^p_b:.*"));
+        assertEquals(Logger.toString(_tmp2), Logger.toString(_tmp2));
+
+        assertNotEquals(Logger.toString(_tmp1), Logger.toString(_tmp2));
     }
 
     @Test
     public void testToStringWithByte() throws Exception {
-        assertEquals("p_y:10", Logger.toString((byte) 10));
+        final byte _tmp = 10;
+        assertTrue(Logger.toString(_tmp).matches("^p_y:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString(20));
     }
 
     @Test
     public void testToStringWithChar() throws Exception {
-        assertEquals("p_c:" + Character.hashCode('c'), Logger.toString('c'));
+        final char _tmp = 'c';
+        assertTrue(Logger.toString(_tmp).matches("^p_c:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString('d'));
     }
 
     @Test
     public void testToStringWithDouble() throws Exception {
-        assertEquals("p_d:10.3", Logger.toString(10.3d));
+        final double _tmp = 10.3d;
+        assertTrue(Logger.toString(_tmp).matches("^p_d:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString(10.4d));
     }
 
     @Test
     public void testToStringWithFloat() throws Exception {
-        assertEquals("p_f:10.3", Logger.toString(10.3f));
+        final float _tmp = 10.3f;
+        assertTrue(Logger.toString(_tmp).matches("^p_f:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString(10.4f));
     }
 
     @Test
     public void testToStringWithInt() throws Exception {
-        assertEquals("p_i:10", Logger.toString(10));
+        final int _tmp = 10;
+        assertTrue(Logger.toString(_tmp).matches("^p_i:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString(20));
     }
 
     @Test
     public void testToStringWithLong() throws Exception {
-        assertEquals("p_l:10", Logger.toString(10L));
+        final long _tmp = 10L;
+        assertTrue(Logger.toString(_tmp).matches("^p_l:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString(20L));
     }
 
     @Test
     public void testToStringWithObjectForArray() throws Exception {
         final String[] _tmp = new String[]{"array"};
-        assertEquals("r_a:" + System.identityHashCode(_tmp),
-                Logger.toString(_tmp));
+        assertTrue(Logger.toString(_tmp).matches("^r_a:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString(new Object[]{"array"}));
     }
 
     @Test
     public void testToStringWithObjectForNull() throws Exception {
         assertEquals("r_o:null", Logger.toString(null));
+        assertNotEquals("r_o:null", Logger.toString("null"));
     }
 
     @Test
     public void testToStringWithObjectForObject() throws Exception {
-        final Integer _tmp = 10;
-        assertEquals("r_o:" + System.identityHashCode(_tmp),
-                Logger.toString(_tmp));
+        final Class<?> _tmp = Logger.class;
+        assertTrue(Logger.toString(_tmp).matches("^r_o:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString(Integer.valueOf(4)));
     }
 
     @Test
     public void testToStringWithObjectForString() throws Exception {
         final String _tmp = "string";
-        assertEquals("r_s:" + System.identityHashCode(_tmp),
-                Logger.toString(_tmp));
+        assertTrue(Logger.toString(_tmp).matches("^r_s:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString("str"));
     }
 
     @Test
     public void testToStringWithObjectForThrowable() throws Exception {
         final Exception _tmp = new RuntimeException();
-        assertEquals("r_t:" + System.identityHashCode(_tmp),
-                Logger.toString(_tmp));
+        assertTrue(Logger.toString(_tmp).matches("^r_t:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString(new IllegalStateException()));
     }
 
     @Test
     public void testToStringWithShort() throws Exception {
-        assertEquals("p_s:10", Logger.toString((short) 10));
+        final short _tmp = 10;
+        assertTrue(Logger.toString(_tmp).matches("^p_s:.*"));
+        assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
+        assertNotEquals(Logger.toString(_tmp), Logger.toString((short) 20));
     }
 
     private String[] getContent() {
