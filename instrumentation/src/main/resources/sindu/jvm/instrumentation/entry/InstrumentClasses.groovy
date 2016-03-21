@@ -9,8 +9,8 @@
 package sindu.jvm.instrumentation.entry
 
 filenames = []
-new File(".").eachFileRecurse({ 
-    if (it.getName() ==~ /.*class$/ && it.getName() != ~ /.*orig$/) {
+new File(".").eachFileRecurse({
+    if (it.getName() ==~ /.*class$/ && it.getName() != ~/.*orig$/) {
         filenames << it.getCanonicalPath()
     }
 })

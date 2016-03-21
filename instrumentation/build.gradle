@@ -1,6 +1,9 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 // In this section you declare where to find the dependencies of your project
 repositories {
     jcenter()
@@ -14,8 +17,9 @@ dependencies {
     compile 'org.ow2.asm:asm:5.1'
     compile 'org.ow2.asm:asm-commons:5.1'
     compile 'commons-io:commons-io:2.4'
+    compile 'commons-cli:commons-cli:1.3.1'
 
-    compile name: "$JAVA_DYN_INFO_COLLECTOR_LOGGING"
+    compile name: "$JVM_DYN_INFO_COLLECTION_LOGGING"
 
     testCompile 'junit:junit:4.12'
 }
@@ -23,16 +27,13 @@ dependencies {
 task copyLogger(type: Copy) {
     from "../logging/build/libs/"
     into "./libs"
-    include("**/${JAVA_DYN_INFO_COLLECTOR_LOGGING}.jar")
+    include("**/${JVM_DYN_INFO_COLLECTION_LOGGING}.jar")
 }
 
-task copyLibs() { }
-
-copyLibs.dependsOn copyLogger
-compileJava.dependsOn copyLibs
+compileJava.dependsOn copyLogger
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "2.11"
+    gradleVersion = "2.12"
 }
 
 compileJava {
