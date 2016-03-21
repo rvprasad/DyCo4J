@@ -43,12 +43,12 @@ class MethodVisitor extends org.objectweb.asm.MethodVisitor {
         mv.visitCode();
 
         if (this.name.equals("<clinit>")) {
-            this.cv.isClinitVisited = true;
+            this.cv.clinitVisited();
             LoggingHelper.emitInsnToLoadAndInitializeLogger(mv);
         }
 
-        if (this.name.matches(this.cv.methodNamePattern) || this.instrumentMethod) {
-            final String _msg = "marker:" + this.cv.className + "/" + name + desc;
+        if (this.name.matches(this.cv.getMethodNamePattern()) || this.instrumentMethod) {
+            final String _msg = "marker:" + this.cv.getClassName() + "/" + name + desc;
             LoggingHelper.emitLogString(mv, _msg);
         }
     }

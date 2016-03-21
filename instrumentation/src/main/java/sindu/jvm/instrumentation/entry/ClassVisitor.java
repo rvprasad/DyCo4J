@@ -12,14 +12,25 @@ import org.objectweb.asm.Opcodes;
 import sindu.jvm.instrumentation.LoggingHelper;
 
 class ClassVisitor extends org.objectweb.asm.ClassVisitor {
-
-    final String methodNamePattern;
-    boolean isClinitVisited;
-    String className;
+    private final String methodNamePattern;
+    private boolean isClinitVisited;
+    private String className;
 
     ClassVisitor(final org.objectweb.asm.ClassVisitor cv, final String methodNamePattern) {
         super(CLI.ASM_VERSION, cv);
         this.methodNamePattern = methodNamePattern;
+    }
+
+    public String getMethodNamePattern() {
+        return methodNamePattern;
+    }
+
+    public void clinitVisited() {
+        isClinitVisited = true;
+    }
+
+    public String getClassName() {
+        return className;
     }
 
     @Override

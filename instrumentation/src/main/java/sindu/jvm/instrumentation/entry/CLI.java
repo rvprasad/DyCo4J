@@ -22,6 +22,8 @@ import java.util.logging.Logger;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public class CLI {
+    // TODO: Add tests for the package
+
     final static int ASM_VERSION = ASM5;
 
     public static void main(final String[] args) {
@@ -33,8 +35,8 @@ public class CLI {
                                                              "This defaults to 'test.*'.").build());
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
-            final Collection<String> _tmp1 = FileUtils.readLines(new File(_cmdLine.getOptionValue('f')));
-            new HashSet<>(_tmp1).parallelStream().forEach(_arg -> {
+            final Collection<String> _fileNames = FileUtils.readLines(new File(_cmdLine.getOptionValue('f')));
+            new HashSet<>(_fileNames).parallelStream().forEach(_arg -> {
                 try {
                     final File _src = new File(_arg);
                     final File _trg = new File(_arg + ".orig");
