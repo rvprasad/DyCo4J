@@ -34,18 +34,20 @@ class MethodVisitor extends org.objectweb.asm.MethodVisitor {
                                 desc.matches("Lorg/testng/annotations/AfterTest") ||
                                 desc.matches("Lorg/testng/annotations/BeforeTest") ||
                                 desc.matches("Lorg/testng/annotations/AfterClass") ||
-                                desc.matches("Lorg/testng/annotations/BeforeClass");
+                                desc.matches("Lorg/testng/annotations/BeforeClass") ||
+                                desc.matches("Lorg/testng/annotations/AfterMethod") ||
+                                desc.matches("Lorg/testng/annotations/BeforeMethod");
         return super.visitAnnotation(desc, visible);
     }
 
     @Override
     public void visitCode() {
-        mv.visitCode();
-
         if (this.name.equals("<clinit>")) {
             this.cv.clinitVisited();
             LoggingHelper.emitInsnToLoadAndInitializeLogger(mv);
         }
+
+        mv.visitCode();
 
         if (this.name.matches(this.cv.getMethodNamePattern()) || this.instrumentMethod) {
             final String _msg = "marker:" + this.cv.getClassName() + "/" + name + desc;
