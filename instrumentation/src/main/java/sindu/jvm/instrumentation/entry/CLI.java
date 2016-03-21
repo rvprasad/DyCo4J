@@ -27,7 +27,10 @@ public class CLI {
     public static void main(final String[] args) {
         final Options _options = new Options();
         _options.addOption(Option.builder("f").hasArg().required()
-                                 .desc("File listing the fully-qualified paths to classes to be instrumented").build());
+                                 .desc("File listing the fully-qualified paths to classes to be instrumented.")
+                                 .build());
+        _options.addOption(Option.builder("m").hasArg().desc("Regex identifying the methods to be instrumented. " +
+                                                             "This defaults to 'test.*'.").build());
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
             final Collection<String> _tmp1 = FileUtils.readLines(new File(_cmdLine.getOptionValue('f')));
@@ -36,7 +39,7 @@ public class CLI {
                     final File _src = new File(_arg);
                     final File _trg = new File(_arg + ".orig");
                     final byte[] _in = FileUtils.readFileToByteArray(_src);
-                    final byte[] _out = instrumentClass(_in);
+                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue('m', "test.*"));
 
                     if (!_trg.exists())
                         FileUtils.moveFile(_src, _trg);
@@ -53,10 +56,10 @@ public class CLI {
         }
     }
 
-    public static byte[] instrumentClass(final byte[] b) {
+    public static byte[] instrumentClass(final byte[] b, final String methodNamePattern) {
         final ClassReader _cr = new ClassReader(b);
         final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
-        final org.objectweb.asm.ClassVisitor _cv = new ClassVisitor(_cw);
+        final org.objectweb.asm.ClassVisitor _cv = new ClassVisitor(_cw, methodNamePattern);
         _cr.accept(_cv, 0);
         return _cw.toByteArray();
     }
