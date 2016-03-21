@@ -28,20 +28,20 @@ public class CLI {
 
     public static void main(final String[] args) {
         final Options _options = new Options();
-        _options.addOption(Option.builder("f").hasArg().required()
+        _options.addOption(Option.builder().longOpt("file").hasArg().required()
                                  .desc("File listing the fully-qualified paths to classes to be instrumented.")
                                  .build());
-        _options.addOption(Option.builder("m").hasArg().desc("Regex identifying the methods to be instrumented. " +
-                                                             "This defaults to 'test.*'.").build());
+        _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg()
+                                 .desc("Regex identifying the methods to be instrumented. Default: test.*.").build());
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
-            final Collection<String> _fileNames = FileUtils.readLines(new File(_cmdLine.getOptionValue('f')));
+            final Collection<String> _fileNames = FileUtils.readLines(new File(_cmdLine.getOptionValue("file")));
             new HashSet<>(_fileNames).parallelStream().forEach(_arg -> {
                 try {
                     final File _src = new File(_arg);
                     final File _trg = new File(_arg + ".orig");
                     final byte[] _in = FileUtils.readFileToByteArray(_src);
-                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue('m', "test.*"));
+                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue("methodNameRegex", "test.*"));
 
                     if (!_trg.exists())
                         FileUtils.moveFile(_src, _trg);
