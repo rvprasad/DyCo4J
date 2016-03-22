@@ -1,2 +1,6 @@
-# java-dynamic-info-collection
-Instrumentation based dynamic information collection tools for JVM based code.
+# jvm-dynamic-info-collection
+The project provides instrumentation-based tools to collect dynamic information collection about JVM based code.
+
+- *logging* module is used to log the collected information.
+- *instrumentation* module is used to instrument the code of interest with
+  logging statements (based on _logging_ module) to collect information.
