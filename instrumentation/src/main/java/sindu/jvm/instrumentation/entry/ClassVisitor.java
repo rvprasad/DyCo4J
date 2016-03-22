@@ -11,7 +11,7 @@ package sindu.jvm.instrumentation.entry;
 import org.objectweb.asm.Opcodes;
 import sindu.jvm.instrumentation.LoggingHelper;
 
-class ClassVisitor extends org.objectweb.asm.ClassVisitor {
+final class ClassVisitor extends org.objectweb.asm.ClassVisitor {
     private final String methodNamePattern;
     private boolean isClinitVisited;
     private String className;

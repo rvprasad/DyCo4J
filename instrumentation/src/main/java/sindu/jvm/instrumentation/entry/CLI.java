@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 
 import static org.objectweb.asm.Opcodes.ASM5;
 
-public class CLI {
+public final class CLI {
     // TODO: Add tests for the package
 
     final static int ASM_VERSION = ASM5;
@@ -32,7 +32,7 @@ public class CLI {
                                  .desc("File listing the fully-qualified paths to classes to be instrumented.")
                                  .build());
         _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg()
-                                 .desc("Regex identifying the methods to be instrumented. Default: test.*.").build());
+                                 .desc("Regex identifying the methods to be instrumented. Default: ^test.*.").build());
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
             final Collection<String> _fileNames = FileUtils.readLines(new File(_cmdLine.getOptionValue("file")));
@@ -41,7 +41,7 @@ public class CLI {
                     final File _src = new File(_arg);
                     final File _trg = new File(_arg + ".orig");
                     final byte[] _in = FileUtils.readFileToByteArray(_src);
-                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue("methodNameRegex", "test.*"));
+                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue("methodNameRegex", "^test.*"));
 
                     if (!_trg.exists())
                         FileUtils.moveFile(_src, _trg);

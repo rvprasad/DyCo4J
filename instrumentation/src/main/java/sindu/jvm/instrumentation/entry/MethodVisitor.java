@@ -11,7 +11,7 @@ package sindu.jvm.instrumentation.entry;
 import org.objectweb.asm.AnnotationVisitor;
 import sindu.jvm.instrumentation.LoggingHelper;
 
-class MethodVisitor extends org.objectweb.asm.MethodVisitor {
+final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
     private final String name;
     private final String desc;
     private final ClassVisitor cv;
