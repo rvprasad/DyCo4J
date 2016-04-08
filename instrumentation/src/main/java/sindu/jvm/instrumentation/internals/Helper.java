@@ -6,7 +6,7 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package sindu.jvm.instrumentation.internal;
+package sindu.jvm.instrumentation.internals;
 
 class Helper {
     static String createJavaName(final String name, final String owner) {

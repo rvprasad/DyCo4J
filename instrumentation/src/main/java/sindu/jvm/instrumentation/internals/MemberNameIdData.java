@@ -6,7 +6,7 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package sindu.jvm.instrumentation.internal;
+package sindu.jvm.instrumentation.internals;
 
 import org.apache.commons.io.FileUtils;
 
@@ -37,7 +37,7 @@ final class MemberNameIdData {
         }
     }
 
-    public void recordData(final TreeMap<String, String> id2Name) {
+    void recordData(final TreeMap<String, String> id2Name) {
         id2Name.entrySet().forEach(_e -> this.writer.println(_e.getKey() + ":" + _e.getValue()));
     }
 

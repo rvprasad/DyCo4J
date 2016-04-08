@@ -6,7 +6,7 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package sindu.jvm.instrumentation.internal;
+package sindu.jvm.instrumentation.internals;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -23,12 +23,11 @@ final class MemberDataCollectingClassVisitor extends ClassVisitor {
     private final Map<String, String> class2superClass;
     private String name;
 
-    public MemberDataCollectingClassVisitor(final Map<String, String> fieldId2name,
-                                            final Map<String, String> shortFieldName2Id,
-                                            final Map<String, String> methodId2name,
-                                            final Map<String, String> shortMethodName2Id,
-                                            final Map<String, String> class2superClass,
-                                            final boolean collectFieldInfo) {
+    MemberDataCollectingClassVisitor(final Map<String, String> fieldId2name,
+                                     final Map<String, String> shortFieldName2Id,
+                                     final Map<String, String> methodId2name,
+                                     final Map<String, String> shortMethodName2Id,
+                                     final Map<String, String> class2superClass, final boolean collectFieldInfo) {
         super(CLI.ASM_VERSION);
         this.fieldId2name = fieldId2name;
         this.shortFieldName2Id = shortFieldName2Id;
