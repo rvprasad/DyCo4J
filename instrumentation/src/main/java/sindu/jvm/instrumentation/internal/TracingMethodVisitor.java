@@ -23,9 +23,8 @@ final class TracingMethodVisitor extends MethodVisitor {
     private final boolean isStatic;
     private Label beginOutermostHandler;
 
-    public TracingMethodVisitor(final int access, final String name, final String desc, final String signature,
-                                final String[] exceptions, final MethodVisitor mv,
-                                final TracingClassVisitor owner) {
+    TracingMethodVisitor(final int access, final String name, final String desc, final String signature,
+                         final String[] exceptions, final MethodVisitor mv, final TracingClassVisitor owner) {
         super(CLI.ASM_VERSION, mv);
         this.method = new Method(name, desc);
         this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
@@ -39,13 +38,15 @@ final class TracingMethodVisitor extends MethodVisitor {
         this.mv.visitCode();
         LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
 
-        // emit code to trace each arg
-        int _position = 0;
-        if (!this.isStatic)
-            _position += LoggingHelper.emitLogArgument(this.mv, _position, Type.getType(Object.class));
+        if (this.cv.cmdLineOptions.traceMethodArgs) {
+            // emit code to trace each arg
+            int _position = 0;
+            if (!this.isStatic)
+                _position += LoggingHelper.emitLogArgument(this.mv, _position, Type.getType(Object.class));
 
-        for (final Type _argType : this.method.getArgumentTypes()) {
-            _position += LoggingHelper.emitLogArgument(this.mv, _position, _argType);
+            for (final Type _argType : this.method.getArgumentTypes()) {
+                _position += LoggingHelper.emitLogArgument(this.mv, _position, _argType);
+            }
         }
 
         this.mv.visitLabel(this.beginOutermostHandler);
@@ -53,12 +54,14 @@ final class TracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitInsn(final int opcode) {
-        if (opcode == Opcodes.IRETURN || opcode == Opcodes.LRETURN || opcode == Opcodes.FRETURN ||
-            opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN) {
-            LoggingHelper.emitLogReturn(this.mv, method.getReturnType());
-            LoggingHelper.emitLogMethodExit(this.mv, this.methodId, "N");
-            this.mv.visitInsn(opcode);
-        } else if (this.cv.traceArrayAccess) {
+        if (this.cv.cmdLineOptions.traceMethodRetValue) {
+            if (opcode == Opcodes.IRETURN || opcode == Opcodes.LRETURN || opcode == Opcodes .FRETURN ||
+            opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN ) {
+                LoggingHelper.emitLogReturn(this.mv, method.getReturnType());
+                LoggingHelper.emitLogMethodExit(this.mv, this.methodId, "N");
+                this.mv.visitInsn(opcode);
+            }
+        } else if (this.cv.cmdLineOptions.traceArrayAccess) {
             if (opcode == Opcodes.AASTORE || opcode == Opcodes.BASTORE || opcode == Opcodes.CASTORE ||
                 opcode == Opcodes.DASTORE || opcode == Opcodes.FASTORE || opcode == Opcodes.IASTORE ||
                 opcode == Opcodes.LASTORE || opcode == Opcodes.SASTORE) {
@@ -75,7 +78,7 @@ final class TracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
-        if (this.cv.traceFieldAccess) {
+        if (this.cv.cmdLineOptions.traceFieldAccess) {
             final Type _fieldType = Type.getType(desc);
             final String _fieldId = this.cv.getFieldId(name, owner, desc);
             final boolean _isFieldStatic = opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC;

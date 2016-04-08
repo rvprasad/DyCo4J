@@ -14,29 +14,22 @@ import org.objectweb.asm.MethodVisitor;
 import java.util.Map;
 
 final class TracingClassVisitor extends ClassVisitor {
-    final boolean traceFieldAccess;
-    final boolean traceArrayAccess;
+    final CLI.CommandLineOptions cmdLineOptions;
     private final Map<String, String> shortMethodName2Id;
     private final Map<String, String> shortFieldName2Id;
     private final Map<String, String> class2superClass;
     private final String methodNameRegex;
     private String className;
 
-    public TracingClassVisitor(final ClassVisitor cv, final Map<String, String> shortFieldName2Id,
-                               final Map<String, String> shortMethodName2Id,
-                               final Map<String, String> class2superClass, final String methodNameRegex,
-                               final boolean traceFieldAccess, final boolean traceArrayAccess) {
+    TracingClassVisitor(final ClassVisitor cv, final Map<String, String> shortFieldName2Id,
+                        final Map<String, String> shortMethodName2Id, final Map<String, String> class2superClass,
+                        final String methodNameRegex, final CLI.CommandLineOptions clo) {
         super(CLI.ASM_VERSION, cv);
         this.shortFieldName2Id = shortFieldName2Id;
         this.shortMethodName2Id = shortMethodName2Id;
         this.class2superClass = class2superClass;
-        this.traceArrayAccess = traceArrayAccess;
-        this.traceFieldAccess = traceArrayAccess;
         this.methodNameRegex = methodNameRegex;
-    }
-
-    public String getClassName() {
-        return className;
+        this.cmdLineOptions = clo;
     }
 
     @Override
@@ -58,7 +51,7 @@ final class TracingClassVisitor extends ClassVisitor {
     }
 
     String getFieldId(final String name, final String owner, final String desc) {
-        assert this.traceFieldAccess : "Should be invoked only when traceFieldAccess is true";
+        assert this.cmdLineOptions.traceFieldAccess : "Should be invoked only when traceFieldAccess is true";
         final String _shortName = Helper.createShortNameDesc(name, owner, desc);
         final String _id = this.shortFieldName2Id.get(_shortName);
         if (_id == null) {

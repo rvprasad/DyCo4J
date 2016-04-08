@@ -36,12 +36,20 @@ public final class CLI {
                                  .desc("Instrument classes to trace field access.  Default: off").build());
         _options.addOption(Option.builder().longOpt("traceArrayAccess").hasArg(false)
                                  .desc("Instrument classes to trace array access.  Default: off").build());
+        _options.addOption(Option.builder().longOpt("traceMethodArgs").hasArg(false)
+                                 .desc("Instrument classes to trace method arguments.  Default: off").build());
+        _options.addOption(Option.builder().longOpt("traceMethodReturnValue").hasArg(false)
+                                 .desc("Instrument classes to trace method return values.  Default: off").build());
 
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
             final Set<String> _filenames = new HashSet<>(FileUtils.readLines(new File(_cmdLine.getOptionValue('f'))));
-            final boolean _traceFieldAccess = _cmdLine.hasOption("traceFieldAccess");
             final String _methodNameRegex = _cmdLine.getOptionValue("methodNameRegex", ".*");
+            final CommandLineOptions _cmdLineOptions = new CommandLineOptions(_cmdLine.hasOption("traceArrayAccess"),
+                                                                              _cmdLine.hasOption("traceFieldAccess"),
+                                                                              _cmdLine.hasOption("traceMethodArgs"),
+                                                                              _cmdLine.hasOption(
+                                                                                      "traceMethodReturnValue"));
 
             final Map<String, String> _fieldId2Name = new HashMap<>();
             final Map<String, String> _shortFieldName2Id = new HashMap<>();
@@ -54,10 +62,10 @@ public final class CLI {
             _shortFieldName2Id.putAll(_memberNameIdData.getShortFieldName2Id());
             _methodId2Name.putAll(_memberNameIdData.getMethodId2Name());
             _shortMethodName2Id.putAll(_memberNameIdData.getShortMethodName2Id());
-            getMemberId2NameMapping(_filenames, _fieldId2Name, _shortFieldName2Id, _methodId2Name, _shortMethodName2Id,
-                                    _class2superClass, _traceFieldAccess);
 
-            final boolean _traceArrayAccess = _cmdLine.hasOption("traceArrayAccess");
+            getMemberId2NameMapping(_filenames, _fieldId2Name, _shortFieldName2Id, _methodId2Name, _shortMethodName2Id,
+                                    _class2superClass, _cmdLineOptions.traceFieldAccess);
+
             _filenames.parallelStream().forEach(_arg -> {
                 try {
                     final File _src = new File(_arg);
@@ -66,9 +74,8 @@ public final class CLI {
                     final ClassReader _cr = new ClassReader(FileUtils.readFileToByteArray(_src));
                     final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
                     final ClassVisitor _cv =
-                            new TracingClassVisitor(_cw, _shortFieldName2Id, _shortMethodName2Id,
-                                                    _class2superClass, _methodNameRegex, _traceFieldAccess,
-                                                    _traceArrayAccess);
+                            new TracingClassVisitor(_cw, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
+                                                    _methodNameRegex, _cmdLineOptions);
                     _cr.accept(_cv, 0);
 
                     if (!_trg.exists())
@@ -80,7 +87,7 @@ public final class CLI {
                 }
             });
 
-            if (_traceFieldAccess)
+            if (_cmdLineOptions.traceFieldAccess)
                 _memberNameIdData.recordData(new TreeMap<>(_fieldId2Name));
 
             _memberNameIdData.recordData(new TreeMap<>(_methodId2Name));
@@ -110,6 +117,21 @@ public final class CLI {
             } catch (final Exception _ex) {
                 throw new RuntimeException(_ex);
             }
+        }
+    }
+
+    static class CommandLineOptions {
+        final boolean traceArrayAccess;
+        final boolean traceFieldAccess;
+        final boolean traceMethodArgs;
+        final boolean traceMethodRetValue;
+
+        CommandLineOptions(final boolean traceArrayAccess, final boolean traceFieldAccess,
+                           final boolean traceMethodArgs, final boolean traceMethodRetValue) {
+            this.traceArrayAccess = traceArrayAccess;
+            this.traceFieldAccess = traceFieldAccess;
+            this.traceMethodArgs = traceMethodArgs;
+            this.traceMethodRetValue = traceMethodRetValue;
         }
     }
 }
