@@ -18,11 +18,11 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "2.12"
+    gradleVersion = "2.13"
 }
 
 compileJava {
     options.compilerArgs << "-Xlint"
 }
 
-version = 0.1
+version = '0.1.0'
