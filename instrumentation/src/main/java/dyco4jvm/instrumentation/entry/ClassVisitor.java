@@ -6,10 +6,10 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package sindu.jvm.instrumentation.entry;
+package dyco4jvm.instrumentation.entry;
 
 import org.objectweb.asm.Opcodes;
-import sindu.jvm.instrumentation.LoggingHelper;
+import dyco4jvm.LoggingHelper;
 
 final class ClassVisitor extends org.objectweb.asm.ClassVisitor {
     private final String methodNamePattern;
@@ -21,15 +21,15 @@ final class ClassVisitor extends org.objectweb.asm.ClassVisitor {
         this.methodNamePattern = methodNamePattern;
     }
 
-    public String getMethodNamePattern() {
+    String getMethodNamePattern() {
         return methodNamePattern;
     }
 
-    public void clinitVisited() {
+    void clinitVisited() {
         isClinitVisited = true;
     }
 
-    public String getClassName() {
+    String getClassName() {
         return className;
     }
 
@@ -43,10 +43,7 @@ final class ClassVisitor extends org.objectweb.asm.ClassVisitor {
     public org.objectweb.asm.MethodVisitor visitMethod(final int access, final String name, final String desc,
                                                        final String signature, final String[] exceptions) {
         final org.objectweb.asm.MethodVisitor _mv = cv.visitMethod(access, name, desc, signature, exceptions);
-        if (_mv == null)
-            return null;
-        else
-            return new MethodVisitor(_mv, name, desc, this);
+        return _mv == null ? null : new MethodVisitor(_mv, name, desc, this);
     }
 
     @Override

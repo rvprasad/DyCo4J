@@ -6,15 +6,15 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package sindu.jvm.instrumentation.internals;
+package dyco4jvm.instrumentation.internals;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
-import sindu.jvm.instrumentation.LoggingHelper;
-import sindu.jvm.instrumentation.logging.Logger.Action;
+import dyco4jvm.LoggingHelper;
+import dyco4jvm.instrumentation.logging.Logger.Action;
 
 final class TracingMethodVisitor extends MethodVisitor {
     private final TracingClassVisitor cv;

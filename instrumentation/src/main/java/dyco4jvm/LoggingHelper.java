@@ -5,15 +5,15 @@
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
-package sindu.jvm.instrumentation;
+package dyco4jvm;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
-import sindu.jvm.instrumentation.logging.Logger;
-import sindu.jvm.instrumentation.logging.LoggerInitializer;
-import sindu.jvm.instrumentation.logging.Logger.Action;
+import dyco4jvm.instrumentation.logging.Logger;
+import dyco4jvm.instrumentation.logging.LoggerInitializer;
+import dyco4jvm.instrumentation.logging.Logger.Action;
 
 public class LoggingHelper {
     private static final String LOGGER;

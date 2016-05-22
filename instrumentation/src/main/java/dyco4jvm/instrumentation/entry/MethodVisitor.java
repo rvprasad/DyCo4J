@@ -6,10 +6,10 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package sindu.jvm.instrumentation.entry;
+package dyco4jvm.instrumentation.entry;
 
 import org.objectweb.asm.AnnotationVisitor;
-import sindu.jvm.instrumentation.LoggingHelper;
+import dyco4jvm.LoggingHelper;
 
 final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
     private final String name;
@@ -17,8 +17,8 @@ final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
     private final ClassVisitor cv;
     private boolean instrumentMethod;
 
-    public MethodVisitor(final org.objectweb.asm.MethodVisitor mv, final String name, final String descriptor,
-                         final ClassVisitor cv) {
+    MethodVisitor(final org.objectweb.asm.MethodVisitor mv, final String name, final String descriptor,
+                  final ClassVisitor cv) {
         super(CLI.ASM_VERSION, mv);
         this.name = name;
         this.desc = descriptor;

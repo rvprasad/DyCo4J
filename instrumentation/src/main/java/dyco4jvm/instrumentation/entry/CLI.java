@@ -5,7 +5,7 @@
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
-package sindu.jvm.instrumentation.entry;
+package dyco4jvm.instrumentation.entry;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
@@ -58,7 +58,7 @@ public final class CLI {
         }
     }
 
-    public static byte[] instrumentClass(final byte[] b, final String methodNamePattern) {
+    private static byte[] instrumentClass(final byte[] b, final String methodNamePattern) {
         final ClassReader _cr = new ClassReader(b);
         final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
         final org.objectweb.asm.ClassVisitor _cv = new ClassVisitor(_cw, methodNamePattern);

@@ -6,7 +6,7 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package sindu.jvm.instrumentation.internals;
+package dyco4jvm.instrumentation.internals;
 
 class Helper {
     static String createJavaName(final String name, final String owner) {
