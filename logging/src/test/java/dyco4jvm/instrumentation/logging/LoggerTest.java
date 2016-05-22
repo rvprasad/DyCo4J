@@ -5,7 +5,7 @@
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
-package sindu.jvm.instrumentation.logging;
+package dyco4jvm.instrumentation.logging;
 
 import org.junit.After;
 import org.junit.Before;
@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("ALL")
 public final class LoggerTest {
     private StringWriter logStore;
 
@@ -162,11 +163,11 @@ public final class LoggerTest {
         Logger.log(_msg2);
 
         final String[] _tmp = getContent();
-        final String _expected1 =
+        @SuppressWarnings("ConfusingArgumentToVarargsMethod") final String _expected1 =
                 MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg1));
         assertEquals(_expected1, _tmp[1]);
 
-        final String _expected2 =
+        @SuppressWarnings("ConfusingArgumentToVarargsMethod") final String _expected2 =
                 MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg2));
         assertEquals(_expected2, _tmp[2]);
     }
@@ -176,7 +177,7 @@ public final class LoggerTest {
         final String[] _msg = new String[]{"test", "message"};
         Logger.log(_msg);
 
-        final String _expected =
+        @SuppressWarnings("ConfusingArgumentToVarargsMethod") final String _expected =
                 MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg));
         assertEquals(_expected, getContent()[1]);
     }

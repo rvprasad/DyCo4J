@@ -5,32 +5,33 @@
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
-package sindu.jvm.instrumentation.logging;
+package dyco4jvm.instrumentation.logging;
 
-import java.io.IOException;
+
 import java.io.PrintWriter;
-
 import java.util.Date;
 import java.util.Objects;
 
 
+@SuppressWarnings("WeakerAccess")
 public final class Logger {
-    private static Logger Logger;
+    private static Logger logger;
     private final PrintWriter logWriter;
     private volatile String prevMsg = null;
     private volatile boolean clean = false;
     private volatile int msgFreq = 1;
 
-    private Logger(final PrintWriter pw) throws IOException {
+    private Logger(final PrintWriter pw) {
         logWriter = pw;
         writeLog((new Date()).toString());
     }
 
     public static void log(final String msg) {
         final String _sb = String.valueOf(Thread.currentThread().getId()) + "," + msg;
-        Logger.writeLog(_sb);
+        logger.writeLog(_sb);
     }
 
+    @SuppressWarnings("ConfusingArgumentToVarargsMethod")
     public static void log(final String... args) {
         log(String.join(",", args));
     }
@@ -56,7 +57,8 @@ public final class Logger {
         log("entry", methodId);
     }
 
-    public static void logMethodExit(final String methodId, final String exitId) {
+    public static void logMethodExit(final String methodId,
+                                     @SuppressWarnings("SameParameterValue") final String exitId) {
         log("exit", methodId, exitId);
     }
 
@@ -120,14 +122,14 @@ public final class Logger {
         }
     }
 
-    static void initialize(final PrintWriter logWriter) throws IOException {
-        Logger = new Logger(logWriter);
+    static void initialize(final PrintWriter logWriter) {
+        logger = new Logger(logWriter);
 
         java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 try {
-                    Logger.cleanup();
+                    logger.cleanup();
                 } catch (final Throwable _e) {
                     throw new RuntimeException(_e);
                 }
