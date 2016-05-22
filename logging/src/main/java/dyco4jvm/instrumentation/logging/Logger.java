@@ -57,9 +57,8 @@ public final class Logger {
         log("entry", methodId);
     }
 
-    public static void logMethodExit(final String methodId,
-                                     @SuppressWarnings("SameParameterValue") final String exitId) {
-        log("exit", methodId, exitId);
+    public static void logMethodExit(final String methodId, final String returnKind) {
+        log("exit", methodId, returnKind);
     }
 
     public static void logReturn(final String val) {
@@ -169,4 +168,5 @@ public final class Logger {
         GET,
         PUT
     }
+
 }

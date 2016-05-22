@@ -8,13 +8,13 @@
 
 package dyco4jvm.instrumentation.internals;
 
+import dyco4jvm.LoggingHelper;
+import dyco4jvm.instrumentation.logging.Logger.Action;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
-import dyco4jvm.LoggingHelper;
-import dyco4jvm.instrumentation.logging.Logger.Action;
 
 final class TracingMethodVisitor extends MethodVisitor {
     private final TracingClassVisitor cv;
@@ -58,7 +58,7 @@ final class TracingMethodVisitor extends MethodVisitor {
             if (opcode == Opcodes.IRETURN || opcode == Opcodes.LRETURN || opcode == Opcodes .FRETURN ||
             opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN ) {
                 LoggingHelper.emitLogReturn(this.mv, method.getReturnType());
-                LoggingHelper.emitLogMethodExit(this.mv, this.methodId, "N");
+                LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.NORMAL);
                 this.mv.visitInsn(opcode);
             }
         } else if (this.cv.cmdLineOptions.traceArrayAccess) {
@@ -117,7 +117,7 @@ final class TracingMethodVisitor extends MethodVisitor {
         this.mv.visitLabel(_endLabel);
         this.mv.visitTryCatchBlock(this.beginOutermostHandler, _endLabel, _endLabel, "java/lang/Throwable");
         LoggingHelper.emitLogException(this.mv);
-        LoggingHelper.emitLogMethodExit(this.mv, this.methodId, "E");
+        LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.EXCEPTIONAL);
         this.mv.visitInsn(Opcodes.ATHROW);
 
         this.mv.visitMaxs(maxStack, maxLocals);

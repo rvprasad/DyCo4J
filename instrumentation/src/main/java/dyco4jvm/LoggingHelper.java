@@ -169,9 +169,9 @@ public class LoggingHelper {
         emitInvokeLog(mv, LOG_METHOD_ENTRY);
     }
 
-    public static void emitLogMethodExit(final MethodVisitor mv, final String methodId, final String exitId) {
+    public static void emitLogMethodExit(final MethodVisitor mv, final String methodId, final ExitKind exitKind) {
         mv.visitLdcInsn(methodId);
-        mv.visitLdcInsn(exitId);
+        mv.visitLdcInsn(exitKind.getAbbreviatedName());
         emitInvokeLog(mv, LOG_METHOD_EXIT);
     }
 
@@ -211,4 +211,12 @@ public class LoggingHelper {
         }
     }
 
+    public enum ExitKind {
+        NORMAL,
+        EXCEPTIONAL;
+
+        public String getAbbreviatedName() {
+            return this.name().substring(0, 1);
+        }
+    }
 }

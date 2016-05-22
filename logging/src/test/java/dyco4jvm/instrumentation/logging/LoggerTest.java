@@ -105,11 +105,20 @@ public final class LoggerTest {
     }
 
     @Test
-    public void testLogMethodExit() throws Exception {
+    public void testLogMethodExitNormal() throws Exception {
         final String _msg = "test message";
         Logger.logMethodExit(_msg, "N");
 
         final String _expected = MessageFormat.format("1,{0},exit,{1},N", Thread.currentThread().getId(), _msg);
+        assertEquals(_expected, getContent()[1]);
+    }
+
+    @Test
+    public void testLogMethodExitExceptional() throws Exception {
+        final String _msg = "test message";
+        Logger.logMethodExit(_msg, "E");
+
+        final String _expected = MessageFormat.format("1,{0},exit,{1},E", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
