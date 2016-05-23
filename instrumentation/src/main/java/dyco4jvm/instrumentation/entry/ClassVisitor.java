@@ -12,17 +12,17 @@ import org.objectweb.asm.Opcodes;
 import dyco4jvm.LoggingHelper;
 
 final class ClassVisitor extends org.objectweb.asm.ClassVisitor {
-    private final String methodNamePattern;
+    private final String methodNameRegex;
     private boolean isClinitVisited;
     private String className;
 
-    ClassVisitor(final org.objectweb.asm.ClassVisitor cv, final String methodNamePattern) {
+    ClassVisitor(final org.objectweb.asm.ClassVisitor cv, final String methodNameRegex) {
         super(CLI.ASM_VERSION, cv);
-        this.methodNamePattern = methodNamePattern;
+        this.methodNameRegex = methodNameRegex;
     }
 
-    String getMethodNamePattern() {
-        return methodNamePattern;
+    String getMethodNameRegex() {
+        return methodNameRegex;
     }
 
     void clinitVisited() {

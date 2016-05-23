@@ -49,7 +49,7 @@ final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
 
         mv.visitCode();
 
-        if (this.name.matches(this.cv.getMethodNamePattern()) || this.instrumentMethod) {
+        if (this.name.matches(this.cv.getMethodNameRegex()) || this.instrumentMethod) {
             final String _msg = "marker:" + this.cv.getClassName() + "/" + name + desc;
             LoggingHelper.emitLogString(mv, _msg);
         }
