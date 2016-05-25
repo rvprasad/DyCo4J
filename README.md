@@ -1,4 +1,4 @@
-# DyCo4JVM 
+# DyCo4J
 
 The project provides instrumentation-based tools to collect dynamic information about JVM based code.
 

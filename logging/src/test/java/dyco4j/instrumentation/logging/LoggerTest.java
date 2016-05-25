@@ -5,7 +5,7 @@
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
-package dyco4jvm.instrumentation.logging;
+package dyco4j.instrumentation.logging;
 
 import org.junit.After;
 import org.junit.Before;

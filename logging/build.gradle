@@ -21,8 +21,6 @@ task wrapper(type: Wrapper) {
     gradleVersion = "2.13"
 }
 
-compileJava {
-    options.compilerArgs << "-Xlint"
-}
+compileJava.options.compilerArgs << "-Xlint"
 
 version = '0.3.0'
