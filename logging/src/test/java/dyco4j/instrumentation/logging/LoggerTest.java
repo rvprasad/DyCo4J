@@ -164,6 +164,28 @@ public final class LoggerTest {
     }
 
     @Test
+    public void testLogStringForIdenticalLogStmts() throws Exception {
+        final String _msg1 = "test message 1";
+        Logger.log(_msg1);
+        Logger.log(_msg1);
+        Logger.log(_msg1);
+        final String _msg2 = "test message 2";
+        Logger.log(_msg2);
+        Logger.log(_msg2);
+        Logger.cleanupForTest();
+
+        final String[] _tmp1 = getContent();
+        final String _expected1 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg1);
+        assertEquals(_expected1, _tmp1[1]);
+        final String _expected2 = MessageFormat.format("2,{0},{1}", Thread.currentThread().getId(), _msg1);
+        assertEquals(_expected2, _tmp1[2]);
+        final String _expected3 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg2);
+        assertEquals(_expected3, _tmp1[3]);
+        final String _expected4 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg2);
+        assertEquals(_expected4, _tmp1[4]);
+    }
+
+    @Test
     public void testLogVarArgsForMultipleLogStmts() throws Exception {
         final String[] _msg1 = new String[]{"test", "message", "1"};
         Logger.log(_msg1);
