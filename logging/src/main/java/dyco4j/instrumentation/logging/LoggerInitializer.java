@@ -1,6 +1,7 @@
 package dyco4j.instrumentation.logging;
 
 import java.io.*;
+import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
@@ -10,9 +11,9 @@ public final class LoggerInitializer {
 
     public static void initialize() throws IOException {
         final Properties _properties = getProperties();
-        final File _folder = new File(_properties.getProperty("rootFolder", "."));
-        if (!_folder.exists())
-            _folder.mkdir();
+        final File _folder = new File(_properties.getProperty("traceFolder", "."));
+        if (!_folder.exists() && !_folder.mkdir())
+            throw new IOException(MessageFormat.format("Cannot create {0}", _folder.toString()));
 
         LoggerInitializer.traceFile = File.createTempFile("trace_", ".gz", _folder);
         final OutputStream _stream = new FileOutputStream(LoggerInitializer.traceFile, true);

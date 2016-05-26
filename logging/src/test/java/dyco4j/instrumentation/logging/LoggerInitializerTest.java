@@ -31,7 +31,7 @@ public class LoggerInitializerTest {
             if (_in1 != null)
                 _tmp.load(_in1);
         }
-        assert _tmp.getProperty("rootFolder") != null : "rootFolder property not found";
+        assert _tmp.getProperty("traceFolder") != null : "traceFolder property not found";
 
         checkTraceFilesForLogs(_msg);
     }
