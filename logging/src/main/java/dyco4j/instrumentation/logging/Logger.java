@@ -136,6 +136,13 @@ public final class Logger {
         });
     }
 
+    /**
+     * This method is intended for testing purpose only.
+     */
+    static void cleanupForTest() {
+        logger.cleanup();
+    }
+
     @Override
     protected void finalize() throws Throwable {
         cleanup();
@@ -144,6 +151,9 @@ public final class Logger {
 
     private synchronized void cleanup() {
         if (!this.clean) {
+            if (msgFreq > 1) {
+                logWriter.println(String.format("%d,%s", msgFreq - 1, prevMsg));
+            }
             logWriter.flush();
             logWriter.close();
             clean = true;
@@ -155,7 +165,7 @@ public final class Logger {
             msgFreq++;
         } else {
             if (msgFreq > 1) {
-                logWriter.println(String.format("%d,%s", msgFreq, prevMsg));
+                logWriter.println(String.format("%d,%s", msgFreq - 1, prevMsg));
             }
 
             logWriter.println(String.format("1,%s", msg));
@@ -168,5 +178,4 @@ public final class Logger {
         GET,
         PUT
     }
-
 }

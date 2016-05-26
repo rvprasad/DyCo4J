@@ -1,8 +1,10 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -21,6 +23,22 @@ task wrapper(type: Wrapper) {
     gradleVersion = "2.13"
 }
 
-compileJava.options.compilerArgs << "-Xlint"
+compileJava {
+    options.compilerArgs << "-Xlint"
+}
 
-version = '0.3.0'
+jar {
+    from('src/test/resources') {
+        include '**/*'
+    }
+}
+
+apply plugin: "jacoco"
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+    }
+}
+version = '0.5.0'
