@@ -27,12 +27,6 @@ compileJava {
     options.compilerArgs << "-Xlint"
 }
 
-jar {
-    from('src/test/resources') {
-        include '**/*'
-    }
-}
-
 apply plugin: "jacoco"
 
 jacocoTestReport {
@@ -41,4 +35,5 @@ jacocoTestReport {
         csv.enabled false
     }
 }
+
 version = '0.5.0'
