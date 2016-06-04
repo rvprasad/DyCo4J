@@ -38,7 +38,7 @@ public class LoggerInitializerTest {
 
     @Test
     public void testInitializeWithoutPropertiesFile() throws Exception {
-        // TODO: change the name of build/resources/test/dyco4j/instrumentation/logging/logging.properties
+        // change the name of build/resources/test/dyco4j/instrumentation/logging/logging.properties
         final Path _srcPropFilePath =
                 Paths.get("build", "resources", "test", "dyco4j", "instrumentation", "logging", "logging.properties");
         final File _srcPropFile = _srcPropFilePath.toFile();
@@ -51,6 +51,7 @@ public class LoggerInitializerTest {
         Logger.log(_msg);
         Logger.cleanupForTest();
 
+        // undo the name change of build/resources/test/dyco4j/instrumentation/logging/logging.properties
         assert _destPropFile.renameTo(_srcPropFile) : "property file renaming could not be undone.";
 
         checkTraceFilesForLogs(_msg);
