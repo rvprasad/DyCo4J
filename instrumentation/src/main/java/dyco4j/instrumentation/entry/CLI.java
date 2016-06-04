@@ -5,7 +5,7 @@
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
-package dyco4jvm.instrumentation.entry;
+package dyco4j.instrumentation.entry;
 
 import org.apache.commons.cli.*;
 import org.objectweb.asm.ClassReader;
@@ -58,7 +58,8 @@ public final class CLI {
                         System.out.println(MessageFormat.format("Writing {0}", _trgPath));
 
                     final byte[] _in = Files.readAllBytes(_srcPath);
-                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue("method-name-regex", "^test.*"));
+                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue("method-name-regex", "^test.*"),
+                                                        _cmdLine.hasOption("skip-annotated-tests"));
                     Files.write(_trgPath, _out);
                 } catch (final IOException _ex) {
                     _logger.log(Level.SEVERE, "Error accessing/writing source/target classes.", _ex);
@@ -71,10 +72,11 @@ public final class CLI {
         }
     }
 
-    private static byte[] instrumentClass(final byte[] b, final String methodNameRegex) {
+    private static byte[] instrumentClass(final byte[] b, final String methodNameRegex,
+                                          final boolean skipAnnotatedTests) {
         final ClassReader _cr = new ClassReader(b);
         final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
-        final org.objectweb.asm.ClassVisitor _cv = new ClassVisitor(_cw, methodNameRegex);
+        final org.objectweb.asm.ClassVisitor _cv = new ClassVisitor(_cw, methodNameRegex, skipAnnotatedTests);
         _cr.accept(_cv, 0);
         return _cw.toByteArray();
     }

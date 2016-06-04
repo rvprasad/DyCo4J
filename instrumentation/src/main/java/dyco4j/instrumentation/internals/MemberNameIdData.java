@@ -6,7 +6,7 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package dyco4jvm.instrumentation.internals;
+package dyco4j.instrumentation.internals;
 
 import org.apache.commons.io.FileUtils;
 

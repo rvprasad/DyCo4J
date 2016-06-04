@@ -6,7 +6,7 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package dyco4jvm.instrumentation.internals;
+package dyco4j.instrumentation.internals;
 
 class Helper {
     static String createJavaName(final String name, final String owner) {

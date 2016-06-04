@@ -6,10 +6,10 @@
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
 
-package dyco4jvm.instrumentation.internals;
+package dyco4j.instrumentation.internals;
 
-import dyco4jvm.LoggingHelper;
-import dyco4jvm.instrumentation.logging.Logger.Action;
+import dyco4j.LoggingHelper;
+import dyco4j.instrumentation.logging.Logger.Action;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
