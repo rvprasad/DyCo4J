@@ -44,11 +44,15 @@ task copyLibs(type: Copy) {
 jar.dependsOn copyLibs
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.13'
+    gradleVersion = '2.14'
 }
 
-compileJava{
+compileJava {
     options.compilerArgs << '-Xlint'
+}
+
+test {
+    exclude '**/TestSubject.class'
 }
 
 version = '0.5.0'
