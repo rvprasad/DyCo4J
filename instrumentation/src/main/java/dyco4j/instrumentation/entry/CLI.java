@@ -23,8 +23,6 @@ import java.util.stream.Stream;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
-    // TODO: Add tests for the package
-
     final static int ASM_VERSION = ASM5;
 
     public static void main(final String[] args) {
