@@ -33,7 +33,7 @@ public final class CLI {
                                  .desc("Folder containing the classes (as descendants) to be instrumented.").build());
         _options.addOption(Option.builder().longOpt("out-folder").required().hasArg()
                                  .desc("Folder containing the classes (as descendants) with instrumentation.").build());
-        _options.addOption(Option.builder().longOpt("method-name-regex").hasArg()
+        _options.addOption(Option.builder().longOpt("method-name-regex").hasArg(true)
                                  .desc("Regex identifying the methods to be instrumented. Default: ^test.*.").build());
         _options.addOption(Option.builder().longOpt("skip-annotated-tests").hasArg(false)
                                  .desc("Do not instrument tests identified by annotations.").build());

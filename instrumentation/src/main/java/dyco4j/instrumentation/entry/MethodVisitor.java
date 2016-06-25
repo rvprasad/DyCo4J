@@ -15,7 +15,7 @@ final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
     private final String name;
     private final String desc;
     private final ClassVisitor cv;
-    private boolean instrumentMethod;
+    private boolean isAnnotatedAsTest;
 
     MethodVisitor(final org.objectweb.asm.MethodVisitor mv, final String name, final String descriptor,
                   final ClassVisitor cv) {
@@ -27,18 +27,18 @@ final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
-        final boolean _isAnnotatedAsTest = desc.matches("Lorg/junit/Test;") ||
-                                           desc.matches("Lorg/junit/After;") || desc.matches("Lorg/junit/Before;") ||
-                                           desc.matches("Lorg/junit/AfterClass;") ||
-                                           desc.matches("Lorg/junit/BeforeClass;") ||
-                                           desc.matches("Lorg/testng/annotations/Test") ||
-                                           desc.matches("Lorg/testng/annotations/AfterTest") ||
-                                           desc.matches("Lorg/testng/annotations/BeforeTest") ||
-                                           desc.matches("Lorg/testng/annotations/AfterClass") ||
-                                           desc.matches("Lorg/testng/annotations/BeforeClass") ||
-                                           desc.matches("Lorg/testng/annotations/AfterMethod") ||
-                                           desc.matches("Lorg/testng/annotations/BeforeMethod");
-        this.instrumentMethod = !this.cv.shouldInstrumentAnnotatedTests() || _isAnnotatedAsTest;
+        this.isAnnotatedAsTest = !this.cv.shouldInstrumentAnnotatedTests() ||
+                                 desc.matches("Lorg/junit/Test;") ||
+                                 desc.matches("Lorg/junit/After;") || desc.matches("Lorg/junit/Before;") ||
+                                 desc.matches("Lorg/junit/AfterClass;") ||
+                                 desc.matches("Lorg/junit/BeforeClass;") ||
+                                 desc.matches("Lorg/testng/annotations/Test") ||
+                                 desc.matches("Lorg/testng/annotations/AfterTest") ||
+                                 desc.matches("Lorg/testng/annotations/BeforeTest") ||
+                                 desc.matches("Lorg/testng/annotations/AfterClass") ||
+                                 desc.matches("Lorg/testng/annotations/BeforeClass") ||
+                                 desc.matches("Lorg/testng/annotations/AfterMethod") ||
+                                 desc.matches("Lorg/testng/annotations/BeforeMethod");
         return super.visitAnnotation(desc, visible);
     }
 
@@ -51,9 +51,13 @@ final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
 
         mv.visitCode();
 
-        if (this.name.matches(this.cv.getMethodNameRegex()) && this.instrumentMethod) {
+        if (this.shouldInstrument()) {
             final String _msg = "marker:" + this.cv.getClassName() + "/" + name + desc;
             LoggingHelper.emitLogString(mv, _msg);
         }
+    }
+
+    private boolean shouldInstrument() {
+        return this.name.matches(this.cv.getMethodNameRegex()) && this.isAnnotatedAsTest;
     }
 }
