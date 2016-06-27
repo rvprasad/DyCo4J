@@ -8,21 +8,28 @@
 
 package dyco4j.instrumentation.entry
 
-import org.junit.*
+import groovy.io.FileType
+import org.junit.AfterClass
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.zip.GZIPInputStream
 
 class CLITest {
-    private static final Path PROPERTY_FILE = Paths.get(".", "build", "classes", "test", "dyco4j", "instrumentation",
+    private static final String LOGGING_LIBRARY = Paths.get("libs", "dyco4j-logging-0.5.1.jar").toString()
+    private static final Path TEST_CLASS_FOLDER = Paths.get("build", "classes", "test")
+    private static final Path PROPERTY_FILE = Paths.get(TEST_CLASS_FOLDER.toString(), "dyco4j", "instrumentation",
             "logging", "logging.properties");
-    private static final Path ROOT_FOLDER = Paths.get(".", "build", "tmp")
+    private static final Path ROOT_FOLDER = Paths.get("build", "tmp")
     private static final Path TRACE_FOLDER = ROOT_FOLDER.resolve("traces")
     private static final Path OUT_FOLDER = ROOT_FOLDER.resolve("out_classes")
     private static final Path IN_FOLDER = ROOT_FOLDER.resolve("in_classes")
 
-    private static void deleteFiles(folder, pattern) {
+    private static void deleteFiles(final Path folder, final pattern) {
         Files.walk(folder).filter { it.fileName ==~ pattern }.each { Files.delete(it) }
     }
 
@@ -58,7 +65,6 @@ class CLITest {
 
     @Before
     void setUp() {
-        deleteFiles(TRACE_FOLDER, /^trace.*gz/)
         deleteFiles(OUT_FOLDER, /.*class$/)
     }
 
@@ -81,68 +87,113 @@ class CLITest {
     void testInFolderAndOutFolderOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1:
                 "Class was not instrumented"
-        // def (stdoutLines, _traceLines) = executeInstrumentedCode()
-        // TODO: assert expected std output
-        // TODO: assert expected trace output
+        final _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+        final String[] _traceLines = _executionResult.traceLines
+        assert _traceLines.length == 5
+        try {
+            Date.parseToStringDate(_traceLines[0].split(',')[1])
+        } catch (_e) {
+            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
+        }
+        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/test1\(\)V/
+        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/test2\(\)V/
+        assert _traceLines[3] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix1\(\)V/
+        assert _traceLines[4] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix2\(\)V/
     }
 
     @Test
     void testMethodNameRegexOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
-                               '^check.*']) == 1: "Class was not instrumented"
-        // def (stdoutLines, _traceLines) = executeInstrumentedCode()
-        // TODO: assert expected std output
-        // TODO: assert expected trace output
+                               '.*Suffix.$']) == 1: "Class was not instrumented"
+        final _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+        final String[] _traceLines = _executionResult.traceLines
+        assert _traceLines.length == 3
+        try {
+            Date.parseToStringDate(_traceLines[0].split(',')[1])
+        } catch (_e) {
+            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
+        }
+        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix1\(\)V/
+        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix2\(\)V/
     }
 
     @Test
     void testMethodNameRegexAndSkipAnnotatedTestsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
-                               '^check.*', '--skip-annotated-tests']) == 1: "Class was not instrumented"
-        // def (stdoutLines, _traceLines) = executeInstrumentedCode()
-        // TODO: assert expected std output
-        // TODO: assert expected trace output
+                               '.*Suffix.$', '--only-annotated-tests']) == 1: "Class was not instrumented"
+        final _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+        final String[] _traceLines = _executionResult.traceLines
+        assert _traceLines.length == 2
+        try {
+            Date.parseToStringDate(_traceLines[0].split(',')[1])
+        } catch (_e) {
+            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
+        }
+        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix2\(\)V/
     }
 
     @Test
     void testSkipAnnotatedTestsOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               '--skip-annotated-tests']) == 1: "Class was not instrumented"
-        // def (stdoutLines, _traceLines) = executeInstrumentedCode()
-        // TODO: assert expected std output
-        // TODO: assert expected trace output
+                               '--only-annotated-tests']) == 1: "Class was not instrumented"
+        final _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+        final String[] _traceLines = _executionResult.traceLines
+        assert _traceLines.length == 3
+        try {
+            Date.parseToStringDate(_traceLines[0].split(',')[1])
+        } catch (_e) {
+            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
+        }
+        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/test2\(\)V/
+        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix2\(\)V/
     }
 
-    private def instrumentCode(args) {
+    private static def instrumentCode(final args) {
         CLI.main((String[]) args)
         return Files.walk(OUT_FOLDER).filter { it.fileName ==~ /.*class$/ }.count()
     }
 
+    /**
+     * execute instrumented code in a different process
+     * @return a quadruple of
+     *  - exit code
+     *  - lines on std out as a list
+     *  - lines on std error as a list
+     *  - lines in trace file as a list
+     */
     private def executeInstrumentedCode() {
-        // TODO: execute instrumented code in a different process
-        //       and return a pair of
-        //        - the output on std out and std error as a list and
-        //        - the lines from the trace file as a list
-    }
-}
-
-
-class TestSubject {
-    void test1() {
-        assert true
-    }
-
-    void check1() {
-        assert true
+        final _path = Paths.get(System.getProperty("java.home"), "bin", "java").toString()
+        final _cp = [OUT_FOLDER, LOGGING_LIBRARY, TEST_CLASS_FOLDER].join(":")
+        final _proc = [_path, "-cp", _cp, TestSubject.class.name].execute()
+        final _ret = new ExecutionResult()
+        _ret.exitCode = _proc.waitFor()
+        _ret.stdoutLines = _proc.inputStream.readLines()
+        _ret.stderrLines = _proc.errorStream.readLines()
+        _ret.traceLines = getTraceLines()
+        deleteFiles(TRACE_FOLDER, /^trace.*gz/)
+        return _ret
     }
 
-    @Test
-    void check2() {
-        assert true
+    private static def getTraceLines() {
+        def _ret = []
+        TRACE_FOLDER.toFile().eachFileMatch(FileType.FILES, ~/^trace.*gz/) {
+            _ret << new GZIPInputStream(it.newInputStream()).readLines()
+        }
+        return _ret.flatten()
     }
 
-    @Test
-    void test2() {
-        assert true
+    private final class ExecutionResult {
+        def exitCode
+        def stdoutLines
+        def stderrLines
+        def traceLines
+
+        def String toString() {
+            return [exitCode, stdoutLines, stderrLines, traceLines]
+        }
     }
 }

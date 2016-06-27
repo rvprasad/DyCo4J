@@ -13,22 +13,22 @@ import dyco4j.LoggingHelper;
 
 final class ClassVisitor extends org.objectweb.asm.ClassVisitor {
     private final String methodNameRegex;
-    private final boolean instrumentAnnotatedTests;
+    private final boolean onlyAnnotatedTests;
     private boolean isClinitVisited;
     private String className;
 
-    ClassVisitor(final org.objectweb.asm.ClassVisitor cv, final String methodNameRegex, boolean skipAnnotatedTests) {
+    ClassVisitor(final org.objectweb.asm.ClassVisitor cv, final String methodNameRegex, boolean onlyAnnotatedTests) {
         super(CLI.ASM_VERSION, cv);
         this.methodNameRegex = methodNameRegex;
-        this.instrumentAnnotatedTests = !skipAnnotatedTests;
+        this.onlyAnnotatedTests = onlyAnnotatedTests;
     }
 
     String getMethodNameRegex() {
         return this.methodNameRegex;
     }
 
-    boolean shouldInstrumentAnnotatedTests() {
-        return this.instrumentAnnotatedTests;
+    boolean instrumentOnlyAnnotatedTests() {
+        return this.onlyAnnotatedTests;
     }
 
     void clinitVisited() {
