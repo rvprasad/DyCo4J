@@ -27,8 +27,7 @@ final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
-        this.isAnnotatedAsTest = !this.cv.shouldInstrumentAnnotatedTests() ||
-                                 desc.matches("Lorg/junit/Test;") ||
+        this.isAnnotatedAsTest = desc.matches("Lorg/junit/Test;") ||
                                  desc.matches("Lorg/junit/After;") || desc.matches("Lorg/junit/Before;") ||
                                  desc.matches("Lorg/junit/AfterClass;") ||
                                  desc.matches("Lorg/junit/BeforeClass;") ||
@@ -58,6 +57,7 @@ final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
     }
 
     private boolean shouldInstrument() {
-        return this.name.matches(this.cv.getMethodNameRegex()) && this.isAnnotatedAsTest;
+        return this.name.matches(this.cv.getMethodNameRegex()) &&
+               (!this.cv.instrumentOnlyAnnotatedTests() || this.isAnnotatedAsTest);
     }
 }

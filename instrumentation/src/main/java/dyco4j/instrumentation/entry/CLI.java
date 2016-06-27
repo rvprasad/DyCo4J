@@ -26,15 +26,17 @@ public final class CLI {
     final static int ASM_VERSION = ASM5;
 
     public static void main(final String[] args) {
+        final String _testPattern = "^test.*";
         final Options _options = new Options();
         _options.addOption(Option.builder().longOpt("in-folder").required().hasArg()
                                  .desc("Folder containing the classes (as descendants) to be instrumented.").build());
         _options.addOption(Option.builder().longOpt("out-folder").required().hasArg()
                                  .desc("Folder containing the classes (as descendants) with instrumentation.").build());
-        _options.addOption(Option.builder().longOpt("method-name-regex").hasArg(true)
-                                 .desc("Regex identifying the methods to be instrumented. Default: ^test.*.").build());
-        _options.addOption(Option.builder().longOpt("skip-annotated-tests").hasArg(false)
-                                 .desc("Do not instrument tests identified by annotations.").build());
+        final String _msg =
+                MessageFormat.format("Regex identifying the methods to be instrumented. Default: {0}.", _testPattern);
+        _options.addOption(Option.builder().longOpt("method-name-regex").hasArg(true).desc(_msg).build());
+        _options.addOption(Option.builder().longOpt("only-annotated-tests").hasArg(false)
+                                 .desc("Instrument only tests identified by annotations.").build());
 
         final Logger _logger = Logger.getGlobal();
         try {
@@ -56,8 +58,8 @@ public final class CLI {
                         System.out.println(MessageFormat.format("Writing {0}", _trgPath));
 
                     final byte[] _in = Files.readAllBytes(_srcPath);
-                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue("method-name-regex", "^test.*"),
-                                                        _cmdLine.hasOption("skip-annotated-tests"));
+                    final byte[] _out = instrumentClass(_in, _cmdLine.getOptionValue("method-name-regex", _testPattern),
+                                                        _cmdLine.hasOption("only-annotated-tests"));
                     Files.write(_trgPath, _out);
                 } catch (final IOException _ex) {
                     _logger.log(Level.SEVERE, "Error accessing/writing source/target classes.", _ex);
@@ -71,10 +73,10 @@ public final class CLI {
     }
 
     private static byte[] instrumentClass(final byte[] b, final String methodNameRegex,
-                                          final boolean skipAnnotatedTests) {
+                                          final boolean onlyAnnotatedTests) {
         final ClassReader _cr = new ClassReader(b);
         final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
-        final org.objectweb.asm.ClassVisitor _cv = new ClassVisitor(_cw, methodNameRegex, skipAnnotatedTests);
+        final org.objectweb.asm.ClassVisitor _cv = new ClassVisitor(_cw, methodNameRegex, onlyAnnotatedTests);
         _cr.accept(_cv, 0);
         return _cw.toByteArray();
     }
