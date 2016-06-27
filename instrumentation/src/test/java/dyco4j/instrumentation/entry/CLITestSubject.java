@@ -10,10 +10,10 @@ package dyco4j.instrumentation.entry;
 
 import org.junit.Test;
 
-public class TestSubject {
+public class CLITestSubject {
 
     public static void main(String[] s) {
-        final TestSubject _t = new TestSubject();
+        final CLITestSubject _t = new CLITestSubject();
         _t.test1();
         _t.test2();
         _t.testSuffix1();

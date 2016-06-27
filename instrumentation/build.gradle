@@ -52,7 +52,7 @@ compileJava {
 }
 
 test {
-    exclude '**/TestSubject.class'
+    exclude '**/CLITestSubject.class'
 }
 
 version = '0.5.0'

@@ -50,7 +50,7 @@ class CLITest {
 
         // copy to-be-instrumented test classes into IN_FOLDER
         final _testClassFolder = Paths.get("build", "classes", "test")
-        Files.walk(_testClassFolder).filter { it.fileName ==~ "TestSubject.class" }.each { src ->
+        Files.walk(_testClassFolder).filter { it.fileName ==~ "CLITestSubject.class" }.each { src ->
             final _trg = IN_FOLDER.resolve(_testClassFolder.relativize(src))
             Files.createDirectories(_trg.parent)
             Files.copy(src, _trg)
@@ -96,10 +96,10 @@ class CLITest {
         } catch (_e) {
             assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
         }
-        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/test1\(\)V/
-        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/test2\(\)V/
-        assert _traceLines[3] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix1\(\)V/
-        assert _traceLines[4] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix2\(\)V/
+        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test1\(\)V/
+        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
+        assert _traceLines[3] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
+        assert _traceLines[4] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 
     @Test
@@ -115,8 +115,8 @@ class CLITest {
         } catch (_e) {
             assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
         }
-        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix1\(\)V/
-        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix2\(\)V/
+        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
+        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 
     @Test
@@ -132,7 +132,7 @@ class CLITest {
         } catch (_e) {
             assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
         }
-        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix2\(\)V/
+        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 
     @Test
@@ -148,8 +148,8 @@ class CLITest {
         } catch (_e) {
             assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
         }
-        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/test2\(\)V/
-        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/TestSubject\/testSuffix2\(\)V/
+        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
+        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 
     private static def instrumentCode(final args) {
@@ -168,7 +168,7 @@ class CLITest {
     private def executeInstrumentedCode() {
         final _path = Paths.get(System.getProperty("java.home"), "bin", "java").toString()
         final _cp = [OUT_FOLDER, LOGGING_LIBRARY, TEST_CLASS_FOLDER].join(":")
-        final _proc = [_path, "-cp", _cp, TestSubject.class.name].execute()
+        final _proc = [_path, "-cp", _cp, CLITestSubject.class.name].execute()
         final _ret = new ExecutionResult()
         _ret.exitCode = _proc.waitFor()
         _ret.stdoutLines = _proc.inputStream.readLines()
