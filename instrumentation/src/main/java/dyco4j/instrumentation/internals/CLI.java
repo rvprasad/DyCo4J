@@ -16,11 +16,17 @@ import org.objectweb.asm.ClassWriter;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.objectweb.asm.Opcodes.ASM5;
 
@@ -29,8 +35,8 @@ public final class CLI {
 
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
-        _options.addOption(Option.builder().longOpt("file").required().hasArg(true)
-                                 .desc("File listing the fully-qualified paths to classes to be instrumented.")
+        _options.addOption(Option.builder().longOpt("in-folder").required().hasArg(true)
+                                 .desc("Folder containing the classes (as descendants) to be instrumented.")
                                  .build());
         _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg(true)
                                  .desc("Regex identifying the methods to be instrumented. Default: .*.").build());
@@ -50,7 +56,7 @@ public final class CLI {
                                                                               _cmdLine.hasOption("traceMethodArgs"),
                                                                               _cmdLine.hasOption(
                                                                                       "traceMethodReturnValue"));
-            final Set<String> _filenames = new HashSet<>(FileUtils.readLines(new File(_cmdLine.getOptionValue('f'))));
+            final Set<Path> _filenames = getFilenames(_cmdLine.getOptionValue("folder"));
             final String _methodNameRegex = _cmdLine.getOptionValue("methodNameRegex", ".*");
 
             final Path _dataFile = Paths.get("auxiliary_data.json");
@@ -60,8 +66,8 @@ public final class CLI {
 
             _filenames.parallelStream().forEach(_arg -> {
                 try {
-                    final File _src = new File(_arg);
-                    final File _trg = new File(_arg + ".orig");
+                    final File _src = _arg.toFile();
+                    final File _trg = new File(_arg.toString() + ".orig");
 
                     final ClassReader _cr = new ClassReader(FileUtils.readFileToByteArray(_src));
                     final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
@@ -93,11 +99,16 @@ public final class CLI {
         }
     }
 
-    private static void getMemberId2NameMapping(final Collection<String> filenames, final AuxiliaryData auxiliaryData,
+    private static Set<Path> getFilenames(final String folder) throws IOException {
+        final Stream<Path> _tmp1 = Files.walk(Paths.get(folder)).filter(p -> p.toString().endsWith(".class"));
+        return _tmp1.collect(Collectors.toSet());
+    }
+
+    private static void getMemberId2NameMapping(final Collection<Path> filenames, final AuxiliaryData auxiliaryData,
                                                 final boolean collectFieldInfo) {
-        for (final String _arg : filenames) {
+        for (final Path _arg : filenames) {
             try {
-                final ClassReader _cr = new ClassReader(FileUtils.readFileToByteArray(new File(_arg)));
+                final ClassReader _cr = new ClassReader(FileUtils.readFileToByteArray(new File(_arg.toString())));
                 final ClassVisitor _cv = new AuxiliaryDataCollectingClassVisitor(auxiliaryData, collectFieldInfo);
                 _cr.accept(_cv, 0);
             } catch (final Exception _ex) {
