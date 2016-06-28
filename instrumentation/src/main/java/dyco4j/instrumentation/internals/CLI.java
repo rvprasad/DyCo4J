@@ -16,6 +16,8 @@ import org.objectweb.asm.ClassWriter;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,46 +27,36 @@ import static org.objectweb.asm.Opcodes.ASM5;
 public final class CLI {
     final static int ASM_VERSION = ASM5;
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
-        _options.addOption(Option.builder().longOpt("file").hasArg().required()
+        _options.addOption(Option.builder().longOpt("file").required().hasArg(true)
                                  .desc("File listing the fully-qualified paths to classes to be instrumented.")
                                  .build());
-        _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg()
+        _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg(true)
                                  .desc("Regex identifying the methods to be instrumented. Default: .*.").build());
         _options.addOption(Option.builder().longOpt("traceFieldAccess").hasArg(false)
-                                 .desc("Instrument classes to trace field access.  Default: off").build());
+                                 .desc("Instrument classes to trace field access.").build());
         _options.addOption(Option.builder().longOpt("traceArrayAccess").hasArg(false)
-                                 .desc("Instrument classes to trace array access.  Default: off").build());
+                                 .desc("Instrument classes to trace array access.").build());
         _options.addOption(Option.builder().longOpt("traceMethodArgs").hasArg(false)
-                                 .desc("Instrument classes to trace method arguments.  Default: off").build());
+                                 .desc("Instrument classes to trace method arguments.").build());
         _options.addOption(Option.builder().longOpt("traceMethodReturnValue").hasArg(false)
-                                 .desc("Instrument classes to trace method return values.  Default: off").build());
+                                 .desc("Instrument classes to trace method return values.").build());
 
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
-            final Set<String> _filenames = new HashSet<>(FileUtils.readLines(new File(_cmdLine.getOptionValue('f'))));
-            final String _methodNameRegex = _cmdLine.getOptionValue("methodNameRegex", ".*");
             final CommandLineOptions _cmdLineOptions = new CommandLineOptions(_cmdLine.hasOption("traceArrayAccess"),
                                                                               _cmdLine.hasOption("traceFieldAccess"),
                                                                               _cmdLine.hasOption("traceMethodArgs"),
                                                                               _cmdLine.hasOption(
                                                                                       "traceMethodReturnValue"));
+            final Set<String> _filenames = new HashSet<>(FileUtils.readLines(new File(_cmdLine.getOptionValue('f'))));
+            final String _methodNameRegex = _cmdLine.getOptionValue("methodNameRegex", ".*");
 
-            final Map<String, String> _fieldId2Name = new HashMap<>();
-            final Map<String, String> _shortFieldName2Id = new HashMap<>();
-            final Map<String, String> _methodId2Name = new HashMap<>();
-            final Map<String, String> _shortMethodName2Id = new HashMap<>();
-            final Map<String, String> _class2superClass = new HashMap<>();
+            final Path _dataFile = Paths.get("auxiliary_data.json");
+            final AuxiliaryData _auxiliaryData = AuxiliaryData.loadData(_dataFile);
 
-            final MemberNameIdData _memberNameIdData = new MemberNameIdData();
-            _fieldId2Name.putAll(_memberNameIdData.getFieldId2Name());
-            _shortFieldName2Id.putAll(_memberNameIdData.getShortFieldName2Id());
-            _methodId2Name.putAll(_memberNameIdData.getMethodId2Name());
-            _shortMethodName2Id.putAll(_memberNameIdData.getShortMethodName2Id());
-
-            getMemberId2NameMapping(_filenames, _fieldId2Name, _shortFieldName2Id, _methodId2Name, _shortMethodName2Id,
-                                    _class2superClass, _cmdLineOptions.traceFieldAccess);
+            getMemberId2NameMapping(_filenames, _auxiliaryData, _cmdLineOptions.traceFieldAccess);
 
             _filenames.parallelStream().forEach(_arg -> {
                 try {
@@ -73,6 +65,12 @@ public final class CLI {
 
                     final ClassReader _cr = new ClassReader(FileUtils.readFileToByteArray(_src));
                     final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
+                    final Map<String, String> _shortFieldName2Id =
+                            Collections.unmodifiableMap(_auxiliaryData.shortFieldName2Id);
+                    final Map<String, String> _shortMethodName2Id =
+                            Collections.unmodifiableMap(_auxiliaryData.shortMethodName2Id);
+                    final Map<String, String> _class2superClass =
+                            Collections.unmodifiableMap(_auxiliaryData.class2superClass);
                     final ClassVisitor _cv =
                             new TracingClassVisitor(_cw, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
                                                     _methodNameRegex, _cmdLineOptions);
@@ -87,12 +85,7 @@ public final class CLI {
                 }
             });
 
-            if (_cmdLineOptions.traceFieldAccess)
-                _memberNameIdData.recordData(new TreeMap<>(_fieldId2Name));
-
-            _memberNameIdData.recordData(new TreeMap<>(_methodId2Name));
-
-            _memberNameIdData.finishedLogging();
+            AuxiliaryData.saveData(_auxiliaryData, _dataFile);
         } catch (final ParseException _ex) {
             new HelpFormatter().printHelp(CLI.class.getName(), _options);
         } catch (final IOException _ex) {
@@ -100,19 +93,12 @@ public final class CLI {
         }
     }
 
-    private static void getMemberId2NameMapping(final Collection<String> filenames,
-                                                final Map<String, String> fieldId2Name,
-                                                final Map<String, String> shortFieldName2Id,
-                                                final Map<String, String> methodId2Name,
-                                                final Map<String, String> shortMethodId2Name,
-                                                final Map<String, String> class2superClass,
+    private static void getMemberId2NameMapping(final Collection<String> filenames, final AuxiliaryData auxiliaryData,
                                                 final boolean collectFieldInfo) {
         for (final String _arg : filenames) {
             try {
                 final ClassReader _cr = new ClassReader(FileUtils.readFileToByteArray(new File(_arg)));
-                final ClassVisitor _cv =
-                        new MemberDataCollectingClassVisitor(fieldId2Name, shortFieldName2Id, methodId2Name,
-                                                             shortMethodId2Name, class2superClass, collectFieldInfo);
+                final ClassVisitor _cv = new AuxiliaryDataCollectingClassVisitor(auxiliaryData, collectFieldInfo);
                 _cr.accept(_cv, 0);
             } catch (final Exception _ex) {
                 throw new RuntimeException(_ex);

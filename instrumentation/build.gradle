@@ -22,6 +22,7 @@ dependencies {
     compile 'commons-io:commons-io:2.5'
     compile 'commons-cli:commons-cli:1.3.1'
     compile 'org.codehaus.groovy:groovy-all:2.4.6'
+    compile 'com.google.code.gson:gson:2.7'
 
     compile name: "$JVM_DYN_INFO_COLLECTION_LOGGING"
 
