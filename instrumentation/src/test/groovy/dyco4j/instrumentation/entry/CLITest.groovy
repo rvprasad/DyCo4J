@@ -34,7 +34,7 @@ class CLITest {
     }
 
     @BeforeClass
-    static void setUpClass() {
+    static void setUpOnceOnlyFixture() {
         final _propertyFolder = PROPERTY_FILE.getParent()
         assert Files.createDirectories(_propertyFolder) != null: "Could not create property folder $_propertyFolder"
         final _propertyFile = Files.createFile(PROPERTY_FILE)
@@ -58,13 +58,13 @@ class CLITest {
     }
 
     @AfterClass
-    static void tearDownClass() {
+    static void tearDownOnceOnlyFixture() {
         Files.delete(PROPERTY_FILE)
         deleteFiles(IN_FOLDER, /.*class$/)
     }
 
     @Before
-    void setUp() {
+    void setUpFixture() {
         deleteFiles(OUT_FOLDER, /.*class$/)
     }
 

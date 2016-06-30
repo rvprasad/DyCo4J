@@ -32,6 +32,7 @@ import static org.objectweb.asm.Opcodes.ASM5;
 public final class CLI {
     final static int ASM_VERSION = ASM5;
     private static final Path AUXILIARY_DATA_FILE_NAME = Paths.get("auxiliary_data.json");
+    private static final String METHOD_NAME_REGEX = ".*";
 
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
@@ -39,8 +40,9 @@ public final class CLI {
                                  .desc("Folder containing the classes (as descendants) to be instrumented.").build());
         _options.addOption(Option.builder().longOpt("out-folder").required().hasArg(true)
                                  .desc("Folder containing the classes (as descendants) with instrumentation.").build());
-        _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg(true)
-                                 .desc("Regex identifying the methods to be instrumented. Default: .*.").build());
+        final String _msg = MessageFormat
+                .format("Regex identifying the methods to be instrumented. Default: {0}.", METHOD_NAME_REGEX);
+        _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg(true).desc(_msg).build());
         _options.addOption(Option.builder().longOpt("traceFieldAccess").hasArg(false)
                                  .desc("Instrument classes to trace field access.").build());
         _options.addOption(Option.builder().longOpt("traceArrayAccess").hasArg(false)
@@ -66,7 +68,7 @@ public final class CLI {
         final AuxiliaryData _auxiliaryData = AuxiliaryData.loadData(AUXILIARY_DATA_FILE_NAME);
         getMemberId2NameMapping(_filenames, _auxiliaryData, _cmdLineOptions.traceFieldAccess);
 
-        final String _methodNameRegex = cmdLine.getOptionValue("methodNameRegex", ".*");
+        final String _methodNameRegex = cmdLine.getOptionValue("methodNameRegex", METHOD_NAME_REGEX);
         final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
         final Path _trgRoot = Paths.get(cmdLine.getOptionValue("out-folder"));
         _filenames.parallelStream().forEach(_srcPath -> {
