@@ -69,22 +69,22 @@ class CLITest {
     }
 
     @Test
-    void testNoOptions() {
+    void withNoOptions() {
         assert instrumentCode([]) == 0: "No class should have been instrumented"
     }
 
     @Test
-    void testOnlyInFolderOption() {
+    void withOnlyInFolderOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER]) == 0: "No class should have been instrumented"
     }
 
     @Test
-    void testOnlyOutFolderOption() {
+    void withOnlyOutFolderOption() {
         assert instrumentCode(["--out-folder", OUT_FOLDER]) == 0: "No class should have been instrumented"
     }
 
     @Test
-    void testInFolderAndOutFolderOptions() {
+    void withInFolderAndOutFolderOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1:
                 "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
@@ -103,7 +103,7 @@ class CLITest {
     }
 
     @Test
-    void testMethodNameRegexOption() {
+    void withMethodNameRegexOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
                                '.*Suffix.$']) == 1: "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
@@ -120,7 +120,7 @@ class CLITest {
     }
 
     @Test
-    void testMethodNameRegexAndSkipAnnotatedTestsOptions() {
+    void withMethodNameRegexAndSkipAnnotatedTestsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
                                '.*Suffix.$', '--only-annotated-tests']) == 1: "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
@@ -136,7 +136,7 @@ class CLITest {
     }
 
     @Test
-    void testSkipAnnotatedTestsOption() {
+    void withOnlyAnnotatedTestsOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
                                '--only-annotated-tests']) == 1: "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
