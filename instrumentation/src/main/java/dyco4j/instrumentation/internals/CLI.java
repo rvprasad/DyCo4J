@@ -19,12 +19,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,12 +31,14 @@ import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
     final static int ASM_VERSION = ASM5;
+    private static final Path AUXILIARY_DATA_FILE_NAME = Paths.get("auxiliary_data.json");
 
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
         _options.addOption(Option.builder().longOpt("in-folder").required().hasArg(true)
-                                 .desc("Folder containing the classes (as descendants) to be instrumented.")
-                                 .build());
+                                 .desc("Folder containing the classes (as descendants) to be instrumented.").build());
+        _options.addOption(Option.builder().longOpt("out-folder").required().hasArg(true)
+                                 .desc("Folder containing the classes (as descendants) with instrumentation.").build());
         _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg(true)
                                  .desc("Regex identifying the methods to be instrumented. Default: .*.").build());
         _options.addOption(Option.builder().longOpt("traceFieldAccess").hasArg(false)
@@ -50,54 +51,58 @@ public final class CLI {
                                  .desc("Instrument classes to trace method return values.").build());
 
         try {
-            final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
-            final CommandLineOptions _cmdLineOptions = new CommandLineOptions(_cmdLine.hasOption("traceArrayAccess"),
-                                                                              _cmdLine.hasOption("traceFieldAccess"),
-                                                                              _cmdLine.hasOption("traceMethodArgs"),
-                                                                              _cmdLine.hasOption(
-                                                                                      "traceMethodReturnValue"));
-            final Set<Path> _filenames = getFilenames(_cmdLine.getOptionValue("folder"));
-            final String _methodNameRegex = _cmdLine.getOptionValue("methodNameRegex", ".*");
-
-            final Path _dataFile = Paths.get("auxiliary_data.json");
-            final AuxiliaryData _auxiliaryData = AuxiliaryData.loadData(_dataFile);
-
-            getMemberId2NameMapping(_filenames, _auxiliaryData, _cmdLineOptions.traceFieldAccess);
-
-            _filenames.parallelStream().forEach(_arg -> {
-                try {
-                    final File _src = _arg.toFile();
-                    final File _trg = new File(_arg.toString() + ".orig");
-
-                    final ClassReader _cr = new ClassReader(FileUtils.readFileToByteArray(_src));
-                    final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
-                    final Map<String, String> _shortFieldName2Id =
-                            Collections.unmodifiableMap(_auxiliaryData.shortFieldName2Id);
-                    final Map<String, String> _shortMethodName2Id =
-                            Collections.unmodifiableMap(_auxiliaryData.shortMethodName2Id);
-                    final Map<String, String> _class2superClass =
-                            Collections.unmodifiableMap(_auxiliaryData.class2superClass);
-                    final ClassVisitor _cv =
-                            new TracingClassVisitor(_cw, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
-                                                    _methodNameRegex, _cmdLineOptions);
-                    _cr.accept(_cv, 0);
-
-                    if (!_trg.exists())
-                        FileUtils.moveFile(_src, _trg);
-
-                    FileUtils.writeByteArrayToFile(_src, _cw.toByteArray());
-                } catch (final Exception _ex) {
-                    throw new RuntimeException(_ex);
-                }
-            });
-
-            AuxiliaryData.saveData(_auxiliaryData, _dataFile);
-        } catch (final ParseException _ex) {
+            processCommandLine(new DefaultParser().parse(_options, args));
+        } catch (final ParseException _ex1) {
             new HelpFormatter().printHelp(CLI.class.getName(), _options);
-        } catch (final IOException _ex) {
-            Logger.getGlobal().log(Level.SEVERE, null, _ex);
         }
     }
+
+    private static void processCommandLine(CommandLine cmdLine) throws IOException {
+        final CommandLineOptions _cmdLineOptions =
+                new CommandLineOptions(cmdLine.hasOption("traceArrayAccess"), cmdLine.hasOption("traceFieldAccess"),
+                                       cmdLine.hasOption("traceMethodArgs"),
+                                       cmdLine.hasOption("traceMethodReturnValue"));
+        final Set<Path> _filenames = getFilenames(cmdLine.getOptionValue("folder"));
+        final AuxiliaryData _auxiliaryData = AuxiliaryData.loadData(AUXILIARY_DATA_FILE_NAME);
+        getMemberId2NameMapping(_filenames, _auxiliaryData, _cmdLineOptions.traceFieldAccess);
+
+        final String _methodNameRegex = cmdLine.getOptionValue("methodNameRegex", ".*");
+        final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
+        final Path _trgRoot = Paths.get(cmdLine.getOptionValue("out-folder"));
+        _filenames.parallelStream().forEach(_srcPath -> {
+            try {
+                final Path _relativeSrcPath = _srcRoot.relativize(_srcPath);
+                final Path _trgPath = _trgRoot.resolve(_relativeSrcPath);
+                final Path _parent = _trgPath.getParent();
+                if (!Files.exists(_parent))
+                    Files.createDirectories(_parent);
+
+                if (Files.exists(_trgPath))
+                    System.out.println(MessageFormat.format("Overwriting {0}", _trgPath));
+                else
+                    System.out.println(MessageFormat.format("Writing {0}", _trgPath));
+
+                final ClassReader _cr = new ClassReader(Files.readAllBytes(_srcPath));
+                final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
+                final Map<String, String> _shortFieldName2Id =
+                        Collections.unmodifiableMap(_auxiliaryData.shortFieldName2Id);
+                final Map<String, String> _shortMethodName2Id =
+                        Collections.unmodifiableMap(_auxiliaryData.shortMethodName2Id);
+                final Map<String, String> _class2superClass =
+                        Collections.unmodifiableMap(_auxiliaryData.class2superClass);
+                final ClassVisitor _cv =
+                        new TracingClassVisitor(_cw, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
+                                                _methodNameRegex, _cmdLineOptions);
+                _cr.accept(_cv, 0);
+
+                Files.write(_trgPath, _cw.toByteArray());
+            } catch (final IOException _ex) {
+                throw new RuntimeException(_ex);
+            }
+        });
+        AuxiliaryData.saveData(_auxiliaryData, AUXILIARY_DATA_FILE_NAME);
+    }
+
 
     private static Set<Path> getFilenames(final String folder) throws IOException {
         final Stream<Path> _tmp1 = Files.walk(Paths.get(folder)).filter(p -> p.toString().endsWith(".class"));
