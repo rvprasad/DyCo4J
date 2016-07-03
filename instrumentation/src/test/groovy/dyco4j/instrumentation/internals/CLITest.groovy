@@ -12,20 +12,15 @@ import dyco4j.instrumentation.AbstractCLITest
 import org.junit.BeforeClass
 import org.junit.Test
 
-import java.nio.file.Files
 import java.nio.file.Paths
 
 class CLITest extends AbstractCLITest {
     @BeforeClass
-    static void copyClassesToBeInstrumented() {
-        // copy to-be-instrumented test classes into IN_FOLDER
+    static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file = Paths.get("dyco4j", "instrumentation", "internals", "CLITestSubject.class")
-        final _trg = IN_FOLDER.resolve(_file)
-        Files.createDirectories(_trg.parent)
-        final _testClassFolder = Paths.get("build", "classes", "test")
-        final _src = _testClassFolder.resolve(_file)
-        Files.copy(_src, _trg)
+        copyClassToBeInstrumentedIntoInFolder(_file)
     }
+
     @Test
     void withNoOptions() {
         assert instrumentCode([]) == 0: "No class should have been instrumented"

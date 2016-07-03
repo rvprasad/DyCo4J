@@ -54,6 +54,14 @@ abstract class AbstractCLITest {
         deleteFiles(IN_FOLDER, /.*class$/)
     }
 
+    protected static def copyClassToBeInstrumentedIntoInFolder(final Path pathToClass) {
+        final _trg = IN_FOLDER.resolve(pathToClass)
+        Files.createDirectories(_trg.parent)
+        final _testClassFolder = Paths.get("build", "classes", "test")
+        final _src = _testClassFolder.resolve(pathToClass)
+        Files.copy(_src, _trg)
+    }
+
     protected static def instrumentCode(final args) {
         CLI.main((String[]) args)
         return Files.walk(OUT_FOLDER).filter { it.fileName ==~ /.*class$/ }.count()
