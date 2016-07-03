@@ -9,9 +9,24 @@
 package dyco4j.instrumentation.entry
 
 import dyco4j.instrumentation.AbstractCLITest
+import org.junit.BeforeClass
 import org.junit.Test
 
+import java.nio.file.Files
+import java.nio.file.Paths
+
 class CLITest extends AbstractCLITest {
+    @BeforeClass
+    static void copyClassesToBeInstrumented() {
+        // copy to-be-instrumented test classes into IN_FOLDER
+        final _file = Paths.get("dyco4j", "instrumentation", "entry", "CLITestSubject.class")
+        final _trg = IN_FOLDER.resolve(_file)
+        Files.createDirectories(_trg.parent)
+        final _testClassFolder = Paths.get("build", "classes", "test")
+        final _src = _testClassFolder.resolve(_file)
+        Files.copy(_src, _trg)
+    }
+
     @Test
     void withNoOptions() {
         assert instrumentCode([]) == 0: "No class should have been instrumented"
@@ -28,7 +43,7 @@ class CLITest extends AbstractCLITest {
     }
 
     @Test
-    void withInFolderAndOutFolderOptions() {
+    void withOnlyInFolderAndOutFolderOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1:
                 "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
@@ -64,7 +79,7 @@ class CLITest extends AbstractCLITest {
     }
 
     @Test
-    void withMethodNameRegexAndSkipAnnotatedTestsOptions() {
+    void withMethodNameRegexAndOnlyAnnotatedTestsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
                                '.*Suffix.$', '--only-annotated-tests']) == 1: "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
@@ -80,7 +95,7 @@ class CLITest extends AbstractCLITest {
     }
 
     @Test
-    void withOnlyAnnotatedTestsOption() {
+    void withAnnotatedTestsOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
                                '--only-annotated-tests']) == 1: "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()

@@ -21,12 +21,12 @@ import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
 
 abstract class AbstractCLITest {
-    protected static final String LOGGING_LIBRARY = Paths.get("libs", "dyco4j-logging-0.5.1.jar").toString()
-    protected static final Path TEST_CLASS_FOLDER = Paths.get("build", "classes", "test")
+    private static final Path TEST_CLASS_FOLDER = Paths.get("build", "classes", "test")
     private static final Path PROPERTY_FILE = Paths.get(TEST_CLASS_FOLDER.toString(), "dyco4j", "instrumentation",
             "logging", "logging.properties")
     private static final Path ROOT_FOLDER = Paths.get("build", "tmp")
-    protected static final Path TRACE_FOLDER = ROOT_FOLDER.resolve("traces")
+    private static final String LOGGING_LIBRARY = Paths.get("libs", "dyco4j-logging-0.5.1.jar").toString()
+    private static final Path TRACE_FOLDER = ROOT_FOLDER.resolve("traces")
     protected static final Path OUT_FOLDER = ROOT_FOLDER.resolve("out_classes")
     protected static final Path IN_FOLDER = ROOT_FOLDER.resolve("in_classes")
 
@@ -35,31 +35,21 @@ abstract class AbstractCLITest {
     }
 
     @BeforeClass
-    static void setUpOnceOnlyFixture() {
+    static void createFoldersAndCopyPropertyFile() {
         final _propertyFolder = PROPERTY_FILE.getParent()
         assert Files.createDirectories(_propertyFolder) != null: "Could not create property folder $_propertyFolder"
         final _propertyFile = Files.createFile(PROPERTY_FILE)
         assert _propertyFile != null: "Could not create property file $PROPERTY_FILE"
-        _propertyFile.withWriter {
-            it.println("traceFolder=" + TRACE_FOLDER.toString())
-        }
+        _propertyFile.withWriter { it.println("traceFolder=" + TRACE_FOLDER.toString()) }
 
         assert Files.createDirectories(ROOT_FOLDER) != null: "Could not create root folder $ROOT_FOLDER"
         assert Files.createDirectories(TRACE_FOLDER) != null: "Could not create trace folder $TRACE_FOLDER"
         assert Files.createDirectories(OUT_FOLDER) != null: "Could not create out folder $OUT_FOLDER"
         assert Files.createDirectories(IN_FOLDER) != null: "Could not create in folder $IN_FOLDER"
-
-        // copy to-be-instrumented test classes into IN_FOLDER
-        final _testClassFolder = Paths.get("build", "classes", "test")
-        Files.walk(_testClassFolder).filter { it.fileName ==~ "CLITestSubject.class" }.each { src ->
-            final _trg = IN_FOLDER.resolve(_testClassFolder.relativize(src))
-            Files.createDirectories(_trg.parent)
-            Files.copy(src, _trg)
-        }
     }
 
     @AfterClass
-    static void tearDownOnceOnlyFixture() {
+    static void deletePropertyAndClassFiles() {
         Files.delete(PROPERTY_FILE)
         deleteFiles(IN_FOLDER, /.*class$/)
     }
