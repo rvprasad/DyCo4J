@@ -23,14 +23,16 @@ class CLITest extends AbstractCLITest {
         copyClassToBeInstrumentedIntoInFolder(_file)
     }
 
-    @After
-    void deleteAuxiliaryFiles() {
-        final _tmp1 = Paths.get("auxiliary_data.json")
-        if (Files.exists(_tmp1))
-            Files.delete(_tmp1)
-        final _tmp2 = Paths.get("auxiliary_data.json.bak")
-        if (Files.exists(_tmp2))
-            Files.delete(_tmp2)
+    private static final commonCheck(String[] traceLines, int numOfLines) {
+        // should not raise exception
+        Date.parseToStringDate(traceLines[0].split(',')[1])
+
+        assertNestingOfCallsIsValid(traceLines[1..numOfLines - 1])
+
+        for (i in 1..23) {
+            final _tmp1 = "m$i"
+            assert traceLines[1..numOfLines - 1].count { it ==~ /entry,$_tmp1/ || it ==~ /exit,$_tmp1,[NE]/ } == 2
+        }
     }
 
     private static final instrumentCode(args) {
@@ -39,6 +41,29 @@ class CLITest extends AbstractCLITest {
 
     private static final executeInstrumentedCode() {
         executeInstrumentedCode(CLITestSubject)
+    }
+
+    private static assertNestingOfCallsIsValid(lines) {
+        final _stack = []
+        for (String l in lines) {
+            if (l =~ /entry/) {
+                _stack << l
+            } else if (l =~ /exit/) {
+                final String _tmp1 = _stack.pop()
+                assert _tmp1.split(',')[1] == l.split(',')[1]
+            }
+        }
+        assert !_stack
+    }
+
+    @After
+    final void deleteAuxiliaryFiles() {
+        final _tmp1 = Paths.get("auxiliary_data.json")
+        if (Files.exists(_tmp1))
+            Files.delete(_tmp1)
+        final _tmp2 = Paths.get("auxiliary_data.json.bak")
+        if (Files.exists(_tmp2))
+            Files.delete(_tmp2)
     }
 
     @Test
@@ -54,19 +79,6 @@ class CLITest extends AbstractCLITest {
     @Test
     void withOnlyOutFolderOption() {
         assert instrumentCode(["--out-folder", OUT_FOLDER]) == 0: "No class should have been instrumented"
-    }
-
-    private static assertNestingOfCallsIsValid(lines) {
-        final _stack = []
-        for (String l in lines) {
-            if (l =~ /entry/) {
-                _stack << l
-            } else if (l =~ /exit/) {
-                final String _tmp1 = _stack.pop()
-                assert _tmp1.split(',')[1] == l.split(',')[1]
-            }
-        }
-        assert !_stack
     }
 
     @Test
@@ -134,8 +146,8 @@ class CLITest extends AbstractCLITest {
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^entry,$_tmp1/
-        assert _traceLines[2] ==~ /^PUTA,1,r_a:\d+,p_i:28$/
-        assert _traceLines[3] ==~ /^GETA,2,r_a:\d+,p_i:0$/
+        assert _traceLines[2] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
+        assert _traceLines[3] ==~ /^GETA,2,r_a:\d+,r_o:null$/
         assert _traceLines[2].split(',')[2] == _traceLines[3].split(',')[2]
         assert _traceLines[4] ==~ /^exit,$_tmp1,N/
     }
@@ -164,7 +176,7 @@ class CLITest extends AbstractCLITest {
         assert _executionResult.exitCode == 0
 
         final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
-        final _numOfLines = 62
+        final _numOfLines = 57
         assert _traceLines.length == _numOfLines
 
         commonCheck(_traceLines, _numOfLines)
@@ -174,8 +186,8 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
         assert _traceLines[8] ==~ /^exit,m\d+,E/
 
-        assert _traceLines[25] ==~ /^PUTA,1,r_a:\d+,p_i:28$/
-        assert _traceLines[26] ==~ /^GETA,2,r_a:\d+,p_i:0$/
+        assert _traceLines[25] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
+        assert _traceLines[26] ==~ /^GETA,2,r_a:\d+,r_o:null$/
         assert _traceLines[25].split(',')[2] == _traceLines[26].split(',')[2]
 
         assert _traceLines[32] ==~ /^exception,r_t:\d+,java.io.IOException$/
@@ -186,18 +198,6 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[53] ==~ /^PUTA,0,r_a:\d+,p_i:29$/
         assert _traceLines[54] ==~ /^GETA,1,r_a:\d+,p_i:0$/
         assert _traceLines[53].split(',')[2] == _traceLines[54].split(',')[2]
-    }
-
-    private void commonCheck(String[] traceLines, int numOfLines) {
-        // should not raise exception
-        Date.parseToStringDate(traceLines[0].split(',')[1])
-
-        assertNestingOfCallsIsValid(traceLines[1..numOfLines - 1])
-
-        for (i in 1..23) {
-            final _tmp1 = "m$i"
-            assert traceLines[1..numOfLines - 1].count { it ==~ /entry,$_tmp1/ || it ==~ /exit,$_tmp1,[NE]/ } == 2
-        }
     }
 
     @Test

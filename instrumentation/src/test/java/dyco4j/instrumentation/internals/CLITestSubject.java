@@ -43,38 +43,9 @@ public class CLITestSubject {
         publishedStaticMethod6("Random");
         publishedStaticMethod7(new Date());
 
-        int[] _tmp1 = new int[3];
+        Integer[] _tmp1 = new Integer[3];
         _tmp1[1] = 28;
         System.out.println(_tmp1[2]);
-    }
-
-
-    private void exerciseInstanceFeatures() {
-        try {
-            this.publishedInstanceExceptionalMethod1();
-        } catch (IOException ignored) {
-
-        }
-
-        try {
-            this.publishedInstanceExceptionalMethod2();
-        } catch (RuntimeException ignored) {
-
-        }
-
-        this.instanceField = 3;
-        this.publishedInstanceMethod0();
-        this.publishedInstanceMethod1(9);
-        this.publishedInstanceMethod2('e');
-        this.publishedInstanceMethod3(323.3f);
-        this.publishedInstanceMethod4(898.98);
-        this.publishedInstanceMethod5(true);
-        this.publishedInstanceMethod6("Random");
-        this.publishedInstanceMethod7(new Date());
-
-        int[] _tmp1 = new int[2];
-        _tmp1[0] = 29;
-        System.out.println(_tmp1[1]);
     }
 
     private static void publishedStaticExceptionalMethod1() throws IOException {
@@ -116,9 +87,38 @@ public class CLITestSubject {
         return date.toString();
     }
 
+    private void exerciseInstanceFeatures() {
+        try {
+            this.publishedInstanceExceptionalMethod1();
+        } catch (IOException ignored) {
+
+        }
+
+        try {
+            this.publishedInstanceExceptionalMethod2();
+        } catch (RuntimeException ignored) {
+
+        }
+
+        this.instanceField = 3;
+        this.publishedInstanceMethod0();
+        this.publishedInstanceMethod1(9);
+        this.publishedInstanceMethod2('e');
+        this.publishedInstanceMethod3(323.3f);
+        this.publishedInstanceMethod4(898.98);
+        this.publishedInstanceMethod5(true);
+        this.publishedInstanceMethod6("Random");
+        this.publishedInstanceMethod7(new Date());
+
+        int[] _tmp1 = new int[2];
+        _tmp1[0] = 29;
+        System.out.println(_tmp1[1]);
+    }
+
     private void publishedInstanceExceptionalMethod1() throws IOException {
         throw new IOException("Test String");
     }
+
     private void publishedInstanceExceptionalMethod2() {
         throw new IllegalStateException();
     }
