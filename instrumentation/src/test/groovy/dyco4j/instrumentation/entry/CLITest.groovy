@@ -21,11 +21,11 @@ class CLITest extends AbstractCLITest {
         copyClassToBeInstrumentedIntoInFolder(_file)
     }
 
-    private final instrumentCode(args) {
+    private static final instrumentCode(args) {
         instrumentCode(CLI, args)
     }
 
-    private final executeInstrumentedCode() {
+    private static final executeInstrumentedCode() {
         executeInstrumentedCode(CLITestSubject)
     }
 
@@ -48,15 +48,16 @@ class CLITest extends AbstractCLITest {
     void withOnlyInFolderAndOutFolderOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1 :
                 "Class was not instrumented"
+
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
+
         final String[] _traceLines = _executionResult.traceLines
         assert _traceLines.length == 5
-        try {
-            Date.parseToStringDate(_traceLines[0].split(',')[1])
-        } catch (_e) {
-            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
-        }
+
+        // should not raise exception
+        Date.parseToStringDate(_traceLines[0].split(',')[1])
+
         assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test1\(\)V/
         assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
         assert _traceLines[3] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
@@ -67,15 +68,16 @@ class CLITest extends AbstractCLITest {
     void withMethodNameRegexOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
                                '.*Suffix.$']) == 1 : "Class was not instrumented"
+
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
+
         final String[] _traceLines = _executionResult.traceLines
         assert _traceLines.length == 3
-        try {
-            Date.parseToStringDate(_traceLines[0].split(',')[1])
-        } catch (_e) {
-            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
-        }
+
+        // should not raise exception
+        Date.parseToStringDate(_traceLines[0].split(',')[1])
+
         assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
         assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
@@ -84,15 +86,16 @@ class CLITest extends AbstractCLITest {
     void withMethodNameRegexAndOnlyAnnotatedTestsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
                                '.*Suffix.$', '--only-annotated-tests']) == 1 : "Class was not instrumented"
+
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
+
         final String[] _traceLines = _executionResult.traceLines
         assert _traceLines.length == 2
-        try {
-            Date.parseToStringDate(_traceLines[0].split(',')[1])
-        } catch (_e) {
-            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
-        }
+
+        // should not raise exception
+        Date.parseToStringDate(_traceLines[0].split(',')[1])
+
         assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 
@@ -100,15 +103,16 @@ class CLITest extends AbstractCLITest {
     void withAnnotatedTestsOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
                                '--only-annotated-tests']) == 1 : "Class was not instrumented"
+
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
+
         final String[] _traceLines = _executionResult.traceLines
         assert _traceLines.length == 3
-        try {
-            Date.parseToStringDate(_traceLines[0].split(',')[1])
-        } catch (_e) {
-            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
-        }
+
+        // should not raise exception
+        Date.parseToStringDate(_traceLines[0].split(',')[1])
+
         assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
         assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
