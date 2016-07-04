@@ -53,26 +53,28 @@ final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<Tracing
 
     @Override
     public void visitInsn(final int opcode) {
-        if (this.cv.cmdLineOptions.traceMethodRetValue) {
-            if (opcode == Opcodes.IRETURN || opcode == Opcodes.LRETURN || opcode == Opcodes .FRETURN ||
-            opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN ) {
+        if (opcode == Opcodes.IRETURN || opcode == Opcodes.LRETURN || opcode == Opcodes.FRETURN ||
+            opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN) {
+            if (this.cv.cmdLineOptions.traceMethodRetValue)
                 LoggingHelper.emitLogReturn(this.mv, method.getReturnType());
-                LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.NORMAL);
-                this.mv.visitInsn(opcode);
-            }
-        } else if (this.cv.cmdLineOptions.traceArrayAccess) {
-            if (opcode == Opcodes.AASTORE || opcode == Opcodes.BASTORE || opcode == Opcodes.CASTORE ||
-                opcode == Opcodes.DASTORE || opcode == Opcodes.FASTORE || opcode == Opcodes.IASTORE ||
-                opcode == Opcodes.LASTORE || opcode == Opcodes.SASTORE) {
-                visitArrayStoreInsn(opcode);
-            } else if (opcode == Opcodes.AALOAD || opcode == Opcodes.BALOAD || opcode == Opcodes.CALOAD ||
-                       opcode == Opcodes.DALOAD || opcode == Opcodes.FALOAD || opcode == Opcodes.IALOAD ||
-                       opcode == Opcodes.LALOAD || opcode == Opcodes.SALOAD) {
-                visitArrayLoadInsn(opcode);
-            }
-        } else {
+            LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.NORMAL);
             this.mv.visitInsn(opcode);
-        }
+        } else if (opcode == Opcodes.AASTORE || opcode == Opcodes.BASTORE || opcode == Opcodes.CASTORE ||
+                   opcode == Opcodes.DASTORE || opcode == Opcodes.FASTORE || opcode == Opcodes.IASTORE ||
+                   opcode == Opcodes.LASTORE || opcode == Opcodes.SASTORE) {
+            if (this.cv.cmdLineOptions.traceArrayAccess)
+                visitArrayStoreInsn(opcode);
+            else
+                this.mv.visitInsn(opcode);
+        } else if (opcode == Opcodes.AALOAD || opcode == Opcodes.BALOAD || opcode == Opcodes.CALOAD ||
+                   opcode == Opcodes.DALOAD || opcode == Opcodes.FALOAD || opcode == Opcodes.IALOAD ||
+                   opcode == Opcodes.LALOAD || opcode == Opcodes.SALOAD) {
+            if (this.cv.cmdLineOptions.traceArrayAccess)
+                visitArrayLoadInsn(opcode);
+            else
+                this.mv.visitInsn(opcode);
+        } else
+            this.mv.visitInsn(opcode);
     }
 
     @Override
