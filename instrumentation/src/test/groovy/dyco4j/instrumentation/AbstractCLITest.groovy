@@ -8,8 +8,6 @@
 
 package dyco4j.instrumentation
 
-import dyco4j.instrumentation.entry.CLI
-import dyco4j.instrumentation.entry.CLITestSubject
 import groovy.io.FileType
 import org.junit.AfterClass
 import org.junit.Before
@@ -62,18 +60,19 @@ abstract class AbstractCLITest {
         Files.copy(_src, _trg)
     }
 
-    protected static def instrumentCode(final args) {
-        CLI.main((String[]) args)
+    protected static def instrumentCode(final clazz, final args) {
+        clazz.main((String[]) args)
         return Files.walk(OUT_FOLDER).filter { it.fileName ==~ /.*class$/ }.count()
     }
+
     /**
      * execute instrumented code in a different process
      * @return a quadruple of
      */
-    protected static def executeInstrumentedCode() {
+    protected static def executeInstrumentedCode(final Class clazz) {
         final _path = Paths.get(System.getProperty("java.home"), "bin", "java").toString()
         final _cp = [OUT_FOLDER, LOGGING_LIBRARY, TEST_CLASS_FOLDER].join(":")
-        final _proc = [_path, "-cp", _cp, CLITestSubject.class.name].execute()
+        final _proc = [_path, "-cp", _cp, clazz.name].execute()
         final _ret = new ExecutionResult(
                 _proc.waitFor(),
                 _proc.inputStream.readLines(),
@@ -97,7 +96,7 @@ abstract class AbstractCLITest {
     }
 
     protected static final class ExecutionResult {
-        protected final exitCode
+        protected final int exitCode
         protected final stdoutLines // list of string
         protected final stderrLines // list of string
         protected final traceLines // list of string

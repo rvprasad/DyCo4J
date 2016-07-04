@@ -9,6 +9,7 @@
 package dyco4j.instrumentation.internals;
 
 import dyco4j.LoggingHelper;
+import dyco4j.instrumentation.LoggerInitializingMethodVisitor;
 import dyco4j.instrumentation.logging.Logger.Action;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -16,8 +17,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
-final class TracingMethodVisitor extends MethodVisitor {
-    private final TracingClassVisitor cv;
+final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<TracingClassVisitor> {
     private final String methodId;
     private final Method method;
     private final boolean isStatic;
@@ -25,16 +25,15 @@ final class TracingMethodVisitor extends MethodVisitor {
 
     TracingMethodVisitor(final int access, final String name, final String desc, final String signature,
                          final String[] exceptions, final MethodVisitor mv, final TracingClassVisitor owner) {
-        super(CLI.ASM_VERSION, mv);
+        super(CLI.ASM_VERSION, mv, name, owner);
         this.method = new Method(name, desc);
         this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
         this.beginOutermostHandler = new Label();
         this.methodId = owner.getMethodId(name, desc);
-        this.cv = owner;
     }
 
     @Override
-    public void visitCode() {
+    public void visitCodeAfterLoggerInitialization() {
         this.mv.visitCode();
         LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
 

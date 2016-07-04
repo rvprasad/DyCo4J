@@ -9,12 +9,10 @@
 package dyco4j.instrumentation.internals;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -64,12 +62,12 @@ public final class CLI {
                 new CommandLineOptions(cmdLine.hasOption("traceArrayAccess"), cmdLine.hasOption("traceFieldAccess"),
                                        cmdLine.hasOption("traceMethodArgs"),
                                        cmdLine.hasOption("traceMethodReturnValue"));
-        final Set<Path> _filenames = getFilenames(cmdLine.getOptionValue("folder"));
+        final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
+        final Set<Path> _filenames = getFilenames(_srcRoot);
         final AuxiliaryData _auxiliaryData = AuxiliaryData.loadData(AUXILIARY_DATA_FILE_NAME);
         getMemberId2NameMapping(_filenames, _auxiliaryData, _cmdLineOptions.traceFieldAccess);
 
         final String _methodNameRegex = cmdLine.getOptionValue("methodNameRegex", METHOD_NAME_REGEX);
-        final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
         final Path _trgRoot = Paths.get(cmdLine.getOptionValue("out-folder"));
         _filenames.parallelStream().forEach(_srcPath -> {
             try {
@@ -85,7 +83,7 @@ public final class CLI {
                     System.out.println(MessageFormat.format("Writing {0}", _trgPath));
 
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(_srcPath));
-                final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
+                final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_FRAMES);
                 final Map<String, String> _shortFieldName2Id =
                         Collections.unmodifiableMap(_auxiliaryData.shortFieldName2Id);
                 final Map<String, String> _shortMethodName2Id =
@@ -106,8 +104,8 @@ public final class CLI {
     }
 
 
-    private static Set<Path> getFilenames(final String folder) throws IOException {
-        final Stream<Path> _tmp1 = Files.walk(Paths.get(folder)).filter(p -> p.toString().endsWith(".class"));
+    private static Set<Path> getFilenames(final Path folder) throws IOException {
+        final Stream<Path> _tmp1 = Files.walk(folder).filter(p -> p.toString().endsWith(".class"));
         return _tmp1.collect(Collectors.toSet());
     }
 
@@ -115,7 +113,7 @@ public final class CLI {
                                                 final boolean collectFieldInfo) {
         for (final Path _arg : filenames) {
             try {
-                final ClassReader _cr = new ClassReader(FileUtils.readFileToByteArray(new File(_arg.toString())));
+                final ClassReader _cr = new ClassReader(Files.readAllBytes(_arg));
                 final ClassVisitor _cv = new AuxiliaryDataCollectingClassVisitor(auxiliaryData, collectFieldInfo);
                 _cr.accept(_cv, 0);
             } catch (final Exception _ex) {

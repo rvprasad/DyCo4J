@@ -8,12 +8,13 @@
 
 package dyco4j.instrumentation.internals;
 
+import dyco4j.instrumentation.LoggerInitializingClassVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Map;
 
-final class TracingClassVisitor extends ClassVisitor {
+final class TracingClassVisitor extends LoggerInitializingClassVisitor {
     final CLI.CommandLineOptions cmdLineOptions;
     private final Map<String, String> shortMethodName2Id;
     private final Map<String, String> shortFieldName2Id;

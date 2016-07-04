@@ -21,24 +21,32 @@ class CLITest extends AbstractCLITest {
         copyClassToBeInstrumentedIntoInFolder(_file)
     }
 
+    private final instrumentCode(args) {
+        instrumentCode(CLI, args)
+    }
+
+    private final executeInstrumentedCode() {
+        executeInstrumentedCode(CLITestSubject)
+    }
+
     @Test
     void withNoOptions() {
-        assert instrumentCode([]) == 0: "No class should have been instrumented"
+        assert instrumentCode([]) == 0 : "No class should have been instrumented"
     }
 
     @Test
     void withOnlyInFolderOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER]) == 0: "No class should have been instrumented"
+        assert instrumentCode(["--in-folder", IN_FOLDER]) == 0 : "No class should have been instrumented"
     }
 
     @Test
     void withOnlyOutFolderOption() {
-        assert instrumentCode(["--out-folder", OUT_FOLDER]) == 0: "No class should have been instrumented"
+        assert instrumentCode(["--out-folder", OUT_FOLDER]) == 0 : "No class should have been instrumented"
     }
 
     @Test
     void withOnlyInFolderAndOutFolderOptions() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1:
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1 :
                 "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -58,7 +66,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withMethodNameRegexOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
-                               '.*Suffix.$']) == 1: "Class was not instrumented"
+                               '.*Suffix.$']) == 1 : "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
         final String[] _traceLines = _executionResult.traceLines
@@ -75,7 +83,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withMethodNameRegexAndOnlyAnnotatedTestsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
-                               '.*Suffix.$', '--only-annotated-tests']) == 1: "Class was not instrumented"
+                               '.*Suffix.$', '--only-annotated-tests']) == 1 : "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
         final String[] _traceLines = _executionResult.traceLines
@@ -91,7 +99,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withAnnotatedTestsOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               '--only-annotated-tests']) == 1: "Class was not instrumented"
+                               '--only-annotated-tests']) == 1 : "Class was not instrumented"
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
         final String[] _traceLines = _executionResult.traceLines

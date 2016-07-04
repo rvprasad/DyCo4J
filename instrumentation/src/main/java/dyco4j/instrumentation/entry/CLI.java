@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -37,7 +36,6 @@ public final class CLI {
         _options.addOption(Option.builder().longOpt("only-annotated-tests").hasArg(false)
                                  .desc("Instrument only tests identified by annotations.").build());
 
-        final Logger _logger = Logger.getGlobal();
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
             final String _methodNameRegex = _cmdLine.getOptionValue("method-name-regex", METHOD_NAME_REGEX);
@@ -73,8 +71,8 @@ public final class CLI {
     private static byte[] instrumentClass(final byte[] b, final String methodNameRegex,
                                           final boolean onlyAnnotatedTests) {
         final ClassReader _cr = new ClassReader(b);
-        final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
-        final org.objectweb.asm.ClassVisitor _cv = new ClassVisitor(_cw, methodNameRegex, onlyAnnotatedTests);
+        final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_FRAMES);
+        final org.objectweb.asm.ClassVisitor _cv = new TracingClassVisitor(_cw, methodNameRegex, onlyAnnotatedTests);
         _cr.accept(_cv, 0);
         return _cw.toByteArray();
     }

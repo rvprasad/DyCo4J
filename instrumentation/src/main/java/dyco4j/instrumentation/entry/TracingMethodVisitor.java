@@ -8,21 +8,18 @@
 
 package dyco4j.instrumentation.entry;
 
-import org.objectweb.asm.AnnotationVisitor;
 import dyco4j.LoggingHelper;
+import dyco4j.instrumentation.LoggerInitializingMethodVisitor;
+import org.objectweb.asm.AnnotationVisitor;
 
-final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
-    private final String name;
+public final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<TracingClassVisitor> {
     private final String desc;
-    private final ClassVisitor cv;
     private boolean isAnnotatedAsTest;
 
-    MethodVisitor(final org.objectweb.asm.MethodVisitor mv, final String name, final String descriptor,
-                  final ClassVisitor cv) {
-        super(CLI.ASM_VERSION, mv);
-        this.name = name;
+    TracingMethodVisitor(final org.objectweb.asm.MethodVisitor mv, final String name, final String descriptor,
+                         final TracingClassVisitor owner) {
+        super(CLI.ASM_VERSION, mv, name, owner);
         this.desc = descriptor;
-        this.cv = cv;
     }
 
     @Override
@@ -41,23 +38,18 @@ final class MethodVisitor extends org.objectweb.asm.MethodVisitor {
         return super.visitAnnotation(desc, visible);
     }
 
-    @Override
-    public void visitCode() {
-        if (this.name.equals("<clinit>")) {
-            this.cv.clinitVisited();
-            LoggingHelper.emitInsnToLoadAndInitializeLogger(mv);
-        }
+    private boolean shouldInstrument() {
+        return this.name.matches(this.cv.getMethodNameRegex()) &&
+               (!this.cv.instrumentOnlyAnnotatedTests() || this.isAnnotatedAsTest);
+    }
 
+    @Override
+    protected void visitCodeAfterLoggerInitialization() {
         mv.visitCode();
 
         if (this.shouldInstrument()) {
             final String _msg = "marker:" + this.cv.getClassName() + "/" + name + desc;
             LoggingHelper.emitLogString(mv, _msg);
         }
-    }
-
-    private boolean shouldInstrument() {
-        return this.name.matches(this.cv.getMethodNameRegex()) &&
-               (!this.cv.instrumentOnlyAnnotatedTests() || this.isAnnotatedAsTest);
     }
 }

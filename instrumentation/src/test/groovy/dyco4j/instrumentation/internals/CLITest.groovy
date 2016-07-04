@@ -9,9 +9,11 @@
 package dyco4j.instrumentation.internals
 
 import dyco4j.instrumentation.AbstractCLITest
+import org.junit.After
 import org.junit.BeforeClass
 import org.junit.Test
 
+import java.nio.file.Files
 import java.nio.file.Paths
 
 class CLITest extends AbstractCLITest {
@@ -19,6 +21,24 @@ class CLITest extends AbstractCLITest {
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file = Paths.get("dyco4j", "instrumentation", "internals", "CLITestSubject.class")
         copyClassToBeInstrumentedIntoInFolder(_file)
+    }
+
+    @After
+    void deleteAuxiliaryFiles() {
+        final _tmp1 = Paths.get("auxiliary_data.json")
+        if (Files.exists(_tmp1))
+            Files.delete(_tmp1)
+        final _tmp2 = Paths.get("auxiliary_data.json.bak")
+        if (Files.exists(_tmp2))
+            Files.delete(_tmp2)
+    }
+
+    private final instrumentCode(args) {
+        instrumentCode(CLI, args)
+    }
+
+    private final executeInstrumentedCode() {
+        executeInstrumentedCode(CLITestSubject)
     }
 
     @Test
@@ -38,7 +58,17 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withOnlyInFolderAndOutFolderOptions() {
-        assert false
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1:
+                "Class was not instrumented"
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+        final String[] _traceLines = _executionResult.traceLines
+        assert _traceLines.length == 1
+        try {
+            Date.parseToStringDate(_traceLines[0].split(',')[1])
+        } catch (_e) {
+            assert False: "Incorrect first line in trace: $_e / ${_traceLines[0]}"
+        }
     }
 
     @Test
