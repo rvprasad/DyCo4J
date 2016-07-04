@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.util.Date;
 
 public class CLITestSubject {
-    static int staticField;
-    int instanceField;
+    private static int staticField;
+    private int instanceField;
 
     public static void main(String[] s) {
         exerciseStaticFeatures();
@@ -24,7 +24,7 @@ public class CLITestSubject {
         System.out.println(_tmp1[0]);
     }
 
-    static void exerciseInstanceFeatures() {
+    private static void exerciseInstanceFeatures() {
         CLITestSubject _tmp1 = new CLITestSubject();
         _tmp1.instanceField = 3;
         _tmp1.publishedInstanceMethod0();
@@ -36,22 +36,20 @@ public class CLITestSubject {
         _tmp1.publishedInstanceMethod6("Random");
         _tmp1.publishedInstanceMethod7(new Date());
 
-        /*
         try {
             _tmp1.publishedInstanceExceptionalMethod1();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
 
         try {
             _tmp1.publishedInstanceExceptionalMethod2();
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
 
         }
-        */
     }
 
-    static void exerciseStaticFeatures() {
+    private static void exerciseStaticFeatures() {
         staticField = 4;
         publishedStaticMethod0();
         publishedStaticMethod1(9);
@@ -62,18 +60,16 @@ public class CLITestSubject {
         publishedStaticMethod6("Random");
         publishedStaticMethod7(new Date());
 
-        /*
         try {
             publishedStaticExceptionalMethod1();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
         try {
             publishedStaticExceptionalMethod2();
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
 
         }
-        */
     }
 
     private static void publishedStaticExceptionalMethod1() throws IOException {
