@@ -17,49 +17,11 @@ public class CLITestSubject {
 
     public static void main(String[] s) {
         exerciseStaticFeatures();
-        exerciseInstanceFeatures();
-
-        int[] _tmp1 = new int[3];
-        _tmp1[2] = 28;
-        System.out.println(_tmp1[0]);
-    }
-
-    private static void exerciseInstanceFeatures() {
         CLITestSubject _tmp1 = new CLITestSubject();
-        _tmp1.instanceField = 3;
-        _tmp1.publishedInstanceMethod0();
-        _tmp1.publishedInstanceMethod1(9);
-        _tmp1.publishedInstanceMethod2('e');
-        _tmp1.publishedInstanceMethod3(323.3f);
-        _tmp1.publishedInstanceMethod4(898.98);
-        _tmp1.publishedInstanceMethod5(true);
-        _tmp1.publishedInstanceMethod6("Random");
-        _tmp1.publishedInstanceMethod7(new Date());
-
-        try {
-            _tmp1.publishedInstanceExceptionalMethod1();
-        } catch (IOException ignored) {
-
-        }
-
-        try {
-            _tmp1.publishedInstanceExceptionalMethod2();
-        } catch (RuntimeException ignored) {
-
-        }
+        _tmp1.exerciseInstanceFeatures();
     }
 
     private static void exerciseStaticFeatures() {
-        staticField = 4;
-        publishedStaticMethod0();
-        publishedStaticMethod1(9);
-        publishedStaticMethod2('e');
-        publishedStaticMethod3(323.3f);
-        publishedStaticMethod4(898.98);
-        publishedStaticMethod5(true);
-        publishedStaticMethod6("Random");
-        publishedStaticMethod7(new Date());
-
         try {
             publishedStaticExceptionalMethod1();
         } catch (IOException ignored) {
@@ -70,6 +32,49 @@ public class CLITestSubject {
         } catch (RuntimeException ignored) {
 
         }
+
+        staticField = 4;
+        publishedStaticMethod0();
+        publishedStaticMethod1(9);
+        publishedStaticMethod2('e');
+        publishedStaticMethod3(323.3f);
+        publishedStaticMethod4(898.98);
+        publishedStaticMethod5(true);
+        publishedStaticMethod6("Random");
+        publishedStaticMethod7(new Date());
+
+        int[] _tmp1 = new int[3];
+        _tmp1[1] = 28;
+        System.out.println(_tmp1[2]);
+    }
+
+
+    private void exerciseInstanceFeatures() {
+        try {
+            this.publishedInstanceExceptionalMethod1();
+        } catch (IOException ignored) {
+
+        }
+
+        try {
+            this.publishedInstanceExceptionalMethod2();
+        } catch (RuntimeException ignored) {
+
+        }
+
+        this.instanceField = 3;
+        this.publishedInstanceMethod0();
+        this.publishedInstanceMethod1(9);
+        this.publishedInstanceMethod2('e');
+        this.publishedInstanceMethod3(323.3f);
+        this.publishedInstanceMethod4(898.98);
+        this.publishedInstanceMethod5(true);
+        this.publishedInstanceMethod6("Random");
+        this.publishedInstanceMethod7(new Date());
+
+        int[] _tmp1 = new int[2];
+        _tmp1[0] = 29;
+        System.out.println(_tmp1[1]);
     }
 
     private static void publishedStaticExceptionalMethod1() throws IOException {
