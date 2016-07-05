@@ -56,12 +56,12 @@ class CLITest extends AbstractCLITest {
         assert _traceLines.length == 5
 
         // should not raise exception
-        Date.parseToStringDate(_traceLines[0].split(',')[1])
+        Date.parseToStringDate(_traceLines[0])
 
-        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test1\(\)V/
-        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
-        assert _traceLines[3] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
-        assert _traceLines[4] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+        assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test1\(\)V/
+        assert _traceLines[2] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
+        assert _traceLines[3] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
+        assert _traceLines[4] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 
     @Test
@@ -76,10 +76,10 @@ class CLITest extends AbstractCLITest {
         assert _traceLines.length == 3
 
         // should not raise exception
-        Date.parseToStringDate(_traceLines[0].split(',')[1])
+        Date.parseToStringDate(_traceLines[0])
 
-        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
-        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+        assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
+        assert _traceLines[2] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 
     @Test
@@ -94,9 +94,9 @@ class CLITest extends AbstractCLITest {
         assert _traceLines.length == 2
 
         // should not raise exception
-        Date.parseToStringDate(_traceLines[0].split(',')[1])
+        Date.parseToStringDate(_traceLines[0])
 
-        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+        assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 
     @Test
@@ -111,9 +111,10 @@ class CLITest extends AbstractCLITest {
         assert _traceLines.length == 3
 
         // should not raise exception
-        Date.parseToStringDate(_traceLines[0].split(',')[1])
+        println(_traceLines)
+        Date.parseToStringDate(_traceLines[0])
 
-        assert _traceLines[1] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
-        assert _traceLines[2] ==~ /1,\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+        assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
+        assert _traceLines[2] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
     }
 }

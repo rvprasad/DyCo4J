@@ -168,7 +168,7 @@ public final class Logger {
                 logWriter.println(String.format("%d,%s", msgFreq - 1, prevMsg));
             }
 
-            logWriter.println(String.format("1,%s", msg));
+            logWriter.println(String.format("%s", msg));
             prevMsg = msg;
             msgFreq = 1;
         }

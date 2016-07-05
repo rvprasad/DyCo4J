@@ -63,7 +63,7 @@ public class LoggerInitializerTest {
                 new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(_traceFile))))) {
             _traceReader.readLine();
             final String _line = _traceReader.readLine();
-            final String _regex = MessageFormat.format("^1,\\d+,{0}$", expectedMessage);
+            final String _regex = MessageFormat.format("^\\d+,{0}$", expectedMessage);
             assert _line.matches(_regex) : "expected log statement not found";
         }
         assert _traceFile.delete() : "Could not delete trace file";

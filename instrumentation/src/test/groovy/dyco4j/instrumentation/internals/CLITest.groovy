@@ -23,26 +23,6 @@ class CLITest extends AbstractCLITest {
         copyClassToBeInstrumentedIntoInFolder(_file)
     }
 
-    private static final commonCheck(String[] traceLines) {
-        // should not raise exception
-        Date.parseToStringDate(traceLines[0].split(',')[1])
-        final _numOfLines = traceLines.length - 1
-        assertNestingOfCallsIsValid(traceLines[1.._numOfLines])
-
-        for (i in 1..23) {
-            final _tmp1 = "m$i"
-            assert traceLines[1.._numOfLines].count { it ==~ /entry,$_tmp1/ || it ==~ /exit,$_tmp1,[NE]/ } == 2
-        }
-    }
-
-    private static final instrumentCode(args) {
-        instrumentCode(CLI, args)
-    }
-
-    private static final executeInstrumentedCode() {
-        executeInstrumentedCode(CLITestSubject)
-    }
-
     private static assertNestingOfCallsIsValid(lines) {
         final _stack = []
         for (String l in lines) {
@@ -55,6 +35,36 @@ class CLITest extends AbstractCLITest {
         }
         assert !_stack
     }
+
+    private static assertTraceLengthIs(_executionResult, _numOfLines) {
+        assert _executionResult.traceLines.size == _numOfLines
+    }
+
+    private static commonCheck(String[] traceLines) {
+        // should not raise exception
+        Date.parseToStringDate(traceLines[0])
+
+        final _numOfLines = traceLines.length - 1
+        assertNestingOfCallsIsValid(traceLines[1.._numOfLines])
+
+        for (i in 1..23) {
+            final _tmp1 = "m$i"
+            assert traceLines[1.._numOfLines].count { it ==~ /entry,$_tmp1/ || it ==~ /exit,$_tmp1,[NE]/ } == 2
+        }
+    }
+
+    private static instrumentCode(args) {
+        instrumentCode(CLI, args)
+    }
+
+    private static executeInstrumentedCode() {
+        executeInstrumentedCode(CLITestSubject)
+    }
+
+    private static removeThreadIdFromLog(final traceLines) {
+        traceLines.collect { it.replaceAll(/^\d+,/, "") }
+    }
+
 
     @After
     final void deleteAuxiliaryFiles() {
@@ -89,10 +99,9 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
-        final _numOfLines = 53
-        assert _traceLines.length == _numOfLines
+        assertTraceLengthIs(_executionResult, 53)
 
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         commonCheck(_traceLines)
 
         assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
@@ -113,12 +122,12 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
-        final _numOfLines = 5
-        assert _traceLines.length == _numOfLines
+        assertTraceLengthIs(_executionResult, 5)
+
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
 
         // should not raise exception
-        Date.parseToStringDate(_traceLines[0].split(',')[1])
+        Date.parseToStringDate(_traceLines[0])
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^entry,$_tmp1$/
@@ -137,12 +146,11 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
-        final _numOfLines = 5
-        assert _traceLines.length == _numOfLines
+        assertTraceLengthIs(_executionResult, 5)
 
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         // should not raise exception
-        Date.parseToStringDate(_traceLines[0].split(',')[1])
+        Date.parseToStringDate(_traceLines[0])
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^entry,$_tmp1$/
@@ -161,9 +169,11 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
-        final _numOfLines = 5
-        assert _traceLines.length == _numOfLines
+        assertTraceLengthIs(_executionResult, 5)
+
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
+        // should not raise exception
+        Date.parseToStringDate(_traceLines[0])
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^entry,$_tmp1$/
@@ -190,10 +200,9 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
-        final _numOfLines = 57
-        assert _traceLines.length == _numOfLines
+        assertTraceLengthIs(_executionResult, 57)
 
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         commonCheck(_traceLines)
 
         assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
@@ -224,10 +233,9 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
-        final _numOfLines = 63
-        assert _traceLines.length == _numOfLines
+        assertTraceLengthIs(_executionResult, 63)
 
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         commonCheck(_traceLines)
 
         assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
@@ -279,10 +287,9 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
-        final _numOfLines = 59
-        assert _traceLines.length == _numOfLines
+        assertTraceLengthIs(_executionResult, 59)
 
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         commonCheck(_traceLines)
 
         assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/

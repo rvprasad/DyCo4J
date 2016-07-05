@@ -40,7 +40,7 @@ public final class LoggerTest {
         final byte _idx = 1;
         Logger.logArgument(_idx, _msg);
 
-        final String _expected = MessageFormat.format("1,{0},arg,{1},{2}", Thread.currentThread().getId(), _idx, _msg);
+        final String _expected = MessageFormat.format("{0},arg,{1},{2}", Thread.currentThread().getId(), _idx, _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -53,7 +53,7 @@ public final class LoggerTest {
         Logger.logArray(_array, _idx, _value, _action);
 
         final String _expected = MessageFormat
-                .format("1,{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action + "A", _idx,
+                .format("{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action + "A", _idx,
                         Logger.toString(_array), _value);
         assertEquals(_expected, getContent()[1]);
     }
@@ -64,7 +64,7 @@ public final class LoggerTest {
         Logger.logException(_tmp);
 
         final String _expected = MessageFormat
-                .format("1,{0},exception,{1},{2}", Thread.currentThread().getId(), Logger.toString(_tmp),
+                .format("{0},exception,{1},{2}", Thread.currentThread().getId(), Logger.toString(_tmp),
                         _tmp.getClass().getName());
         assertEquals(_expected, getContent()[1]);
     }
@@ -78,7 +78,7 @@ public final class LoggerTest {
         Logger.logField(_object, _fieldValue, _fieldName, _action);
 
         final String _expected = MessageFormat
-                .format("1,{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action + "F", _fieldName,
+                .format("{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action + "F", _fieldName,
                         Logger.toString(_object), _fieldValue);
         assertEquals(_expected, getContent()[1]);
     }
@@ -91,7 +91,7 @@ public final class LoggerTest {
         Logger.logField(null, _fieldValue, _fieldName, _action);
 
         final String _expected = MessageFormat
-                .format("1,{0},{1},{2},,{3}", Thread.currentThread().getId(), _action + "F", _fieldName, _fieldValue);
+                .format("{0},{1},{2},,{3}", Thread.currentThread().getId(), _action + "F", _fieldName, _fieldValue);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -100,7 +100,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.logMethodEntry(_msg);
 
-        final String _expected = MessageFormat.format("1,{0},entry,{1}", Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("{0},entry,{1}", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -109,7 +109,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.logMethodExit(_msg, "N");
 
-        final String _expected = MessageFormat.format("1,{0},exit,{1},N", Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("{0},exit,{1},N", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -118,7 +118,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.logMethodExit(_msg, "E");
 
-        final String _expected = MessageFormat.format("1,{0},exit,{1},E", Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("{0},exit,{1},E", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -127,7 +127,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.logReturn(_msg);
 
-        final String _expected = MessageFormat.format("1,{0},return,{1}", Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("{0},return,{1}", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -135,7 +135,7 @@ public final class LoggerTest {
     public void testLogReturnForVoidValue() throws Exception {
         Logger.logReturn(null);
 
-        final String _expected = MessageFormat.format("1,{0},return", Thread.currentThread().getId());
+        final String _expected = MessageFormat.format("{0},return", Thread.currentThread().getId());
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -147,10 +147,10 @@ public final class LoggerTest {
         Logger.log(_msg2);
 
         final String[] _tmp = getContent();
-        final String _expected1 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg1);
+        final String _expected1 = MessageFormat.format("{0},{1}", Thread.currentThread().getId(), _msg1);
         assertEquals(_expected1, _tmp[1]);
 
-        final String _expected2 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg2);
+        final String _expected2 = MessageFormat.format("{0},{1}", Thread.currentThread().getId(), _msg2);
         assertEquals(_expected2, _tmp[2]);
     }
 
@@ -159,7 +159,7 @@ public final class LoggerTest {
         final String _msg = "test message";
         Logger.log(_msg);
 
-        final String _expected = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg);
+        final String _expected = MessageFormat.format("{0},{1}", Thread.currentThread().getId(), _msg);
         assertEquals(_expected, getContent()[1]);
     }
 
@@ -175,11 +175,11 @@ public final class LoggerTest {
         Logger.cleanupForTest();
 
         final String[] _tmp1 = getContent();
-        final String _expected1 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg1);
+        final String _expected1 = MessageFormat.format("{0},{1}", Thread.currentThread().getId(), _msg1);
         assertEquals(_expected1, _tmp1[1]);
         final String _expected2 = MessageFormat.format("2,{0},{1}", Thread.currentThread().getId(), _msg1);
         assertEquals(_expected2, _tmp1[2]);
-        final String _expected3 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg2);
+        final String _expected3 = MessageFormat.format("{0},{1}", Thread.currentThread().getId(), _msg2);
         assertEquals(_expected3, _tmp1[3]);
         final String _expected4 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg2);
         assertEquals(_expected4, _tmp1[4]);
@@ -195,11 +195,11 @@ public final class LoggerTest {
 
         final String[] _tmp = getContent();
         @SuppressWarnings("ConfusingArgumentToVarargsMethod") final String _expected1 =
-                MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg1));
+                MessageFormat.format("{0},{1}", Thread.currentThread().getId(), String.join(",", _msg1));
         assertEquals(_expected1, _tmp[1]);
 
         @SuppressWarnings("ConfusingArgumentToVarargsMethod") final String _expected2 =
-                MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg2));
+                MessageFormat.format("{0},{1}", Thread.currentThread().getId(), String.join(",", _msg2));
         assertEquals(_expected2, _tmp[2]);
     }
 
@@ -209,7 +209,7 @@ public final class LoggerTest {
         Logger.log(_msg);
 
         @SuppressWarnings("ConfusingArgumentToVarargsMethod") final String _expected =
-                MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), String.join(",", _msg));
+                MessageFormat.format("{0},{1}", Thread.currentThread().getId(), String.join(",", _msg));
         assertEquals(_expected, getContent()[1]);
     }
 
