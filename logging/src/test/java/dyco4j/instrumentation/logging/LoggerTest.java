@@ -290,8 +290,8 @@ public final class LoggerTest {
 
     @Test
     public void testToStringWithObjectForNull() throws Exception {
-        assertEquals("r_o:null", Logger.toString(null));
-        assertNotEquals("r_o:null", Logger.toString("null"));
+        assertEquals("null", Logger.toString(null));
+        assertNotEquals("null", Logger.toString("null"));
     }
 
     @Test

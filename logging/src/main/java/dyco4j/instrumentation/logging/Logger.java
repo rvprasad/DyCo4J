@@ -109,7 +109,7 @@ public final class Logger {
 
     public static String toString(final Object o) {
         if (o == null) {
-            return "r_o:null";
+            return "null";
         } else {
             final String _tmp;
 

@@ -166,7 +166,7 @@ class CLITest extends AbstractCLITest {
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
         assert _traceLines[2] ==~ /^$PUT_ARRAY,1,r_a:\d+,r_o:\d+$/
-        assert _traceLines[3] ==~ /^$GET_ARRAY,2,r_a:\d+,r_o:null$/
+        assert _traceLines[3] ==~ /^$GET_ARRAY,2,r_a:\d+,null$/
         assert _traceLines[2].split(',')[2] == _traceLines[3].split(',')[2]
         assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp1,N$/
     }
@@ -222,7 +222,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
         assert _traceLines[25] ==~ /^$PUT_ARRAY,1,r_a:\d+,r_o:\d+$/
-        assert _traceLines[26] ==~ /^$GET_ARRAY,2,r_a:\d+,r_o:null$/
+        assert _traceLines[26] ==~ /^$GET_ARRAY,2,r_a:\d+,null$/
         assert _traceLines[25].split(',')[2] == _traceLines[26].split(',')[2]
 
         assert _traceLines[32] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
@@ -259,7 +259,7 @@ class CLITest extends AbstractCLITest {
 
         assert _traceLines[27] ==~ /^$PUT_ARRAY,1,r_a:\d+,r_o:\d+$/
         assert _traceLines[28] ==~ /^$GET_FIELD,f\d,,r_o:\d+$/
-        assert _traceLines[29] ==~ /^$GET_ARRAY,2,r_a:\d+,r_o:null$/
+        assert _traceLines[29] ==~ /^$GET_ARRAY,2,r_a:\d+,null$/
         assert _traceLines[27].split(',')[2] == _traceLines[29].split(',')[2]
 
         assert _traceLines[35] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
