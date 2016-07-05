@@ -65,7 +65,7 @@ public class CLITestSubject {
     }
 
     private static boolean publishedStaticMethod2(char i) {
-        return i == 'c';
+        return i == 'e';
     }
 
     private static char publishedStaticMethod3(float i) {
@@ -124,7 +124,7 @@ public class CLITestSubject {
     }
 
     private boolean publishedInstanceMethod0() {
-        return instanceField.equals("My my");
+        return instanceField.equals("Whatever");
     }
 
     private float publishedInstanceMethod1(int i) {
