@@ -21,6 +21,23 @@ public final class Logger {
     public static final String METHOD_ARG_TAG = "ar";
     public static final String METHOD_RETURN_TAG = "re";
 
+    public static final String ARRAY_TYPE_TAG = "a:";
+    public static final String BOOLEAN_TYPE_TAG = "b:";
+    public static final String BYTE_TYPE_TAG = "y:";
+    public static final String CHAR_TYPE_TAG = "c:";
+    public static final String DOUBLE_TYPE_TAG = "d:";
+    public static final String FLOAT_TYPE_TAG = "f:";
+    public static final String INT_TYPE_TAG = "i:";
+    public static final String LONG_TYPE_TAG = "l:";
+    public static final String OBJECT_TYPE_TAG = "o:";
+    public static final String SHORT_TYPE_TAG = "h:";
+    public static final String STRING_TYPE_TAG = "s:";
+    public static final String THROWABLE_TYPE_TAG = "t:";
+
+    public static final String FALSE_VALUE = BOOLEAN_TYPE_TAG + "f";
+    public static final String TRUE_VALUE = BOOLEAN_TYPE_TAG + "t";
+    public static final String NULL_VALUE = "null";
+
     private static Logger logger;
     private final PrintWriter logWriter;
     private volatile String prevMsg = null;
@@ -76,51 +93,51 @@ public final class Logger {
     }
 
     public static String toString(final boolean v) {
-        return v ? "p_b:1" : "p_b:0";
+        return v ? TRUE_VALUE : FALSE_VALUE;
     }
 
     public static String toString(final byte v) {
-        return "p_y:" + v;
+        return BYTE_TYPE_TAG + v;
     }
 
     public static String toString(final char v) {
-        return "p_c:" + Character.hashCode(v);
+        return CHAR_TYPE_TAG + Character.hashCode(v);
     }
 
     public static String toString(final short v) {
-        return "p_s:" + v;
+        return SHORT_TYPE_TAG + v;
     }
 
     public static String toString(final int v) {
-        return "p_i:" + v;
+        return INT_TYPE_TAG + v;
     }
 
     public static String toString(final long v) {
-        return "p_l:" + v;
+        return LONG_TYPE_TAG + v;
     }
 
     public static String toString(final float v) {
-        return "p_f:" + v;
+        return FLOAT_TYPE_TAG + v;
     }
 
     public static String toString(final double v) {
-        return "p_d:" + v;
+        return DOUBLE_TYPE_TAG + v;
     }
 
     public static String toString(final Object o) {
         if (o == null) {
-            return "null";
+            return NULL_VALUE;
         } else {
             final String _tmp;
 
             if (o instanceof String) {
-                _tmp = "r_s:";
+                _tmp = STRING_TYPE_TAG;
             } else if (o instanceof Throwable) {
-                _tmp = "r_t:";
+                _tmp = THROWABLE_TYPE_TAG;
             } else if (o.getClass().isArray()) {
-                _tmp = "r_a:";
+                _tmp = ARRAY_TYPE_TAG;
             } else {
-                _tmp = "r_o:";
+                _tmp = OBJECT_TYPE_TAG;
             }
 
             return _tmp + System.identityHashCode(o);

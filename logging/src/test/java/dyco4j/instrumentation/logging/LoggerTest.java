@@ -222,12 +222,10 @@ public final class LoggerTest {
     @Test
     public void testToStringWithBoolean() throws Exception {
         final boolean _tmp1 = true;
-        assertTrue(Logger.toString(_tmp1).matches("^p_b:.*"));
-        assertEquals(Logger.toString(_tmp1), Logger.toString(_tmp1));
+        assertTrue(Logger.toString(_tmp1).matches(MessageFormat.format("^{0}", Logger.TRUE_VALUE)));
 
         final boolean _tmp2 = false;
-        assertTrue(Logger.toString(_tmp2).matches("^p_b:.*"));
-        assertEquals(Logger.toString(_tmp2), Logger.toString(_tmp2));
+        assertTrue(Logger.toString(_tmp2).matches(MessageFormat.format("^{0}", Logger.FALSE_VALUE)));
 
         assertNotEquals(Logger.toString(_tmp1), Logger.toString(_tmp2));
     }
@@ -235,7 +233,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithByte() throws Exception {
         final byte _tmp = 10;
-        assertTrue(Logger.toString(_tmp).matches("^p_y:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.BYTE_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString(20));
     }
@@ -243,7 +241,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithChar() throws Exception {
         final char _tmp = 'c';
-        assertTrue(Logger.toString(_tmp).matches("^p_c:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.CHAR_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString('d'));
     }
@@ -251,7 +249,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithDouble() throws Exception {
         final double _tmp = 10.3d;
-        assertTrue(Logger.toString(_tmp).matches("^p_d:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.DOUBLE_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString(10.4d));
     }
@@ -259,7 +257,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithFloat() throws Exception {
         final float _tmp = 10.3f;
-        assertTrue(Logger.toString(_tmp).matches("^p_f:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.FLOAT_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString(10.4f));
     }
@@ -267,7 +265,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithInt() throws Exception {
         final int _tmp = 10;
-        assertTrue(Logger.toString(_tmp).matches("^p_i:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.INT_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString(20));
     }
@@ -275,7 +273,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithLong() throws Exception {
         final long _tmp = 10L;
-        assertTrue(Logger.toString(_tmp).matches("^p_l:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.LONG_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString(20L));
     }
@@ -283,21 +281,21 @@ public final class LoggerTest {
     @Test
     public void testToStringWithObjectForArray() throws Exception {
         final String[] _tmp = new String[]{"array"};
-        assertTrue(Logger.toString(_tmp).matches("^r_a:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.ARRAY_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString(new Object[]{"array"}));
     }
 
     @Test
     public void testToStringWithObjectForNull() throws Exception {
-        assertEquals("null", Logger.toString(null));
-        assertNotEquals("null", Logger.toString("null"));
+        assertEquals(Logger.NULL_VALUE, Logger.toString(null));
+        assertNotEquals(Logger.NULL_VALUE, Logger.toString("null"));
     }
 
     @Test
     public void testToStringWithObjectForObject() throws Exception {
         final Class<?> _tmp = Logger.class;
-        assertTrue(Logger.toString(_tmp).matches("^r_o:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.OBJECT_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString(Integer.valueOf(4)));
     }
@@ -305,7 +303,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithObjectForString() throws Exception {
         final String _tmp = "string";
-        assertTrue(Logger.toString(_tmp).matches("^r_s:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.STRING_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString("str"));
     }
@@ -313,7 +311,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithObjectForThrowable() throws Exception {
         final Exception _tmp = new RuntimeException();
-        assertTrue(Logger.toString(_tmp).matches("^r_t:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.THROWABLE_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString(new IllegalStateException()));
     }
@@ -321,7 +319,7 @@ public final class LoggerTest {
     @Test
     public void testToStringWithShort() throws Exception {
         final short _tmp = 10;
-        assertTrue(Logger.toString(_tmp).matches("^p_s:.*"));
+        assertTrue(Logger.toString(_tmp).matches(MessageFormat.format("^{0}.*", Logger.SHORT_TYPE_TAG)));
         assertEquals(Logger.toString(_tmp), Logger.toString(_tmp));
         assertNotEquals(Logger.toString(_tmp), Logger.toString((short) 20));
     }

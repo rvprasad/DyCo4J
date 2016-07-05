@@ -96,10 +96,10 @@ abstract class AbstractCLITest {
     }
 
     protected static final class ExecutionResult {
-        protected final int exitCode
-        protected final stdoutLines // list of string
-        protected final stderrLines // list of string
-        protected final traceLines // list of string
+        final int exitCode
+        final stdoutLines // list of string
+        final stderrLines // list of string
+        final traceLines // list of string
 
         ExecutionResult(exitCode, stdoutLines, stderrLines, traceLines) {
             this.exitCode = exitCode
