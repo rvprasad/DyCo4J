@@ -10,7 +10,7 @@ package dyco4j.instrumentation.internals;
 
 import dyco4j.LoggingHelper;
 import dyco4j.instrumentation.LoggerInitializingMethodVisitor;
-import dyco4j.instrumentation.logging.Logger.DataAction;
+import dyco4j.instrumentation.logging.Logger;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -90,7 +90,7 @@ final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<Tracing
                     this.mv.visitInsn(Opcodes.DUP);
 
                 this.mv.visitFieldInsn(opcode, owner, name, desc);
-                LoggingHelper.emitLogField(this.mv, _fieldId, _fieldType, DataAction.GET);
+                LoggingHelper.emitLogField(this.mv, _fieldId, _fieldType, Logger.FieldAction.GETF);
             } else if (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD) {
                 if (_isFieldStatic) {
                     this.mv.visitInsn(Opcodes.ACONST_NULL);
@@ -104,7 +104,7 @@ final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<Tracing
                 }
 
                 LoggingHelper.emitSwapOneWordAndTwoWords(this.mv, _fieldType);
-                LoggingHelper.emitLogField(this.mv, _fieldId, _fieldType, DataAction.PUT);
+                LoggingHelper.emitLogField(this.mv, _fieldId, _fieldType, Logger.FieldAction.PUTF);
                 this.mv.visitFieldInsn(opcode, owner, name, desc);
             }
         } else {
@@ -168,7 +168,7 @@ final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<Tracing
                 break;
         }
 
-        LoggingHelper.emitLogArray(this.mv, DataAction.PUT);
+        LoggingHelper.emitLogArray(this.mv, Logger.ArrayAction.PUTA);
 
         this.mv.visitInsn(opcode);
     }
@@ -210,6 +210,6 @@ final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<Tracing
                 break;
         }
 
-        LoggingHelper.emitLogArray(this.mv, DataAction.GET);
+        LoggingHelper.emitLogArray(this.mv, Logger.ArrayAction.GETA);
     }
 }

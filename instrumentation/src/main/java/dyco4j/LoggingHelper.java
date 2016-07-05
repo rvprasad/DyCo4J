@@ -7,13 +7,12 @@
  */
 package dyco4j;
 
+import dyco4j.instrumentation.logging.Logger;
+import dyco4j.instrumentation.logging.LoggerInitializer;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
-import dyco4j.instrumentation.logging.Logger;
-import dyco4j.instrumentation.logging.LoggerInitializer;
-import dyco4j.instrumentation.logging.Logger.DataAction;
 
 public class LoggingHelper {
     private static final String LOGGER;
@@ -36,10 +35,10 @@ public class LoggingHelper {
             LOG_METHOD_EXIT = Method.getMethod(Logger.class.getMethod("logMethodExit", String.class, String.class));
             LOG_ARGUMENT = Method.getMethod(Logger.class.getMethod("logArgument", Byte.TYPE, String.class));
             LOG_RETURN = Method.getMethod(Logger.class.getMethod("logReturn", String.class));
-            LOG_FIELD = Method.getMethod(
-                    Logger.class.getMethod("logField", Object.class, String.class, String.class, DataAction.class));
-            LOG_ARRAY = Method.getMethod(
-                    Logger.class.getMethod("logArray", Object.class, Integer.TYPE, String.class, DataAction.class));
+            LOG_FIELD = Method.getMethod(Logger.class.getMethod("logField", Object.class, String.class, String.class,
+                    Logger.FieldAction.class));
+            LOG_ARRAY = Method.getMethod(Logger.class.getMethod("logArray", Object.class, Integer.TYPE, String.class,
+                    Logger.ArrayAction.class));
             LOG_EXCEPTION = Method.getMethod(Logger.class.getMethod("logException", Throwable.class));
             LOGGER_INITIALIZER = LoggerInitializer.class.getName().replace("" + ".", "/");
             LOGGER_INITIALIZER_INITIALIZE = Method.getMethod(LoggerInitializer.class.getMethod("initialize"));
@@ -55,7 +54,7 @@ public class LoggingHelper {
         switch (type.getSort()) {
             case Type.ARRAY:
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString",
-                                   "(Ljava/lang/Object;)Ljava/lang/String;" + "", false);
+                        "(Ljava/lang/Object;)Ljava/lang/String;" + "", false);
                 break;
             case Type.BOOLEAN:
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString", "(Z)Ljava/lang/String;", false);
@@ -83,7 +82,7 @@ public class LoggingHelper {
                 break;
             case Type.OBJECT:
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString",
-                                   "(Ljava/lang/Object;)Ljava/lang/String;" + "", false);
+                        "(Ljava/lang/Object;)Ljava/lang/String;" + "", false);
                 break;
             default:
                 throw new RuntimeException("Unknown type" + type.getInternalName());
@@ -92,7 +91,7 @@ public class LoggingHelper {
 
     public static void emitInsnToLoadAndInitializeLogger(final MethodVisitor mv) {
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER_INITIALIZER, LOGGER_INITIALIZER_INITIALIZE.getName(),
-                           LOGGER_INITIALIZER_INITIALIZE.getDescriptor(), false);
+                LOGGER_INITIALIZER_INITIALIZE.getDescriptor(), false);
     }
 
     public static int emitLogArgument(final MethodVisitor mv, final int index, final Type argType) {
@@ -130,8 +129,8 @@ public class LoggingHelper {
         return _typeLength;
     }
 
-    public static void emitLogArray(final MethodVisitor mv, final DataAction action) {
-        final Type _a = Type.getType(DataAction.class);
+    public static void emitLogArray(final MethodVisitor mv, final Logger.ArrayAction action) {
+        final Type _a = Type.getType(Logger.ArrayAction.class);
         final String _name = action.toString();
         mv.visitFieldInsn(Opcodes.GETSTATIC, _a.getInternalName(), _name, _a.getDescriptor());
         emitInvokeLog(mv, LOG_ARRAY);
@@ -143,7 +142,7 @@ public class LoggingHelper {
     }
 
     public static void emitLogField(final MethodVisitor mv, final String fieldName, final Type fieldType,
-                                    final DataAction dataAction) {
+                                    final Logger.FieldAction action) {
         final int _fieldSort = fieldType.getSort();
         if (_fieldSort == Type.LONG || _fieldSort == Type.DOUBLE) {
             mv.visitInsn(Opcodes.DUP2_X1);
@@ -154,8 +153,8 @@ public class LoggingHelper {
         emitConvertToString(mv, fieldType);
         mv.visitLdcInsn(fieldName);
 
-        final Type _a = Type.getType(DataAction.class);
-        final String _name = dataAction.toString();
+        final Type _a = Type.getType(Logger.FieldAction.class);
+        final String _name = action.toString();
         mv.visitFieldInsn(Opcodes.GETSTATIC, _a.getInternalName(), _name, _a.getDescriptor());
         emitInvokeLog(mv, LOG_FIELD);
     }

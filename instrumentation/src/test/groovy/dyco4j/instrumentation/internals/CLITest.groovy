@@ -17,11 +17,15 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import static Logger.METHOD_ENTRY_TAG
-import static Logger.METHOD_EXIT_TAG
+import static dyco4j.instrumentation.logging.Logger.METHOD_ENTRY_TAG
+import static dyco4j.instrumentation.logging.Logger.METHOD_EXIT_TAG
 import static dyco4j.instrumentation.logging.Logger.METHOD_EXCEPTION_TAG
 
 class CLITest extends AbstractCLITest {
+    private static final GET_ARRAY = Logger.ArrayAction.GETA.toString()
+    private static final PUT_ARRAY = Logger.ArrayAction.PUTA.toString()
+    private static final GET_FIELD = Logger.FieldAction.GETF.toString()
+    private static final PUT_FIELD = Logger.FieldAction.PUTF.toString()
 
     @BeforeClass
     static void copyClassesToBeInstrumentedIntoInFolder() {
@@ -56,8 +60,7 @@ class CLITest extends AbstractCLITest {
         for (i in 1..23) {
             final _tmp1 = "m$i"
             assert traceLines[1.._numOfLines].count {
-                it ==~ /$METHOD_ENTRY_TAG,$_tmp1/ ||
-                        it ==~ /$METHOD_EXIT_TAG,$_tmp1,[NE]/
+                it ==~ /$METHOD_ENTRY_TAG,$_tmp1/ || it ==~ /$METHOD_EXIT_TAG,$_tmp1,[NE]/
             } == 2
         }
     }
@@ -162,8 +165,8 @@ class CLITest extends AbstractCLITest {
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
-        assert _traceLines[2] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
-        assert _traceLines[3] ==~ /^GETA,2,r_a:\d+,r_o:null$/
+        assert _traceLines[2] ==~ /^$PUT_ARRAY,1,r_a:\d+,r_o:\d+$/
+        assert _traceLines[3] ==~ /^$GET_ARRAY,2,r_a:\d+,r_o:null$/
         assert _traceLines[2].split(',')[2] == _traceLines[3].split(',')[2]
         assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp1,N$/
     }
@@ -185,8 +188,8 @@ class CLITest extends AbstractCLITest {
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
-        assert _traceLines[2] ==~ /^PUTF,f\d,,p_i:4$/
-        assert _traceLines[3] ==~ /^GETF,f\d,,r_o:\d+$/
+        assert _traceLines[2] ==~ /^$PUT_FIELD,f\d,,p_i:4$/
+        assert _traceLines[3] ==~ /^$GET_FIELD,f\d,,r_o:\d+$/
         assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp1,N$/
     }
 
@@ -218,8 +221,8 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[7] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
         assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
-        assert _traceLines[25] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
-        assert _traceLines[26] ==~ /^GETA,2,r_a:\d+,r_o:null$/
+        assert _traceLines[25] ==~ /^$PUT_ARRAY,1,r_a:\d+,r_o:\d+$/
+        assert _traceLines[26] ==~ /^$GET_ARRAY,2,r_a:\d+,r_o:null$/
         assert _traceLines[25].split(',')[2] == _traceLines[26].split(',')[2]
 
         assert _traceLines[32] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
@@ -227,8 +230,8 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[35] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
         assert _traceLines[36] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
-        assert _traceLines[53] ==~ /^PUTA,0,r_a:\d+,p_i:29$/
-        assert _traceLines[54] ==~ /^GETA,1,r_a:\d+,p_i:0$/
+        assert _traceLines[53] ==~ /^$PUT_ARRAY,0,r_a:\d+,p_i:29$/
+        assert _traceLines[54] ==~ /^$GET_ARRAY,1,r_a:\d+,p_i:0$/
         assert _traceLines[53].split(',')[2] == _traceLines[54].split(',')[2]
     }
 
@@ -250,13 +253,13 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
         assert _traceLines[7] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
         assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
-        assert _traceLines[9] ==~ /^PUTF,f\d,,p_i:4$/
-        assert _traceLines[11] ==~ /^GETF,f\d,,p_i:4$/
+        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,,p_i:4$/
+        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,p_i:4$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
 
-        assert _traceLines[27] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
-        assert _traceLines[28] ==~ /^GETF,f\d,,r_o:\d+$/
-        assert _traceLines[29] ==~ /^GETA,2,r_a:\d+,r_o:null$/
+        assert _traceLines[27] ==~ /^$PUT_ARRAY,1,r_a:\d+,r_o:\d+$/
+        assert _traceLines[28] ==~ /^$GET_FIELD,f\d,,r_o:\d+$/
+        assert _traceLines[29] ==~ /^$GET_ARRAY,2,r_a:\d+,r_o:null$/
         assert _traceLines[27].split(',')[2] == _traceLines[29].split(',')[2]
 
         assert _traceLines[35] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
@@ -264,16 +267,16 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[38] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
         assert _traceLines[39] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
-        assert _traceLines[40] ==~ /^PUTF,f\d,r_o:\d+,r_s:\d+$/
-        assert _traceLines[42] ==~ /^GETF,f\d,r_o:\d+,r_s:\d+$/
+        assert _traceLines[40] ==~ /^$PUT_FIELD,f\d,r_o:\d+,r_s:\d+$/
+        assert _traceLines[42] ==~ /^$GET_FIELD,f\d,r_o:\d+,r_s:\d+$/
         assert _traceLines[40].split(',')[1] == _traceLines[42].split(',')[1]
         assert _traceLines[40].split(',')[2] == _traceLines[42].split(',')[2]
         assert _traceLines[40].split(',')[3] == _traceLines[42].split(',')[3]
 
-        assert _traceLines[58] ==~ /^PUTA,0,r_a:\d+,p_i:29$/
-        assert _traceLines[59] ==~ /^GETF,f\d,,r_o:\d+$/
+        assert _traceLines[58] ==~ /^$PUT_ARRAY,0,r_a:\d+,p_i:29$/
+        assert _traceLines[59] ==~ /^$GET_FIELD,f\d,,r_o:\d+$/
         assert _traceLines[28].split(',')[3] == _traceLines[59].split(',')[3]
-        assert _traceLines[60] ==~ /^GETA,1,r_a:\d+,p_i:0$/
+        assert _traceLines[60] ==~ /^$GET_ARRAY,1,r_a:\d+,p_i:0$/
         assert _traceLines[58].split(',')[2] == _traceLines[60].split(',')[2]
     }
 
@@ -304,24 +307,24 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
         assert _traceLines[7] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
         assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
-        assert _traceLines[9] ==~ /^PUTF,f\d,,p_i:4$/
-        assert _traceLines[11] ==~ /^GETF,f\d,,p_i:4$/
+        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,,p_i:4$/
+        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,p_i:4$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
 
-        assert _traceLines[27] ==~ /^GETF,f\d,,r_o:\d+$/
+        assert _traceLines[27] ==~ /^$GET_FIELD,f\d,,r_o:\d+$/
 
         assert _traceLines[33] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
         assert _traceLines[34] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
         assert _traceLines[36] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
         assert _traceLines[37] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
-        assert _traceLines[38] ==~ /^PUTF,f\d,r_o:\d+,r_s:\d+$/
-        assert _traceLines[40] ==~ /^GETF,f\d,r_o:\d+,r_s:\d+$/
+        assert _traceLines[38] ==~ /^$PUT_FIELD,f\d,r_o:\d+,r_s:\d+$/
+        assert _traceLines[40] ==~ /^$GET_FIELD,f\d,r_o:\d+,r_s:\d+$/
         assert _traceLines[38].split(',')[1] == _traceLines[40].split(',')[1]
         assert _traceLines[38].split(',')[2] == _traceLines[40].split(',')[2]
         assert _traceLines[38].split(',')[3] == _traceLines[40].split(',')[3]
 
-        assert _traceLines[56] ==~ /^GETF,f\d,,r_o:\d+$/
+        assert _traceLines[56] ==~ /^$GET_FIELD,f\d,,r_o:\d+$/
         assert _traceLines[27].split(',')[3] == _traceLines[56].split(',')[3]
     }
 

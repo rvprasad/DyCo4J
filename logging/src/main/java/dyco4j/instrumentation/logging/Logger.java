@@ -46,8 +46,8 @@ public final class Logger {
         log(METHOD_ARG_TAG, Byte.toString(index), val);
     }
 
-    public static void logArray(final Object array, final int index, final String value, final DataAction dataAction) {
-        log(dataAction.toString().concat("A"), Integer.toString(index), toString(array), value);
+    public static void logArray(final Object array, final int index, final String value, final ArrayAction action) {
+        log(action.toString(), Integer.toString(index), toString(array), value);
     }
 
     public static void logException(final Throwable exception) {
@@ -55,8 +55,8 @@ public final class Logger {
     }
 
     public static void logField(final Object receiver, final String fieldValue, final String fieldName,
-                                final DataAction dataAction) {
-        log(dataAction.toString().concat("F"), fieldName, (receiver == null) ? "" : toString(receiver), fieldValue);
+                                final FieldAction action) {
+        log(action.toString(), fieldName, (receiver == null) ? "" : toString(receiver), fieldValue);
     }
 
     public static void logMethodEntry(final String methodId) {
@@ -180,8 +180,13 @@ public final class Logger {
         }
     }
 
-    public enum DataAction {
-        GET,
-        PUT
+    public enum ArrayAction {
+        GETA,
+        PUTA
+    }
+
+    public enum FieldAction {
+        GETF,
+        PUTF
     }
 }

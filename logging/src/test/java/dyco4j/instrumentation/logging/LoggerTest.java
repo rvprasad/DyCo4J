@@ -50,11 +50,11 @@ public final class LoggerTest {
         final String[] _array = new String[]{"array"};
         final String _value = "value";
         final int _idx = 1;
-        final Logger.DataAction _dataAction = Logger.DataAction.GET;
-        Logger.logArray(_array, _idx, _value, _dataAction);
+        final Logger.ArrayAction _action = Logger.ArrayAction.GETA;
+        Logger.logArray(_array, _idx, _value, _action);
 
         final String _expected = MessageFormat
-                .format("{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _dataAction + "A", _idx,
+                .format("{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action, _idx,
                         Logger.toString(_array), _value);
         assertEquals(_expected, getContent()[1]);
     }
@@ -75,11 +75,11 @@ public final class LoggerTest {
         final Object _object = 10;
         final String _fieldValue = "test";
         final String _fieldName = "message";
-        final Logger.DataAction _dataAction = Logger.DataAction.GET;
-        Logger.logField(_object, _fieldValue, _fieldName, _dataAction);
+        final Logger.FieldAction _action = Logger.FieldAction.GETF;
+        Logger.logField(_object, _fieldValue, _fieldName, _action);
 
         final String _expected = MessageFormat
-                .format("{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _dataAction + "F", _fieldName,
+                .format("{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action, _fieldName,
                         Logger.toString(_object), _fieldValue);
         assertEquals(_expected, getContent()[1]);
     }
@@ -88,11 +88,11 @@ public final class LoggerTest {
     public void testLogFieldForStaticField() throws Exception {
         final String _fieldValue = "test";
         final String _fieldName = "message";
-        final Logger.DataAction _dataAaction = Logger.DataAction.PUT;
-        Logger.logField(null, _fieldValue, _fieldName, _dataAaction);
+        final Logger.FieldAction _action = Logger.FieldAction.PUTF;
+        Logger.logField(null, _fieldValue, _fieldName, _action);
 
         final String _expected = MessageFormat
-                .format("{0},{1},{2},,{3}", Thread.currentThread().getId(), _dataAaction + "F", _fieldName, _fieldValue);
+                .format("{0},{1},{2},,{3}", Thread.currentThread().getId(), _action, _fieldName, _fieldValue);
         assertEquals(_expected, getContent()[1]);
     }
 
