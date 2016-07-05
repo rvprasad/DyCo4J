@@ -15,6 +15,12 @@ import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
 public final class Logger {
+    public static final String METHOD_ENTRY_TAG = "en";
+    public static final String METHOD_EXIT_TAG = "ex";
+    public static final String METHOD_EXCEPTION_TAG = "xp";
+    public static final String METHOD_ARG_TAG = "ar";
+    public static final String METHOD_RETURN_TAG = "re";
+
     private static Logger logger;
     private final PrintWriter logWriter;
     private volatile String prevMsg = null;
@@ -37,35 +43,35 @@ public final class Logger {
     }
 
     public static void logArgument(final byte index, final String val) {
-        log("arg", Byte.toString(index), val);
+        log(METHOD_ARG_TAG, Byte.toString(index), val);
     }
 
-    public static void logArray(final Object array, final int index, final String value, final Action action) {
-        log(action.toString().concat("A"), Integer.toString(index), toString(array), value);
+    public static void logArray(final Object array, final int index, final String value, final DataAction dataAction) {
+        log(dataAction.toString().concat("A"), Integer.toString(index), toString(array), value);
     }
 
     public static void logException(final Throwable exception) {
-        log("exception", toString(exception), exception.getClass().getName());
+        log(METHOD_EXCEPTION_TAG, toString(exception), exception.getClass().getName());
     }
 
     public static void logField(final Object receiver, final String fieldValue, final String fieldName,
-                                final Action action) {
-        log(action.toString().concat("F"), fieldName, (receiver == null) ? "" : toString(receiver), fieldValue);
+                                final DataAction dataAction) {
+        log(dataAction.toString().concat("F"), fieldName, (receiver == null) ? "" : toString(receiver), fieldValue);
     }
 
     public static void logMethodEntry(final String methodId) {
-        log("entry", methodId);
+        log(METHOD_ENTRY_TAG, methodId);
     }
 
     public static void logMethodExit(final String methodId, final String returnKind) {
-        log("exit", methodId, returnKind);
+        log(METHOD_EXIT_TAG, methodId, returnKind);
     }
 
     public static void logReturn(final String val) {
         if (val != null) {
-            log("return", val);
+            log(METHOD_RETURN_TAG, val);
         } else {
-            log("return");
+            log(METHOD_RETURN_TAG);
         }
     }
 
@@ -174,7 +180,7 @@ public final class Logger {
         }
     }
 
-    public enum Action {
+    public enum DataAction {
         GET,
         PUT
     }

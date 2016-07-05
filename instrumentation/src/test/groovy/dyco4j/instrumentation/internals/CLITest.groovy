@@ -9,6 +9,7 @@
 package dyco4j.instrumentation.internals
 
 import dyco4j.instrumentation.AbstractCLITest
+import dyco4j.instrumentation.logging.Logger
 import org.junit.After
 import org.junit.BeforeClass
 import org.junit.Test
@@ -16,7 +17,12 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 
+import static Logger.METHOD_ENTRY_TAG
+import static Logger.METHOD_EXIT_TAG
+import static dyco4j.instrumentation.logging.Logger.METHOD_EXCEPTION_TAG
+
 class CLITest extends AbstractCLITest {
+
     @BeforeClass
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file = Paths.get("dyco4j", "instrumentation", "internals", "CLITestSubject.class")
@@ -26,9 +32,9 @@ class CLITest extends AbstractCLITest {
     private static assertNestingOfCallsIsValid(lines) {
         final _stack = []
         for (String l in lines) {
-            if (l =~ /entry/) {
+            if (l =~ /$METHOD_ENTRY_TAG/) {
                 _stack << l
-            } else if (l =~ /exit/) {
+            } else if (l =~ /$METHOD_EXIT_TAG/) {
                 final String _tmp1 = _stack.pop()
                 assert _tmp1.split(',')[1] == l.split(',')[1]
             }
@@ -49,22 +55,24 @@ class CLITest extends AbstractCLITest {
 
         for (i in 1..23) {
             final _tmp1 = "m$i"
-            assert traceLines[1.._numOfLines].count { it ==~ /entry,$_tmp1/ || it ==~ /exit,$_tmp1,[NE]/ } == 2
+            assert traceLines[1.._numOfLines].count {
+                it ==~ /$METHOD_ENTRY_TAG,$_tmp1/ ||
+                        it ==~ /$METHOD_EXIT_TAG,$_tmp1,[NE]/
+            } == 2
         }
-    }
-
-    private static instrumentCode(args) {
-        instrumentCode(CLI, args)
     }
 
     private static executeInstrumentedCode() {
         executeInstrumentedCode(CLITestSubject)
     }
 
+    private static instrumentCode(args) {
+        instrumentCode(CLI, args)
+    }
+
     private static removeThreadIdFromLog(final traceLines) {
         traceLines.collect { it.replaceAll(/^\d+,/, "") }
     }
-
 
     @After
     final void deleteAuxiliaryFiles() {
@@ -104,14 +112,14 @@ class CLITest extends AbstractCLITest {
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         commonCheck(_traceLines)
 
-        assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[5] ==~ /^exit,m\d+,E$/
-        assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[8] ==~ /^exit,m\d+,E$/
-        assert _traceLines[30] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[31] ==~ /^exit,m\d+,E$/
-        assert _traceLines[33] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[34] ==~ /^exit,m\d+,E$/
+        assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
+        assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[7] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[30] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
+        assert _traceLines[31] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[33] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[34] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
     }
 
     @Test
@@ -130,11 +138,11 @@ class CLITest extends AbstractCLITest {
         Date.parseToStringDate(_traceLines[0])
 
         final _tmp1 = _traceLines[1].split(',')[1]
-        assert _traceLines[1] ==~ /^entry,$_tmp1$/
-        assert _traceLines[2] ==~ /^exit,$_tmp1,N$/
+        assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
+        assert _traceLines[2] ==~ /^$METHOD_EXIT_TAG,$_tmp1,N$/
         final _tmp2 = _traceLines[3].split(',')[1]
-        assert _traceLines[3] ==~ /^entry,$_tmp2$/
-        assert _traceLines[4] ==~ /^exit,$_tmp2,N$/
+        assert _traceLines[3] ==~ /^$METHOD_ENTRY_TAG,$_tmp2$/
+        assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp2,N$/
     }
 
     @Test
@@ -153,11 +161,11 @@ class CLITest extends AbstractCLITest {
         Date.parseToStringDate(_traceLines[0])
 
         final _tmp1 = _traceLines[1].split(',')[1]
-        assert _traceLines[1] ==~ /^entry,$_tmp1$/
+        assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
         assert _traceLines[2] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
         assert _traceLines[3] ==~ /^GETA,2,r_a:\d+,r_o:null$/
         assert _traceLines[2].split(',')[2] == _traceLines[3].split(',')[2]
-        assert _traceLines[4] ==~ /^exit,$_tmp1,N$/
+        assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp1,N$/
     }
 
     @Test
@@ -176,10 +184,10 @@ class CLITest extends AbstractCLITest {
         Date.parseToStringDate(_traceLines[0])
 
         final _tmp1 = _traceLines[1].split(',')[1]
-        assert _traceLines[1] ==~ /^entry,$_tmp1$/
+        assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
         assert _traceLines[2] ==~ /^PUTF,f\d,,p_i:4$/
         assert _traceLines[3] ==~ /^GETF,f\d,,r_o:\d+$/
-        assert _traceLines[4] ==~ /^exit,$_tmp1,N$/
+        assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp1,N$/
     }
 
     @Test
@@ -205,19 +213,19 @@ class CLITest extends AbstractCLITest {
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         commonCheck(_traceLines)
 
-        assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[5] ==~ /^exit,m\d+,E$/
-        assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[8] ==~ /^exit,m\d+,E$/
+        assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
+        assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[7] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
         assert _traceLines[25] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
         assert _traceLines[26] ==~ /^GETA,2,r_a:\d+,r_o:null$/
         assert _traceLines[25].split(',')[2] == _traceLines[26].split(',')[2]
 
-        assert _traceLines[32] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[33] ==~ /^exit,m\d+,E$/
-        assert _traceLines[35] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[36] ==~ /^exit,m\d+,E$/
+        assert _traceLines[32] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
+        assert _traceLines[33] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[35] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[36] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
         assert _traceLines[53] ==~ /^PUTA,0,r_a:\d+,p_i:29$/
         assert _traceLines[54] ==~ /^GETA,1,r_a:\d+,p_i:0$/
@@ -238,10 +246,10 @@ class CLITest extends AbstractCLITest {
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         commonCheck(_traceLines)
 
-        assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[5] ==~ /^exit,m\d+,E$/
-        assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[8] ==~ /^exit,m\d+,E$/
+        assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
+        assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[7] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
         assert _traceLines[9] ==~ /^PUTF,f\d,,p_i:4$/
         assert _traceLines[11] ==~ /^GETF,f\d,,p_i:4$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
@@ -251,10 +259,10 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[29] ==~ /^GETA,2,r_a:\d+,r_o:null$/
         assert _traceLines[27].split(',')[2] == _traceLines[29].split(',')[2]
 
-        assert _traceLines[35] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[36] ==~ /^exit,m\d+,E$/
-        assert _traceLines[38] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[39] ==~ /^exit,m\d+,E$/
+        assert _traceLines[35] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
+        assert _traceLines[36] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[38] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[39] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
         assert _traceLines[40] ==~ /^PUTF,f\d,r_o:\d+,r_s:\d+$/
         assert _traceLines[42] ==~ /^GETF,f\d,r_o:\d+,r_s:\d+$/
@@ -292,20 +300,20 @@ class CLITest extends AbstractCLITest {
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         commonCheck(_traceLines)
 
-        assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[5] ==~ /^exit,m\d+,E$/
-        assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[8] ==~ /^exit,m\d+,E$/
+        assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
+        assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[7] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
         assert _traceLines[9] ==~ /^PUTF,f\d,,p_i:4$/
         assert _traceLines[11] ==~ /^GETF,f\d,,p_i:4$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
 
         assert _traceLines[27] ==~ /^GETF,f\d,,r_o:\d+$/
 
-        assert _traceLines[33] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[34] ==~ /^exit,m\d+,E$/
-        assert _traceLines[36] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[37] ==~ /^exit,m\d+,E$/
+        assert _traceLines[33] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.io.IOException$/
+        assert _traceLines[34] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[36] ==~ /^$METHOD_EXCEPTION_TAG,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[37] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
         assert _traceLines[38] ==~ /^PUTF,f\d,r_o:\d+,r_s:\d+$/
         assert _traceLines[40] ==~ /^GETF,f\d,r_o:\d+,r_s:\d+$/
