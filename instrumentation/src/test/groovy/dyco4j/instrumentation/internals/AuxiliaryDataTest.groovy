@@ -49,6 +49,12 @@ class AuxiliaryDataTest {
     }
 
     @Test
+    void loadFromNonExistentFile() {
+        final _tmp2 = AuxiliaryData.loadData(Paths.get("This cannot exists!"))
+        assert _tmp2.equals(new AuxiliaryData())
+    }
+
+    @Test
     void writeWhenDataFileIsPresent() {
         final _dataFile = File.createTempFile("pre", ".json").toPath()
         final _bakFile = Paths.get(_dataFile.toString() + ".bak")
