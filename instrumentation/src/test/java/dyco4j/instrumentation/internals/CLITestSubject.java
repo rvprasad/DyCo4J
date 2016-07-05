@@ -13,7 +13,7 @@ import java.util.Date;
 
 public class CLITestSubject {
     private static int staticField;
-    private int instanceField;
+    private String instanceField;
 
     public static void main(String[] s) {
         exerciseStaticFeatures();
@@ -100,7 +100,7 @@ public class CLITestSubject {
 
         }
 
-        this.instanceField = 3;
+        this.instanceField = "Whatever";
         this.publishedInstanceMethod0();
         this.publishedInstanceMethod1(9);
         this.publishedInstanceMethod2('e');
@@ -124,7 +124,7 @@ public class CLITestSubject {
     }
 
     private boolean publishedInstanceMethod0() {
-        return instanceField == 3;
+        return instanceField.equals("My my");
     }
 
     private float publishedInstanceMethod1(int i) {

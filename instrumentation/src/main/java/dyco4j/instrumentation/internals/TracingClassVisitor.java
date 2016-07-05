@@ -12,6 +12,7 @@ import dyco4j.instrumentation.LoggerInitializingClassVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 final class TracingClassVisitor extends LoggerInitializingClassVisitor {
@@ -57,9 +58,11 @@ final class TracingClassVisitor extends LoggerInitializingClassVisitor {
         final String _id = this.shortFieldName2Id.get(_shortName);
         if (_id == null) {
             final String _superClass = this.class2superClass.get(owner);
-            if (_superClass == null)
-                throw new IllegalStateException(_shortName);
-            else
+            if (_superClass == null) {
+                final String _msg = MessageFormat.format("Incomplete information: name={0}, owner={1}, desc={2} " +
+                        "_shortName={3}", name, owner, desc, _shortName);
+                throw new IllegalStateException(_msg);
+            } else
                 return getFieldId(name, _superClass, desc);
         }
         return _id;

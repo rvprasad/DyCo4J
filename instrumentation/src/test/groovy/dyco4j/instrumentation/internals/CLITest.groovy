@@ -23,15 +23,15 @@ class CLITest extends AbstractCLITest {
         copyClassToBeInstrumentedIntoInFolder(_file)
     }
 
-    private static final commonCheck(String[] traceLines, int numOfLines) {
+    private static final commonCheck(String[] traceLines) {
         // should not raise exception
         Date.parseToStringDate(traceLines[0].split(',')[1])
-
-        assertNestingOfCallsIsValid(traceLines[1..numOfLines - 1])
+        final _numOfLines = traceLines.length - 1
+        assertNestingOfCallsIsValid(traceLines[1.._numOfLines])
 
         for (i in 1..23) {
             final _tmp1 = "m$i"
-            assert traceLines[1..numOfLines - 1].count { it ==~ /entry,$_tmp1/ || it ==~ /exit,$_tmp1,[NE]/ } == 2
+            assert traceLines[1.._numOfLines].count { it ==~ /entry,$_tmp1/ || it ==~ /exit,$_tmp1,[NE]/ } == 2
         }
     }
 
@@ -93,16 +93,16 @@ class CLITest extends AbstractCLITest {
         final _numOfLines = 53
         assert _traceLines.length == _numOfLines
 
-        commonCheck(_traceLines, _numOfLines)
+        commonCheck(_traceLines)
 
         assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[5] ==~ /^exit,m\d+,E/
+        assert _traceLines[5] ==~ /^exit,m\d+,E$/
         assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[8] ==~ /^exit,m\d+,E/
+        assert _traceLines[8] ==~ /^exit,m\d+,E$/
         assert _traceLines[30] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[31] ==~ /^exit,m\d+,E/
+        assert _traceLines[31] ==~ /^exit,m\d+,E$/
         assert _traceLines[33] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[34] ==~ /^exit,m\d+,E/
+        assert _traceLines[34] ==~ /^exit,m\d+,E$/
     }
 
     @Test
@@ -121,11 +121,11 @@ class CLITest extends AbstractCLITest {
         Date.parseToStringDate(_traceLines[0].split(',')[1])
 
         final _tmp1 = _traceLines[1].split(',')[1]
-        assert _traceLines[1] ==~ /^entry,$_tmp1/
-        assert _traceLines[2] ==~ /^exit,$_tmp1,N/
+        assert _traceLines[1] ==~ /^entry,$_tmp1$/
+        assert _traceLines[2] ==~ /^exit,$_tmp1,N$/
         final _tmp2 = _traceLines[3].split(',')[1]
-        assert _traceLines[3] ==~ /^entry,$_tmp2/
-        assert _traceLines[4] ==~ /^exit,$_tmp2,N/
+        assert _traceLines[3] ==~ /^entry,$_tmp2$/
+        assert _traceLines[4] ==~ /^exit,$_tmp2,N$/
     }
 
     @Test
@@ -145,16 +145,31 @@ class CLITest extends AbstractCLITest {
         Date.parseToStringDate(_traceLines[0].split(',')[1])
 
         final _tmp1 = _traceLines[1].split(',')[1]
-        assert _traceLines[1] ==~ /^entry,$_tmp1/
+        assert _traceLines[1] ==~ /^entry,$_tmp1$/
         assert _traceLines[2] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
         assert _traceLines[3] ==~ /^GETA,2,r_a:\d+,r_o:null$/
         assert _traceLines[2].split(',')[2] == _traceLines[3].split(',')[2]
-        assert _traceLines[4] ==~ /^exit,$_tmp1,N/
+        assert _traceLines[4] ==~ /^exit,$_tmp1,N$/
     }
 
     @Test
     void withMethodNameRegexAndTraceFieldAccessOptions() {
-        assert false
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
+                               "--methodNameRegex", ".*exerciseStatic.*", "--traceFieldAccess"]) == 1:
+                "Class was not instrumented"
+
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
+        final _numOfLines = 5
+        assert _traceLines.length == _numOfLines
+
+        final _tmp1 = _traceLines[1].split(',')[1]
+        assert _traceLines[1] ==~ /^entry,$_tmp1$/
+        assert _traceLines[2] ==~ /^PUTF,f\d,,p_i:4$/
+        assert _traceLines[3] ==~ /^GETF,f\d,,r_o:\d+$/
+        assert _traceLines[4] ==~ /^exit,$_tmp1,N$/
     }
 
     @Test
@@ -179,21 +194,21 @@ class CLITest extends AbstractCLITest {
         final _numOfLines = 57
         assert _traceLines.length == _numOfLines
 
-        commonCheck(_traceLines, _numOfLines)
+        commonCheck(_traceLines)
 
         assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[5] ==~ /^exit,m\d+,E/
+        assert _traceLines[5] ==~ /^exit,m\d+,E$/
         assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[8] ==~ /^exit,m\d+,E/
+        assert _traceLines[8] ==~ /^exit,m\d+,E$/
 
         assert _traceLines[25] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
         assert _traceLines[26] ==~ /^GETA,2,r_a:\d+,r_o:null$/
         assert _traceLines[25].split(',')[2] == _traceLines[26].split(',')[2]
 
         assert _traceLines[32] ==~ /^exception,r_t:\d+,java.io.IOException$/
-        assert _traceLines[33] ==~ /^exit,m\d+,E/
+        assert _traceLines[33] ==~ /^exit,m\d+,E$/
         assert _traceLines[35] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
-        assert _traceLines[36] ==~ /^exit,m\d+,E/
+        assert _traceLines[36] ==~ /^exit,m\d+,E$/
 
         assert _traceLines[53] ==~ /^PUTA,0,r_a:\d+,p_i:29$/
         assert _traceLines[54] ==~ /^GETA,1,r_a:\d+,p_i:0$/
@@ -202,7 +217,48 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withTraceArrayAccessAndTraceFieldAccessOptions() {
-        assert false
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceArrayAccess",
+                               "--traceFieldAccess"]) == 1:
+                "Class was not instrumented"
+
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
+        final _numOfLines = 63
+        assert _traceLines.length == _numOfLines
+
+        commonCheck(_traceLines)
+
+        assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
+        assert _traceLines[5] ==~ /^exit,m\d+,E$/
+        assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[8] ==~ /^exit,m\d+,E$/
+        assert _traceLines[9] ==~ /^PUTF,f\d,,p_i:4$/
+        assert _traceLines[11] ==~ /^GETF,f\d,,p_i:4$/
+        assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
+
+        assert _traceLines[27] ==~ /^PUTA,1,r_a:\d+,r_o:\d+$/
+        assert _traceLines[28] ==~ /^GETF,f\d,,r_o:\d+$/
+        assert _traceLines[29] ==~ /^GETA,2,r_a:\d+,r_o:null$/
+        assert _traceLines[27].split(',')[2] == _traceLines[29].split(',')[2]
+
+        assert _traceLines[35] ==~ /^exception,r_t:\d+,java.io.IOException$/
+        assert _traceLines[36] ==~ /^exit,m\d+,E$/
+        assert _traceLines[38] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[39] ==~ /^exit,m\d+,E$/
+
+        assert _traceLines[40] ==~ /^PUTF,f\d,r_o:\d+,r_s:\d+$/
+        assert _traceLines[42] ==~ /^GETF,f\d,r_o:\d+,r_s:\d+$/
+        assert _traceLines[40].split(',')[1] == _traceLines[42].split(',')[1]
+        assert _traceLines[40].split(',')[2] == _traceLines[42].split(',')[2]
+        assert _traceLines[40].split(',')[3] == _traceLines[42].split(',')[3]
+
+        assert _traceLines[58] ==~ /^PUTA,0,r_a:\d+,p_i:29$/
+        assert _traceLines[59] ==~ /^GETF,f\d,,r_o:\d+$/
+        assert _traceLines[28].split(',')[3] == _traceLines[59].split(',')[3]
+        assert _traceLines[60] ==~ /^GETA,1,r_a:\d+,p_i:0$/
+        assert _traceLines[58].split(',')[2] == _traceLines[60].split(',')[2]
     }
 
     @Test
@@ -217,7 +273,41 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withTraceFieldAccessOption() {
-        assert false
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceFieldAccess"]) == 1:
+                "Class was not instrumented"
+
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        final String[] _traceLines = _executionResult.traceLines.collect { it.replaceAll(/\d+,\d+,/, "") }
+        final _numOfLines = 59
+        assert _traceLines.length == _numOfLines
+
+        commonCheck(_traceLines)
+
+        assert _traceLines[4] ==~ /^exception,r_t:\d+,java.io.IOException$/
+        assert _traceLines[5] ==~ /^exit,m\d+,E$/
+        assert _traceLines[7] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[8] ==~ /^exit,m\d+,E$/
+        assert _traceLines[9] ==~ /^PUTF,f\d,,p_i:4$/
+        assert _traceLines[11] ==~ /^GETF,f\d,,p_i:4$/
+        assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
+
+        assert _traceLines[27] ==~ /^GETF,f\d,,r_o:\d+$/
+
+        assert _traceLines[33] ==~ /^exception,r_t:\d+,java.io.IOException$/
+        assert _traceLines[34] ==~ /^exit,m\d+,E$/
+        assert _traceLines[36] ==~ /^exception,r_t:\d+,java.lang.IllegalStateException$/
+        assert _traceLines[37] ==~ /^exit,m\d+,E$/
+
+        assert _traceLines[38] ==~ /^PUTF,f\d,r_o:\d+,r_s:\d+$/
+        assert _traceLines[40] ==~ /^GETF,f\d,r_o:\d+,r_s:\d+$/
+        assert _traceLines[38].split(',')[1] == _traceLines[40].split(',')[1]
+        assert _traceLines[38].split(',')[2] == _traceLines[40].split(',')[2]
+        assert _traceLines[38].split(',')[3] == _traceLines[40].split(',')[3]
+
+        assert _traceLines[56] ==~ /^GETF,f\d,,r_o:\d+$/
+        assert _traceLines[27].split(',')[3] == _traceLines[56].split(',')[3]
     }
 
     @Test
