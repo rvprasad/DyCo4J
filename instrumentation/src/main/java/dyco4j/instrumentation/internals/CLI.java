@@ -8,6 +8,7 @@
 
 package dyco4j.instrumentation.internals;
 
+import dyco4j.instrumentation.LoggerInitializingClassVisitor;
 import org.apache.commons.cli.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -90,10 +91,11 @@ public final class CLI {
                         Collections.unmodifiableMap(_auxiliaryData.shortMethodName2Id);
                 final Map<String, String> _class2superClass =
                         Collections.unmodifiableMap(_auxiliaryData.class2superClass);
-                final ClassVisitor _cv =
-                        new TracingClassVisitor(_cw, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
+                final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
+                final ClassVisitor _cv2 =
+                        new TracingClassVisitor(_cv1, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
                                                 _methodNameRegex, _cmdLineOptions);
-                _cr.accept(_cv, 0);
+                _cr.accept(_cv2, 0);
 
                 Files.write(_trgPath, _cw.toByteArray());
             } catch (final IOException _ex) {

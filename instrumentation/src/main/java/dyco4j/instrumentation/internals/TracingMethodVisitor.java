@@ -9,7 +9,6 @@
 package dyco4j.instrumentation.internals;
 
 import dyco4j.LoggingHelper;
-import dyco4j.instrumentation.LoggerInitializingMethodVisitor;
 import dyco4j.instrumentation.logging.Logger;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -17,58 +16,52 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
-final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<TracingClassVisitor> {
+class TracingMethodVisitor extends MethodVisitor {
     private final String methodId;
+    private final Label beginOutermostHandler;
     private final Method method;
     private final boolean isStatic;
-    private Label beginOutermostHandler;
+    private final TracingClassVisitor cv;
 
-    TracingMethodVisitor(final int access, final String name, final String desc, final String signature,
-                         final String[] exceptions, final MethodVisitor mv, final TracingClassVisitor owner) {
-        super(CLI.ASM_VERSION, mv, name, owner);
+    TracingMethodVisitor(final int access, final String name, final String desc, final MethodVisitor mv,
+                         final TracingClassVisitor owner) {
+        super(CLI.ASM_VERSION, mv);
         this.method = new Method(name, desc);
         this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
         this.beginOutermostHandler = new Label();
         this.methodId = owner.getMethodId(name, desc);
+        this.cv = owner;
     }
 
     @Override
-    public void visitCodeAfterLoggerInitialization() {
+    public void visitCode() {
         this.mv.visitCode();
-        LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
-
-        if (this.cv.cmdLineOptions.traceMethodArgs) {
-            // emit code to trace each arg
-            int _position = 0;
-            if (!this.isStatic)
-                _position += LoggingHelper.emitLogArgument(this.mv, _position, Type.getType(Object.class));
-
-            for (final Type _argType : this.method.getArgumentTypes()) {
-                _position += LoggingHelper.emitLogArgument(this.mv, _position, _argType);
-            }
-        }
 
         this.mv.visitLabel(this.beginOutermostHandler);
+
+        LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
+
+        emitLogMethodArguments();
     }
 
     @Override
-    public void visitInsn(final int opcode) {
+    public final void visitInsn(final int opcode) {
         if (opcode == Opcodes.IRETURN || opcode == Opcodes.LRETURN || opcode == Opcodes.FRETURN ||
-            opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN) {
+                opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN) {
             if (this.cv.cmdLineOptions.traceMethodRetValue)
                 LoggingHelper.emitLogReturn(this.mv, method.getReturnType());
             LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.NORMAL);
             this.mv.visitInsn(opcode);
         } else if (opcode == Opcodes.AASTORE || opcode == Opcodes.BASTORE || opcode == Opcodes.CASTORE ||
-                   opcode == Opcodes.DASTORE || opcode == Opcodes.FASTORE || opcode == Opcodes.IASTORE ||
-                   opcode == Opcodes.LASTORE || opcode == Opcodes.SASTORE) {
+                opcode == Opcodes.DASTORE || opcode == Opcodes.FASTORE || opcode == Opcodes.IASTORE ||
+                opcode == Opcodes.LASTORE || opcode == Opcodes.SASTORE) {
             if (this.cv.cmdLineOptions.traceArrayAccess)
                 visitArrayStoreInsn(opcode);
             else
                 this.mv.visitInsn(opcode);
         } else if (opcode == Opcodes.AALOAD || opcode == Opcodes.BALOAD || opcode == Opcodes.CALOAD ||
-                   opcode == Opcodes.DALOAD || opcode == Opcodes.FALOAD || opcode == Opcodes.IALOAD ||
-                   opcode == Opcodes.LALOAD || opcode == Opcodes.SALOAD) {
+                opcode == Opcodes.DALOAD || opcode == Opcodes.FALOAD || opcode == Opcodes.IALOAD ||
+                opcode == Opcodes.LALOAD || opcode == Opcodes.SALOAD) {
             if (this.cv.cmdLineOptions.traceArrayAccess)
                 visitArrayLoadInsn(opcode);
             else
@@ -78,7 +71,7 @@ final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<Tracing
     }
 
     @Override
-    public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
+    public final void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
         if (this.cv.cmdLineOptions.traceFieldAccess) {
             final Type _fieldType = Type.getType(desc);
             final String _fieldId = this.cv.getFieldId(name, owner, desc);
@@ -113,7 +106,7 @@ final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<Tracing
     }
 
     @Override
-    public void visitMaxs(final int maxStack, final int maxLocals) {
+    public final void visitMaxs(final int maxStack, final int maxLocals) {
         final Label _endLabel = new Label();
         this.mv.visitLabel(_endLabel);
         this.mv.visitTryCatchBlock(this.beginOutermostHandler, _endLabel, _endLabel, "java/lang/Throwable");
@@ -122,6 +115,19 @@ final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<Tracing
         this.mv.visitInsn(Opcodes.ATHROW);
 
         this.mv.visitMaxs(maxStack, maxLocals);
+    }
+
+    private void emitLogMethodArguments() {
+        if (this.cv.cmdLineOptions.traceMethodArgs) {
+            // emit code to trace each arg
+            int _position = 0;
+            if (!this.isStatic)
+                _position += LoggingHelper.emitLogArgument(this.mv, _position, Type.getType(Object.class));
+
+            for (final Type _argType : this.method.getArgumentTypes()) {
+                _position += LoggingHelper.emitLogArgument(this.mv, _position, _argType);
+            }
+        }
     }
 
     private void visitArrayStoreInsn(final int opcode) {

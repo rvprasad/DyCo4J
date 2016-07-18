@@ -7,8 +7,10 @@
  */
 package dyco4j.instrumentation.entry;
 
+import dyco4j.instrumentation.LoggerInitializingClassVisitor;
 import org.apache.commons.cli.*;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
 import java.io.IOException;
@@ -72,8 +74,9 @@ public final class CLI {
                                           final boolean onlyAnnotatedTests) {
         final ClassReader _cr = new ClassReader(b);
         final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_FRAMES);
-        final org.objectweb.asm.ClassVisitor _cv = new TracingClassVisitor(_cw, methodNameRegex, onlyAnnotatedTests);
-        _cr.accept(_cv, 0);
+        final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
+        final ClassVisitor _cv2 = new TracingClassVisitor(_cv1, methodNameRegex, onlyAnnotatedTests);
+        _cr.accept(_cv2, 0);
         return _cw.toByteArray();
     }
 }

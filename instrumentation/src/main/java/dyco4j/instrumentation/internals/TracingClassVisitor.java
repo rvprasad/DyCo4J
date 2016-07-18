@@ -8,14 +8,13 @@
 
 package dyco4j.instrumentation.internals;
 
-import dyco4j.instrumentation.LoggerInitializingClassVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
 import java.text.MessageFormat;
 import java.util.Map;
 
-final class TracingClassVisitor extends LoggerInitializingClassVisitor {
+final class TracingClassVisitor extends ClassVisitor {
     final CLI.CommandLineOptions cmdLineOptions;
     private final Map<String, String> shortMethodName2Id;
     private final Map<String, String> shortFieldName2Id;
@@ -45,11 +44,11 @@ final class TracingClassVisitor extends LoggerInitializingClassVisitor {
     @Override
     public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature,
                                      final String[] exceptions) {
-        final MethodVisitor _mv = cv.visitMethod(access, name, desc, signature, exceptions);
-        if (_mv != null && shouldInstrumentMethod(name))
-            return new TracingMethodVisitor(access, name, desc, signature, exceptions, _mv, this);
-        else
-            return _mv;
+        final MethodVisitor _mv1 = cv.visitMethod(access, name, desc, signature, exceptions);
+        if (_mv1 != null && shouldInstrumentMethod(name)) {
+            return new TracingMethodVisitor(access, name, desc, _mv1, this);
+        } else
+            return _mv1;
     }
 
     String getFieldId(final String name, final String owner, final String desc) {

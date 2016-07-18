@@ -9,17 +9,21 @@
 package dyco4j.instrumentation.entry;
 
 import dyco4j.LoggingHelper;
-import dyco4j.instrumentation.LoggerInitializingMethodVisitor;
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.MethodVisitor;
 
-public final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<TracingClassVisitor> {
+final class TracingMethodVisitor extends MethodVisitor {
     private final String desc;
+    private final TracingClassVisitor cv;
+    private final String name;
     private boolean isAnnotatedAsTest;
 
-    TracingMethodVisitor(final org.objectweb.asm.MethodVisitor mv, final String name, final String descriptor,
+    TracingMethodVisitor(final String name, final String descriptor, final MethodVisitor mv,
                          final TracingClassVisitor owner) {
-        super(CLI.ASM_VERSION, mv, name, owner);
+        super(CLI.ASM_VERSION, mv);
+        this.name = name;
         this.desc = descriptor;
+        this.cv = owner;
     }
 
     @Override
@@ -38,18 +42,18 @@ public final class TracingMethodVisitor extends LoggerInitializingMethodVisitor<
         return super.visitAnnotation(desc, visible);
     }
 
-    private boolean shouldInstrument() {
-        return this.name.matches(this.cv.getMethodNameRegex()) &&
-               (!this.cv.instrumentOnlyAnnotatedTests() || this.isAnnotatedAsTest);
-    }
-
     @Override
-    protected void visitCodeAfterLoggerInitialization() {
+    public void visitCode() {
         mv.visitCode();
 
         if (this.shouldInstrument()) {
             final String _msg = "marker:" + this.cv.getClassName() + "/" + name + desc;
             LoggingHelper.emitLogString(mv, _msg);
         }
+    }
+
+    private boolean shouldInstrument() {
+        return this.name.matches(this.cv.getMethodNameRegex()) &&
+                (!this.cv.instrumentOnlyAnnotatedTests() || this.isAnnotatedAsTest);
     }
 }

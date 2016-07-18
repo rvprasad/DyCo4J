@@ -8,31 +8,19 @@
 
 package dyco4j.instrumentation.entry;
 
-import dyco4j.instrumentation.LoggerInitializingClassVisitor;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
-final class TracingClassVisitor extends LoggerInitializingClassVisitor {
+final class TracingClassVisitor extends ClassVisitor {
     private final String methodNameRegex;
     private final boolean onlyAnnotatedTests;
     private String className;
 
-    TracingClassVisitor(final org.objectweb.asm.ClassVisitor cv, final String methodNameRegex,
-                        boolean onlyAnnotatedTests) {
+    TracingClassVisitor(final ClassVisitor cv, final String methodNameRegex,
+                        final boolean onlyAnnotatedTests) {
         super(CLI.ASM_VERSION, cv);
         this.methodNameRegex = methodNameRegex;
         this.onlyAnnotatedTests = onlyAnnotatedTests;
-    }
-
-    String getMethodNameRegex() {
-        return this.methodNameRegex;
-    }
-
-    boolean instrumentOnlyAnnotatedTests() {
-        return this.onlyAnnotatedTests;
-    }
-
-    String getClassName() {
-        return this.className;
     }
 
     @Override
@@ -45,6 +33,18 @@ final class TracingClassVisitor extends LoggerInitializingClassVisitor {
     public MethodVisitor visitMethod(final int access, final String name, final String desc,
                                      final String signature, final String[] exceptions) {
         final MethodVisitor _mv = cv.visitMethod(access, name, desc, signature, exceptions);
-        return _mv == null ? null : new TracingMethodVisitor(_mv, name, desc, this);
+        return _mv == null ? null : new TracingMethodVisitor(name, desc, _mv, this);
+    }
+
+    String getMethodNameRegex() {
+        return this.methodNameRegex;
+    }
+
+    boolean instrumentOnlyAnnotatedTests() {
+        return this.onlyAnnotatedTests;
+    }
+
+    String getClassName() {
+        return this.className;
     }
 }

@@ -10,17 +10,21 @@ package dyco4j.instrumentation;
 
 import dyco4j.LoggingHelper;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public abstract class LoggerInitializingClassVisitor extends ClassVisitor {
+public final class LoggerInitializingClassVisitor extends ClassVisitor {
     private boolean isClinitVisited;
 
-    public LoggerInitializingClassVisitor(int api, ClassVisitor cv) {
+    public LoggerInitializingClassVisitor(final int api, final ClassVisitor cv) {
         super(api, cv);
     }
 
-    public void clinitVisited() {
-        this.isClinitVisited = true;
+    @Override
+    public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature,
+                                     final String[] exceptions) {
+        final MethodVisitor _mv = cv.visitMethod(access, name, desc, signature, exceptions);
+        return _mv == null ? null : new LoggerInitializingMethodVisitor(this.api, _mv, this, name);
     }
 
     public void visitEnd() {
@@ -32,5 +36,9 @@ public abstract class LoggerInitializingClassVisitor extends ClassVisitor {
                 _mv.visitInsn(Opcodes.RETURN);
             }
         }
+    }
+
+    void clinitVisited() {
+        this.isClinitVisited = true;
     }
 }

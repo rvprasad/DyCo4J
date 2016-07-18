@@ -11,26 +11,24 @@ package dyco4j.instrumentation;
 import dyco4j.LoggingHelper;
 import org.objectweb.asm.MethodVisitor;
 
-public abstract class LoggerInitializingMethodVisitor<T extends LoggerInitializingClassVisitor> extends MethodVisitor {
-    protected final String name;
-    protected final T cv;
+final class LoggerInitializingMethodVisitor extends MethodVisitor {
+    private final String name;
+    private final LoggerInitializingClassVisitor cv;
 
-    protected LoggerInitializingMethodVisitor(final int api, final MethodVisitor mv, final String name,
-                                              final T cv) {
+    LoggerInitializingMethodVisitor(final int api, final MethodVisitor mv,
+                                    final LoggerInitializingClassVisitor cv, final String name) {
         super(api, mv);
-        this.name = name;
         this.cv = cv;
+        this.name = name;
     }
 
     @Override
     public final void visitCode() {
+        this.mv.visitCode();
+
         if (this.name.equals("<clinit>")) {
             this.cv.clinitVisited();
             LoggingHelper.emitInsnToLoadAndInitializeLogger(mv);
         }
-
-        visitCodeAfterLoggerInitialization();
     }
-
-    protected abstract void visitCodeAfterLoggerInitialization();
 }

@@ -5,7 +5,6 @@ repositories {
         dirs 'libs'
     }
 }
-
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 
@@ -53,6 +52,16 @@ compileJava {
 
 test {
     exclude '**/CLITestSubject.class'
+}
+
+// Apply jacoco plugin to add support for code coverage
+apply plugin: "jacoco"
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+    }
 }
 
 version = '0.5.0'
