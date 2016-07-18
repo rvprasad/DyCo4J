@@ -15,9 +15,12 @@ public class CLITestSubject {
     private static int staticField;
     private String instanceField;
 
+    private CLITestSubject(Object o) {
+    }
+
     public static void main(String[] s) {
         exerciseStaticFeatures();
-        CLITestSubject _tmp1 = new CLITestSubject();
+        CLITestSubject _tmp1 = new CLITestSubject(new Object());
         _tmp1.exerciseInstanceFeatures();
     }
 

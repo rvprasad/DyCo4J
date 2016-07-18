@@ -470,8 +470,6 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withTraceMethodArgsOption() {
-        assert false
-        /*
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
                                "--traceMethodArgs"]) == 1:
                 "Class was not instrumented"
@@ -479,20 +477,52 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        assertTraceLengthIs(_executionResult, 53)
+        assertTraceLengthIs(_executionResult, 81)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines)
+        commonCheck(_traceLines, 24)
 
-        assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
-        assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
-        assert _traceLines[7] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.lang.IllegalStateException$/
-        assert _traceLines[8] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
-        assert _traceLines[30] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
-        assert _traceLines[31] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
-        assert _traceLines[33] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.lang.IllegalStateException$/
-        assert _traceLines[34] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
-        */
+        assert _traceLines[2] ==~ /^$METHOD_ARG_TAG,0,$ARRAY_TYPE_TAG\d+$/
+        assert _traceLines[5] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
+        assert _traceLines[6] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[8] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.lang.IllegalStateException$/
+        assert _traceLines[9] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+
+        assert _traceLines[13] ==~ /^$METHOD_ARG_TAG,0,${INT_TYPE_TAG}9$/
+        assert _traceLines[16] ==~ /^$METHOD_ARG_TAG,0,${CHAR_TYPE_TAG}101$/
+        assert _traceLines[19] ==~ /^$METHOD_ARG_TAG,0,${FLOAT_TYPE_TAG}323.3$/
+        assert _traceLines[22] ==~ /^$METHOD_ARG_TAG,0,${DOUBLE_TYPE_TAG}898.98$/
+        assert _traceLines[25] ==~ /^$METHOD_ARG_TAG,0,${BOOLEAN_TYPE_TAG}t$/
+        assert _traceLines[28] ==~ /^$METHOD_ARG_TAG,0,${STRING_TYPE_TAG}\d+$/
+        assert _traceLines[31] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
+
+        assert _traceLines[35] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
+        final def _objId = _traceLines[35].split(",")[2]
+        assert _traceLines[36] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
+
+        assert _traceLines[39] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[41] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[42] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
+        assert _traceLines[43] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+        assert _traceLines[45] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[46] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.lang.IllegalStateException$/
+        assert _traceLines[47] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
+
+        assert _traceLines[49] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[52] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[53] ==~ /^$METHOD_ARG_TAG,1,${INT_TYPE_TAG}9$/
+        assert _traceLines[56] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[57] ==~ /^$METHOD_ARG_TAG,1,${CHAR_TYPE_TAG}101$/
+        assert _traceLines[60] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[61] ==~ /^$METHOD_ARG_TAG,1,${FLOAT_TYPE_TAG}323.3$/
+        assert _traceLines[64] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[65] ==~ /^$METHOD_ARG_TAG,1,${DOUBLE_TYPE_TAG}898.98$/
+        assert _traceLines[68] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[69] ==~ /^$METHOD_ARG_TAG,1,${BOOLEAN_TYPE_TAG}t$/
+        assert _traceLines[72] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[73] ==~ /^$METHOD_ARG_TAG,1,${STRING_TYPE_TAG}\d+$/
+        assert _traceLines[76] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[77] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
     }
 
     @Test

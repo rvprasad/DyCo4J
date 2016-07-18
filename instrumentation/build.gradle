@@ -43,7 +43,7 @@ task copyLibs(type: Copy) {
 jar.dependsOn copyLibs
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.14'
+    gradleVersion = '2.14.1'
 }
 
 compileJava {

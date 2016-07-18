@@ -46,7 +46,8 @@ final class TracingClassVisitor extends ClassVisitor {
                                      final String[] exceptions) {
         final MethodVisitor _mv1 = cv.visitMethod(access, name, desc, signature, exceptions);
         if (_mv1 != null && shouldInstrumentMethod(name)) {
-            return new TracingMethodVisitor(access, name, desc, _mv1, this);
+            final TracingMethodVisitor _mv2 = new TracingMethodVisitor(access, name, desc, _mv1, this);
+            return name.equals("<init>") ? new InitTracingMethodVisitor(access, name, _mv2) : _mv2;
         } else
             return _mv1;
     }

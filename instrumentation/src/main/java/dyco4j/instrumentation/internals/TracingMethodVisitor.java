@@ -16,7 +16,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
-class TracingMethodVisitor extends MethodVisitor {
+final class TracingMethodVisitor extends MethodVisitor {
     private final String methodId;
     private final Label beginOutermostHandler;
     private final Method method;
@@ -35,12 +35,7 @@ class TracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitCode() {
-        this.mv.visitCode();
-
-        this.mv.visitLabel(this.beginOutermostHandler);
-
-        LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
-
+        emitLogMethodEntry();
         emitLogMethodArguments();
     }
 
@@ -117,7 +112,13 @@ class TracingMethodVisitor extends MethodVisitor {
         this.mv.visitMaxs(maxStack, maxLocals);
     }
 
-    private void emitLogMethodArguments() {
+    void emitLogMethodEntry() {
+        this.mv.visitCode();
+        this.mv.visitLabel(this.beginOutermostHandler);
+        LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
+    }
+
+    void emitLogMethodArguments() {
         if (this.cv.cmdLineOptions.traceMethodArgs) {
             // emit code to trace each arg
             int _position = 0;
