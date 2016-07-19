@@ -22,6 +22,7 @@ public class CLITestSubject {
         exerciseStaticFeatures();
         CLITestSubject _tmp1 = new CLITestSubject(new Object());
         _tmp1.exerciseInstanceFeatures();
+        _tmp1.additionalFeatures(0L, (byte) 1, (short) 2);
     }
 
     private static void exerciseStaticFeatures() {
@@ -88,6 +89,9 @@ public class CLITestSubject {
 
     private static String publishedStaticMethod7(Date date) {
         return date.toString();
+    }
+
+    private void additionalFeatures(long l, byte i, short i1) {
     }
 
     private void exerciseInstanceFeatures() {

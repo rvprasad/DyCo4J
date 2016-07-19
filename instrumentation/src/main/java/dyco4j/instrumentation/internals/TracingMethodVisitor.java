@@ -122,11 +122,15 @@ final class TracingMethodVisitor extends MethodVisitor {
         if (this.cv.cmdLineOptions.traceMethodArgs) {
             // emit code to trace each arg
             int _position = 0;
-            if (!this.isStatic)
-                _position += LoggingHelper.emitLogArgument(this.mv, _position, Type.getType(Object.class));
+            int _index = 0;
+            if (!this.isStatic) {
+                _index += LoggingHelper.emitLogArgument(this.mv, _position, _index, Type.getType(Object.class));
+                _position++;
+            }
 
             for (final Type _argType : this.method.getArgumentTypes()) {
-                _position += LoggingHelper.emitLogArgument(this.mv, _position, _argType);
+                _index += LoggingHelper.emitLogArgument(this.mv, _position, _index, _argType);
+                _position++;
             }
         }
     }

@@ -94,8 +94,9 @@ public class LoggingHelper {
                 LOGGER_INITIALIZER_INITIALIZE.getDescriptor(), false);
     }
 
-    public static int emitLogArgument(final MethodVisitor mv, final int index, final Type argType) {
-        mv.visitLdcInsn(index);
+    public static int emitLogArgument(final MethodVisitor mv, final int position, final int index,
+                                      final Type argType) {
+        mv.visitLdcInsn(position);
 
         int _typeLength = 1;
         switch (argType.getSort()) {
