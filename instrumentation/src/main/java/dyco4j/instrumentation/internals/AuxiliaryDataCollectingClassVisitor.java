@@ -8,6 +8,7 @@
 
 package dyco4j.instrumentation.internals;
 
+import dyco4j.utility.ClassNameHelper;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -27,11 +28,11 @@ final class AuxiliaryDataCollectingClassVisitor extends ClassVisitor {
     private static void collectMemberInfo(final int access, final String name, final String desc, final String owner,
                                           final Map<String, String> id2Name, final Map<String, String> shortName2Id,
                                           final String prefix) {
-        final String _shortName = Helper.createShortNameDesc(name, owner, desc);
+        final String _shortName = ClassNameHelper.createShortNameDesc(name, owner, desc);
         if (!shortName2Id.containsKey(_shortName)) {
             final String _tmp = prefix + String.valueOf(shortName2Id.size());
             shortName2Id.put(_shortName, _tmp);
-            final String _name = Helper.createNameDesc(name, owner, desc, (access & Opcodes.ACC_STATIC) != 0,
+            final String _name = ClassNameHelper.createNameDesc(name, owner, desc, (access & Opcodes.ACC_STATIC) != 0,
                     (access & Opcodes.ACC_PRIVATE) == 0);
             id2Name.put(_tmp, _name);
         }

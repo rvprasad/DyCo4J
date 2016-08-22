@@ -25,8 +25,15 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7'
 
     compile name: "$JVM_DYN_INFO_COLLECTION_LOGGING"
+    compile name: "$JVM_DYN_INFO_COLLECTION_UTILITY"
 
     testCompile 'junit:junit:4.12'
+}
+
+task copyUtility(type: Copy) {
+    from '../utility/build/libs/'
+    into './libs'
+    include("${JVM_DYN_INFO_COLLECTION_UTILITY}.jar")
 }
 
 task copyLogger(type: Copy) {
@@ -35,7 +42,9 @@ task copyLogger(type: Copy) {
     include("${JVM_DYN_INFO_COLLECTION_LOGGING}.jar")
 }
 
-compileJava.dependsOn copyLogger
+compileJava {
+    dependsOn copyLogger, copyUtility
+}
 
 task copyLibs(type: Copy) {
     into "$buildDir/libs"
