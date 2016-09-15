@@ -1,4 +1,3 @@
-// Apply the java plugin to add support for Java
 apply plugin: 'java'
 
 compileJava {
@@ -6,9 +5,13 @@ compileJava {
     targetCompatibility = 1.8
 }
 
-// In this section you declare where to find the dependencies of your project
 repositories {
     jcenter()
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.0'
 }
 
 version = '0.1'
