@@ -24,6 +24,9 @@ abstract class AbstractCLITest {
             "logging", "logging.properties")
     private static final Path ROOT_FOLDER = Paths.get("build", "tmp")
     private static final String LOGGING_LIBRARY = Paths.get("libs", "dyco4j-logging-0.5.1.jar").toString()
+    private static final CLASS_FILE_REGEX = /.*class$/
+    private static final TRACE_FILE_REGEX = /^trace.*gz/
+    private static final RESOURCE_FILE_REGEX = /test.txt/
     private static final Path TRACE_FOLDER = ROOT_FOLDER.resolve("traces")
     protected static final Path OUT_FOLDER = ROOT_FOLDER.resolve("out_classes")
     protected static final Path IN_FOLDER = ROOT_FOLDER.resolve("in_classes")
@@ -49,20 +52,21 @@ abstract class AbstractCLITest {
     @AfterClass
     static void deletePropertyAndClassFiles() {
         Files.delete(PROPERTY_FILE)
-        deleteFiles(IN_FOLDER, /.*class$/)
+        deleteFiles(IN_FOLDER, CLASS_FILE_REGEX)
+        deleteFiles(OUT_FOLDER, RESOURCE_FILE_REGEX)
     }
 
     protected static def copyClassToBeInstrumentedIntoInFolder(final Path pathToClass) {
-        final _trg = IN_FOLDER.resolve(pathToClass)
-        Files.createDirectories(_trg.parent)
-        final _testClassFolder = Paths.get("build", "classes", "test")
-        final _src = _testClassFolder.resolve(pathToClass)
-        Files.copy(_src, _trg)
+        copyFileIntoInFolder(pathToClass, Paths.get("build", "classes", "test"))
+    }
+
+    protected static def copyResourceIntoInFolder(final Path pathToClass) {
+        copyFileIntoInFolder(pathToClass, Paths.get("build", "resources", "test"))
     }
 
     protected static def instrumentCode(final clazz, final args) {
         clazz.main((String[]) args)
-        return Files.walk(OUT_FOLDER).filter { it.fileName ==~ /.*class$/ }.count()
+        return Files.walk(OUT_FOLDER).filter { it.fileName ==~ CLASS_FILE_REGEX }.count()
     }
 
     /**
@@ -78,13 +82,20 @@ abstract class AbstractCLITest {
                 _proc.inputStream.readLines(),
                 _proc.errorStream.readLines(),
                 getTraceLines())
-        deleteFiles(TRACE_FOLDER, /^trace.*gz/)
+        deleteFiles(TRACE_FOLDER, TRACE_FILE_REGEX)
         return _ret
+    }
+
+    private static def copyFileIntoInFolder(final Path pathToFile, final Path srcFolder) {
+        final _trg = IN_FOLDER.resolve(pathToFile)
+        Files.createDirectories(_trg.parent)
+        final _src = srcFolder.resolve(pathToFile)
+        Files.copy(_src, _trg)
     }
 
     private static def getTraceLines() {
         def _ret = []
-        TRACE_FOLDER.toFile().eachFileMatch(FileType.FILES, ~/^trace.*gz/) {
+        TRACE_FOLDER.toFile().eachFileMatch(FileType.FILES, ~TRACE_FILE_REGEX) {
             _ret << new GZIPInputStream(it.newInputStream()).readLines()
         }
         return _ret.flatten()
@@ -92,7 +103,8 @@ abstract class AbstractCLITest {
 
     @Before
     void setUpFixture() {
-        deleteFiles(OUT_FOLDER, /.*class$/)
+        deleteFiles(OUT_FOLDER, CLASS_FILE_REGEX)
+        deleteFiles(OUT_FOLDER, RESOURCE_FILE_REGEX)
     }
 
     protected static final class ExecutionResult {

@@ -12,13 +12,20 @@ import dyco4j.instrumentation.AbstractCLITest
 import org.junit.BeforeClass
 import org.junit.Test
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class CLITest extends AbstractCLITest {
+
+    private static final Path TEST_RESOURCE_PATH = Paths.get(OUT_FOLDER.toString(), 'dyco4j', 'instrumentation',
+            'entry', 'test.txt')
+
     @BeforeClass
     static void copyClassesToBeInstrumentedIntoInFolder() {
-        final _file = Paths.get("dyco4j", "instrumentation", "entry", "CLITestSubject.class")
-        copyClassToBeInstrumentedIntoInFolder(_file)
+        final _file1 = Paths.get("dyco4j", "instrumentation", "entry", "CLITestSubject.class")
+        copyClassToBeInstrumentedIntoInFolder(_file1)
+        final _file2 = Paths.get("dyco4j", "instrumentation", "entry", "test.txt")
+        copyResourceIntoInFolder(_file2)
     }
 
     private static final instrumentCode(args) {
@@ -31,22 +38,25 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withNoOptions() {
-        assert instrumentCode([]) == 0 : "No class should have been instrumented"
+        assert instrumentCode([]) == 0: "No class should have been instrumented"
+        assert !TEST_RESOURCE_PATH.toFile().exists()
     }
 
     @Test
     void withOnlyInFolderOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER]) == 0 : "No class should have been instrumented"
+        assert instrumentCode(["--in-folder", IN_FOLDER]) == 0: "No class should have been instrumented"
+        assert !TEST_RESOURCE_PATH.toFile().exists()
     }
 
     @Test
     void withOnlyOutFolderOption() {
-        assert instrumentCode(["--out-folder", OUT_FOLDER]) == 0 : "No class should have been instrumented"
+        assert instrumentCode(["--out-folder", OUT_FOLDER]) == 0: "No class should have been instrumented"
+        assert !TEST_RESOURCE_PATH.toFile().exists()
     }
 
     @Test
     void withOnlyInFolderAndOutFolderOptions() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1 :
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1:
                 "Class was not instrumented"
 
         final _executionResult = executeInstrumentedCode()
@@ -62,12 +72,13 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[2] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
         assert _traceLines[3] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
         assert _traceLines[4] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+        assert TEST_RESOURCE_PATH.toFile().exists()
     }
 
     @Test
     void withMethodNameRegexOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
-                               '.*Suffix.$']) == 1 : "Class was not instrumented"
+                               '.*Suffix.$']) == 1: "Class was not instrumented"
 
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -80,12 +91,13 @@ class CLITest extends AbstractCLITest {
 
         assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix1\(\)V/
         assert _traceLines[2] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+        assert TEST_RESOURCE_PATH.toFile().exists()
     }
 
     @Test
     void withMethodNameRegexAndOnlyAnnotatedTestsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
-                               '.*Suffix.$', '--only-annotated-tests']) == 1 : "Class was not instrumented"
+                               '.*Suffix.$', '--only-annotated-tests']) == 1: "Class was not instrumented"
 
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -97,12 +109,13 @@ class CLITest extends AbstractCLITest {
         Date.parseToStringDate(_traceLines[0])
 
         assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+        assert TEST_RESOURCE_PATH.toFile().exists()
     }
 
     @Test
     void withAnnotatedTestsOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               '--only-annotated-tests']) == 1 : "Class was not instrumented"
+                               '--only-annotated-tests']) == 1: "Class was not instrumented"
 
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -111,10 +124,10 @@ class CLITest extends AbstractCLITest {
         assert _traceLines.length == 3
 
         // should not raise exception
-        println(_traceLines)
         Date.parseToStringDate(_traceLines[0])
 
         assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
         assert _traceLines[2] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+        assert TEST_RESOURCE_PATH.toFile().exists()
     }
 }

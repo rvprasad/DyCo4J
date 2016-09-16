@@ -18,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -39,35 +41,62 @@ public final class CLI {
                                  .desc("Instrument only tests identified by annotations.").build());
 
         try {
-            final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
-            final String _methodNameRegex = _cmdLine.getOptionValue("method-name-regex", METHOD_NAME_REGEX);
-            final Path _srcRoot = Paths.get(_cmdLine.getOptionValue("in-folder"));
-            final Path _trgRoot = Paths.get(_cmdLine.getOptionValue("out-folder"));
-            final Stream<Path> _srcPaths = Files.walk(_srcRoot).filter(p -> p.toString().endsWith(".class"));
-            _srcPaths.parallel().forEach(_srcPath -> {
-                try {
-                    final Path _relativeSrcPath = _srcRoot.relativize(_srcPath);
-                    final Path _trgPath = _trgRoot.resolve(_relativeSrcPath);
-                    final Path _parent = _trgPath.getParent();
-                    if (!Files.exists(_parent))
-                        Files.createDirectories(_parent);
-
-                    if (Files.exists(_trgPath))
-                        System.out.println(MessageFormat.format("Overwriting {0}", _trgPath));
-                    else
-                        System.out.println(MessageFormat.format("Writing {0}", _trgPath));
-
-                    final byte[] _in = Files.readAllBytes(_srcPath);
-                    final byte[] _out =
-                            instrumentClass(_in, _methodNameRegex, _cmdLine.hasOption("only-annotated-tests"));
-                    Files.write(_trgPath, _out);
-                } catch (final IOException _ex) {
-                    throw new RuntimeException(_ex);
-                }
-            });
+            processCommandLine(new DefaultParser().parse(_options, args));
         } catch (final ParseException _ex) {
             new HelpFormatter().printHelp(CLI.class.getName(), _options);
         }
+    }
+
+    private static void processCommandLine(final CommandLine cmdLine) throws IOException {
+        final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
+        final Path _trgRoot = Paths.get(cmdLine.getOptionValue("out-folder"));
+
+        final Predicate<Path> _nonClassFileSelector = p -> !p.toString().endsWith(".class") && Files.isRegularFile(p);
+        final BiConsumer<Path, Path> _fileCopier = (srcPath, trgPath) -> {
+            try {
+                Files.copy(srcPath, trgPath);
+            } catch (final IOException _ex) {
+                throw new RuntimeException(_ex);
+            }
+        };
+        processFiles(_srcRoot, _trgRoot, _nonClassFileSelector, _fileCopier);
+
+        final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
+        final String _methodNameRegex = cmdLine.getOptionValue("method-name-regex", METHOD_NAME_REGEX);
+        final Boolean _onlyAnnotatedTests = cmdLine.hasOption("only-annotated-tests");
+        final BiConsumer<Path, Path> _classInstrumenter = (srcPath, trgPath) -> {
+            try {
+                final byte[] _in = Files.readAllBytes(srcPath);
+                final byte[] _out = instrumentClass(_in, _methodNameRegex, _onlyAnnotatedTests);
+                Files.write(trgPath, _out);
+            } catch (final IOException _ex) {
+                throw new RuntimeException(_ex);
+            }
+        };
+        processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
+    }
+
+    private static void processFiles(final Path srcRoot, final Path trgRoot, final Predicate<Path> pathSelector,
+                                     final BiConsumer<Path, Path> transformer) throws IOException {
+        final Stream<Path> _srcPaths = Files.walk(srcRoot).filter(pathSelector);
+        _srcPaths.parallel().forEach(_srcPath -> {
+            try {
+                final Path _relativeSrcPath = srcRoot.relativize(_srcPath);
+                final Path _trgPath = trgRoot.resolve(_relativeSrcPath);
+                final Path _parent = _trgPath.getParent();
+                if (!Files.exists(_parent))
+                    Files.createDirectories(_parent);
+
+                if (Files.exists(_trgPath))
+                    System.out.println(MessageFormat.format("Overwriting {0}", _trgPath));
+                else
+                    System.out.println(MessageFormat.format("Writing {0}", _trgPath));
+
+                transformer.accept(_srcPath, _trgPath);
+            } catch (final IOException _ex) {
+                throw new RuntimeException(_ex);
+            }
+        });
     }
 
     private static byte[] instrumentClass(final byte[] b, final String methodNameRegex,
