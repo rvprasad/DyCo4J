@@ -23,10 +23,10 @@ abstract class AbstractCLITest {
     private static final Path TEST_RESOURCE_FOLDER = Paths.get("build", "resources", "test")
     private static final Path LOGGING_PROPERTY_FILE = Paths.get(TEST_CLASS_FOLDER.toString(), "dyco4j",
             "instrumentation", "logging", "logging.properties")
-    private static final Path ROOT_FOLDER = Paths.get("build", "tmp")
-    private static final String LOGGING_LIBRARY = Paths.get("libs", "dyco4j-logging-0.5.1.jar").toString()
+    private static final String LOGGING_LIBRARY = System.getProperty('logging.jar').toString()
     private static final CLASS_FILE_REGEX = /.*class$/
     private static final TRACE_FILE_REGEX = /^trace.*gz/
+    private static final Path ROOT_FOLDER = Paths.get("build", "tmp")
     private static final Path TRACE_FOLDER = ROOT_FOLDER.resolve("traces")
     protected static final Path OUT_FOLDER = ROOT_FOLDER.resolve("out_classes")
     protected static final Path IN_FOLDER = ROOT_FOLDER.resolve("in_classes")
@@ -39,6 +39,7 @@ abstract class AbstractCLITest {
 
     @BeforeClass
     static void createFoldersAndCopyPropertyFile() {
+        println("--- $LOGGING_LIBRARY")
         final _propertyFolder = LOGGING_PROPERTY_FILE.getParent()
         assert Files.createDirectories(_propertyFolder) != null: "Could not create property folder $_propertyFolder"
         final _propertyFile = Files.createFile(LOGGING_PROPERTY_FILE)

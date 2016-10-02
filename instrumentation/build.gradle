@@ -62,6 +62,8 @@ compileJava {
 }
 
 test {
+    systemProperty 'logging.jar', "libs/${JVM_DYN_INFO_COLLECTION_LOGGING}.jar"
+
     exclude '**/CLITestSubject.class'
 }
 
