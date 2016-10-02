@@ -21,21 +21,21 @@ public class CLITestSubject {
         _t.nonTest();
     }
 
-    void test1() {
-    }
-
-    void testSuffix1() {
+    @Test
+    public void test2() {
     }
 
     @Test
-    void test2() {
+    public void testSuffix2() {
     }
 
-    @Test
-    void testSuffix2() {
+    private void test1() {
     }
 
-    void nonTest() {
+    private void testSuffix1() {
+    }
+
+    private void nonTest() {
     }
 
 }

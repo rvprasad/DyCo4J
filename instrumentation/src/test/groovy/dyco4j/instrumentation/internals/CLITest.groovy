@@ -28,6 +28,8 @@ class CLITest extends AbstractCLITest {
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file = Paths.get("dyco4j", "instrumentation", "internals", "CLITestSubject.class")
         copyClassToBeInstrumentedIntoInFolder(_file)
+        final _file2 = Paths.get("dyco4j", "instrumentation", "internals", RESOURCE_FILE_NAME)
+        copyResourceIntoInFolder(_file2)
     }
 
     private static assertNestingOfCallsIsValid(traceLines, numOfCalls) {
@@ -92,23 +94,22 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withNoOptions() {
-        assert instrumentCode([]) == 0: "No class should have been instrumented"
+        assert instrumentCode([]) == [0L, 0L]
     }
 
     @Test
     void withOnlyInFolderOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER]) == 0: "No class should have been instrumented"
+        assert instrumentCode(["--in-folder", IN_FOLDER]) == [0L, 0L]
     }
 
     @Test
     void withOnlyOutFolderOption() {
-        assert instrumentCode(["--out-folder", OUT_FOLDER]) == 0: "No class should have been instrumented"
+        assert instrumentCode(["--out-folder", OUT_FOLDER]) == [0L, 0L]
     }
 
     @Test
     void withOnlyInFolderAndOutFolderOptions() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == 1:
-                "Class was not instrumented"
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -131,7 +132,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withMethodNameRegexOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*exercise.*"]) == 1: "Class was not instrumented"
+                               "--methodNameRegex", ".*exercise.*"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -152,8 +153,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withMethodNameRegexAndTraceArrayAccessOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*exerciseStatic.*", "--traceArrayAccess"]) == 1:
-                "Class was not instrumented"
+                               "--methodNameRegex", ".*exerciseStatic.*", "--traceArrayAccess"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -174,8 +174,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withMethodNameRegexAndTraceFieldAccessOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*exerciseStatic.*", "--traceFieldAccess"]) == 1:
-                "Class was not instrumented"
+                               "--methodNameRegex", ".*exerciseStatic.*", "--traceFieldAccess"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -195,8 +194,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withMethodNameRegexAndTraceMethodArgsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*publishedStatic.*", "--traceMethodArgs"]) == 1:
-                "Class was not instrumented"
+                               "--methodNameRegex", ".*publishedStatic.*", "--traceMethodArgs"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -223,8 +221,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withMethodNameRegexAndTraceMethodReturnValueOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*publishedStatic.*", "--traceMethodReturnValue"]) == 1:
-                "Class was not instrumented"
+                               "--methodNameRegex", ".*publishedStatic.*", "--traceMethodReturnValue"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -250,8 +247,7 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withTraceArrayAccessOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceArrayAccess"]) == 1:
-                "Class was not instrumented"
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceArrayAccess"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -283,8 +279,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withTraceArrayAccessAndTraceFieldAccessOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceArrayAccess",
-                               "--traceFieldAccess"]) == 1:
-                "Class was not instrumented"
+                               "--traceFieldAccess"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -329,8 +324,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withTraceArrayAccessAndTraceMethodArgsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--traceArrayAccess", "--traceMethodArgs"]) == 1:
-                "Class was not instrumented"
+                               "--traceArrayAccess", "--traceMethodArgs"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -399,8 +393,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withTraceArrayAccessAndTraceMethodReturnValueOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--traceArrayAccess", "--traceMethodReturnValue"]) == 1:
-                "Class was not instrumented"
+                               "--traceArrayAccess", "--traceMethodReturnValue"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -447,8 +440,7 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withTraceFieldAccessOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceFieldAccess"]) == 1:
-                "Class was not instrumented"
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceFieldAccess"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -487,8 +479,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withTraceFieldAccessAndTraceMethodArgsOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceFieldAccess",
-                               "--traceMethodArgs"]) == 1:
-                "Class was not instrumented"
+                               "--traceMethodArgs"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -563,8 +554,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withTraceFieldAccessAndTraceMethodReturnValueOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--traceFieldAccess", "--traceMethodReturnValue"]) == 1:
-                "Class was not instrumented"
+                               "--traceFieldAccess", "--traceMethodReturnValue"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -618,8 +608,7 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withTraceMethodArgsOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceMethodArgs"]) == 1:
-                "Class was not instrumented"
+        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceMethodArgs"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -679,7 +668,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withTraceMethodArgsAndTraceMethodReturnValueOptions() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--traceMethodArgs",
-                               "--traceMethodReturnValue"]) == 1: "Class was not instrumented"
+                               "--traceMethodReturnValue"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -753,7 +742,7 @@ class CLITest extends AbstractCLITest {
     @Test
     void withTraceMethodReturnValueOption() {
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--traceMethodReturnValue"]) == 1:
+                               "--traceMethodReturnValue"]) == [1L, 1L]
                 "Class was not instrumented"
 
         final ExecutionResult _executionResult = executeInstrumentedCode()

@@ -23,9 +23,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dyco4j.instrumentation.entry.CLI.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
@@ -58,32 +61,33 @@ public final class CLI {
         }
     }
 
-    private static void processCommandLine(CommandLine cmdLine) throws IOException {
+    private static void processCommandLine(final CommandLine cmdLine) throws IOException {
+        final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
+        final Path _trgRoot = Paths.get(cmdLine.getOptionValue("out-folder"));
+
+        final Predicate<Path> _nonClassFileSelector = p -> !p.toString().endsWith(".class") && Files.isRegularFile(p);
+        final BiConsumer<Path, Path> _fileCopier = (srcPath, trgPath) -> {
+            try {
+                Files.copy(srcPath, trgPath);
+            } catch (final IOException _ex) {
+                throw new RuntimeException(_ex);
+            }
+        };
+        processFiles(_srcRoot, _trgRoot, _nonClassFileSelector, _fileCopier);
+
         final CommandLineOptions _cmdLineOptions =
                 new CommandLineOptions(cmdLine.hasOption("traceArrayAccess"), cmdLine.hasOption("traceFieldAccess"),
-                                       cmdLine.hasOption("traceMethodArgs"),
-                                       cmdLine.hasOption("traceMethodReturnValue"));
-        final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
+                        cmdLine.hasOption("traceMethodArgs"),
+                        cmdLine.hasOption("traceMethodReturnValue"));
         final Set<Path> _filenames = getFilenames(_srcRoot);
         final AuxiliaryData _auxiliaryData = AuxiliaryData.loadData(AUXILIARY_DATA_FILE_NAME);
         getMemberId2NameMapping(_filenames, _auxiliaryData, _cmdLineOptions.traceFieldAccess);
 
+        final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
         final String _methodNameRegex = cmdLine.getOptionValue("methodNameRegex", METHOD_NAME_REGEX);
-        final Path _trgRoot = Paths.get(cmdLine.getOptionValue("out-folder"));
-        _filenames.parallelStream().forEach(_srcPath -> {
+        final BiConsumer<Path, Path> _classInstrumenter = (srcPath, trgPath) -> {
             try {
-                final Path _relativeSrcPath = _srcRoot.relativize(_srcPath);
-                final Path _trgPath = _trgRoot.resolve(_relativeSrcPath);
-                final Path _parent = _trgPath.getParent();
-                if (!Files.exists(_parent))
-                    Files.createDirectories(_parent);
-
-                if (Files.exists(_trgPath))
-                    System.out.println(MessageFormat.format("Overwriting {0}", _trgPath));
-                else
-                    System.out.println(MessageFormat.format("Writing {0}", _trgPath));
-
-                final ClassReader _cr = new ClassReader(Files.readAllBytes(_srcPath));
+                final ClassReader _cr = new ClassReader(Files.readAllBytes(srcPath));
                 final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_FRAMES);
                 final Map<String, String> _shortFieldName2Id =
                         Collections.unmodifiableMap(_auxiliaryData.shortFieldName2Id);
@@ -94,17 +98,17 @@ public final class CLI {
                 final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
                 final ClassVisitor _cv2 =
                         new TracingClassVisitor(_cv1, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
-                                                _methodNameRegex, _cmdLineOptions);
+                                _methodNameRegex, _cmdLineOptions);
                 _cr.accept(_cv2, 0);
 
-                Files.write(_trgPath, _cw.toByteArray());
+                Files.write(trgPath, _cw.toByteArray());
             } catch (final IOException _ex) {
                 throw new RuntimeException(_ex);
             }
-        });
+        };
+        processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
         AuxiliaryData.saveData(_auxiliaryData, AUXILIARY_DATA_FILE_NAME);
     }
-
 
     private static Set<Path> getFilenames(final Path folder) throws IOException {
         final Stream<Path> _tmp1 = Files.walk(folder).filter(p -> p.toString().endsWith(".class"));
