@@ -62,7 +62,7 @@ test {
 }
 
 task entryJar(type: Jar) {
-    dependsOn classes, copyLibs, test
+    dependsOn copyLibs, test
     baseName 'dyco4j'
     appendix 'entry-cli'
     from sourceSets.main.output
@@ -73,7 +73,7 @@ task entryJar(type: Jar) {
 }
 
 task internalsJar(type: Jar) {
-    dependsOn classes, copyLibs, test
+    dependsOn copyLibs, test
     baseName 'dyco4j'
     appendix 'internals-cli'
     from sourceSets.main.output
@@ -83,8 +83,37 @@ task internalsJar(type: Jar) {
     }
 }
 
-assemble {
-    dependsOn entryJar, internalsJar
+task entryFatJar(type: Jar) {
+    manifest.from entryJar.manifest
+    baseName 'dyco4j'
+    appendix 'entry'
+    classifier 'all'
+    from {
+        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    with entryJar
+}
+
+task internalsFatJar(type: Jar) {
+    manifest.from internalsJar.manifest
+    baseName 'dyco4j'
+    appendix 'internals'
+    classifier 'all'
+    from {
+        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    with internalsJar
+}
+
+task fatJars() {
+    dependsOn entryFatJar, internalsFatJar
+}
+
+artifacts {
+    archives entryJar
+    archives internalsJar
 }
 
 // Apply jacoco plugin to add support for code coverage
