@@ -5,12 +5,14 @@ repositories {
         dirs 'libs'
     }
 }
+
+version = '0.6'
+
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+jar {
+    enabled = false
 }
 
 // Apply the groovy plugin to add support for Groovy
@@ -21,7 +23,7 @@ dependencies {
     compile 'org.ow2.asm:asm:5.1'
     compile 'org.ow2.asm:asm-commons:5.1'
     compile 'commons-cli:commons-cli:1.3.1'
-    compile 'org.codehaus.groovy:groovy-all:2.4.6'
+    compile 'org.codehaus.groovy:groovy-all:2.4.7'
     compile 'com.google.code.gson:gson:2.7'
 
     compile name: "$JVM_DYN_INFO_COLLECTION_LOGGING"
@@ -43,6 +45,9 @@ task copyLogger(type: Copy) {
 }
 
 compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    options.compilerArgs << '-Xlint'
     dependsOn copyLogger, copyUtility
 }
 
@@ -51,20 +56,35 @@ task copyLibs(type: Copy) {
     from configurations.runtime
 }
 
-jar.dependsOn copyLibs
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.1'
-}
-
-compileJava {
-    options.compilerArgs << '-Xlint'
-}
-
 test {
     systemProperty 'logging.jar', "libs/${JVM_DYN_INFO_COLLECTION_LOGGING}.jar"
-
     exclude '**/CLITestSubject.class'
+}
+
+task entryJar(type: Jar) {
+    dependsOn classes, copyLibs, test
+    baseName 'dyco4j'
+    appendix 'entry-cli'
+    from sourceSets.main.output
+    exclude '**/internals/**'
+    manifest {
+        attributes 'Main-Class': 'dyco4j/instrumentation/entry/CLI'
+    }
+}
+
+task internalsJar(type: Jar) {
+    dependsOn classes, copyLibs, test
+    baseName 'dyco4j'
+    appendix 'internals-cli'
+    from sourceSets.main.output
+    exclude '**/entry/**'
+    manifest {
+        attributes 'Main-Class': 'dyco4j/instrumentation/internals/CLI'
+    }
+}
+
+assemble {
+    dependsOn entryJar, internalsJar
 }
 
 // Apply jacoco plugin to add support for code coverage
@@ -77,4 +97,7 @@ jacocoTestReport {
     }
 }
 
-version = '0.6'
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.1'
+}
+
