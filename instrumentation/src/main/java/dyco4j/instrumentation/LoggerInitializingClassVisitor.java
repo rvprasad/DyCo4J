@@ -8,7 +8,6 @@
 
 package dyco4j.instrumentation;
 
-import dyco4j.LoggingHelper;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;

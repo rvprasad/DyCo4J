@@ -77,6 +77,7 @@ task internalsJar(type: Jar) {
     baseName 'dyco4j'
     appendix 'internals-cli'
     from sourceSets.main.output
+    exclude '**/entry/**'
     manifest {
         attributes 'Main-Class': 'dyco4j/instrumentation/internals/CLI'
     }

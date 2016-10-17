@@ -8,7 +8,7 @@
 
 package dyco4j.instrumentation.entry;
 
-import dyco4j.LoggingHelper;
+import dyco4j.instrumentation.LoggingHelper;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 

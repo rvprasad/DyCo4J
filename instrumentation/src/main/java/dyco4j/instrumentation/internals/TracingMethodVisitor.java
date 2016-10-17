@@ -8,7 +8,7 @@
 
 package dyco4j.instrumentation.internals;
 
-import dyco4j.LoggingHelper;
+import dyco4j.instrumentation.LoggingHelper;
 import dyco4j.instrumentation.logging.Logger;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;

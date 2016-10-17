@@ -5,7 +5,8 @@
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
  */
-package dyco4j;
+
+package dyco4j.instrumentation;
 
 import dyco4j.instrumentation.logging.Logger;
 import dyco4j.instrumentation.logging.LoggerInitializer;
@@ -87,11 +88,6 @@ public class LoggingHelper {
             default:
                 throw new RuntimeException("Unknown type" + type.getInternalName());
         }
-    }
-
-    public static void emitInsnToLoadAndInitializeLogger(final MethodVisitor mv) {
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER_INITIALIZER, LOGGER_INITIALIZER_INITIALIZE.getName(),
-                LOGGER_INITIALIZER_INITIALIZE.getDescriptor(), false);
     }
 
     public static int emitLogArgument(final MethodVisitor mv, final int position, final int index,
@@ -205,6 +201,11 @@ public class LoggingHelper {
         } else {
             mv.visitInsn(Opcodes.SWAP);
         }
+    }
+
+    static void emitInsnToLoadAndInitializeLogger(final MethodVisitor mv) {
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER_INITIALIZER, LOGGER_INITIALIZER_INITIALIZE.getName(),
+                LOGGER_INITIALIZER_INITIALIZE.getDescriptor(), false);
     }
 
     private static void emitInvokeLog(final MethodVisitor mv, final Method method) {

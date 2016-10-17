@@ -28,7 +28,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dyco4j.instrumentation.entry.CLI.processFiles;
+import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
