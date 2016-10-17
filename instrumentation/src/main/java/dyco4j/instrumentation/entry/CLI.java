@@ -91,7 +91,7 @@ public final class CLI {
             try {
                 final byte[] _bytecode = Files.readAllBytes(srcPath);
                 final ClassReader _cr = new ClassReader(_bytecode);
-                final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_FRAMES);
+                final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
                 final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
                 final ClassVisitor _cv2 = new TracingClassVisitor(_cv1, _methodNameRegex, _onlyAnnotatedTests);
                 _cr.accept(_cv2, 0);
