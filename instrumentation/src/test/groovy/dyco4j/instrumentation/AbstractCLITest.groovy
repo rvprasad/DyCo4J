@@ -76,7 +76,7 @@ abstract class AbstractCLITest {
 
     /**
      * execute instrumented code in a different process
-     * @return a quadruple of
+     * @return a quadruple of process return status, standard output, standard error, and generated trace
      */
     protected static def executeInstrumentedCode(final Class clazz) {
         final _path = Paths.get(System.getProperty("java.home"), "bin", "java").toString()

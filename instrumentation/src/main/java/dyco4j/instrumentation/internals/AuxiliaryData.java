@@ -9,9 +9,13 @@
 package dyco4j.instrumentation.internals;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.*;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,8 +29,7 @@ final class AuxiliaryData {
     static AuxiliaryData loadData(final Path dataFile) throws IOException {
         if (Files.exists(dataFile)) {
             try (final Reader _rdr = new FileReader(dataFile.toFile())) {
-                final Gson _gson = new Gson();
-                return _gson.fromJson(_rdr, AuxiliaryData.class);
+                return new Gson().fromJson(_rdr, AuxiliaryData.class);
             }
         } else
             return new AuxiliaryData();
@@ -37,7 +40,7 @@ final class AuxiliaryData {
             Files.move(dataFile, Paths.get(dataFile.toString() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
 
         try (final Writer _wtr = new FileWriter(dataFile.toFile())) {
-            new Gson().toJson(staticData, _wtr);
+            new GsonBuilder().setPrettyPrinting().create().toJson(staticData, _wtr);
         }
     }
 
