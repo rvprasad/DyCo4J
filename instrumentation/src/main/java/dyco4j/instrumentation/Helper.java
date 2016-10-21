@@ -8,6 +8,9 @@
 
 package dyco4j.instrumentation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +20,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class Helper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Helper.class);
     private Helper() {
     }
 
@@ -32,9 +36,9 @@ public class Helper {
                     Files.createDirectories(_parent);
 
                 if (Files.exists(_trgPath))
-                    System.out.println(MessageFormat.format("Overwriting {0}", _trgPath));
+                    LOGGER.info(MessageFormat.format("Overwriting {0}", _trgPath));
                 else
-                    System.out.println(MessageFormat.format("Writing {0}", _trgPath));
+                    LOGGER.info(MessageFormat.format("Writing {0}", _trgPath));
 
                 transformer.accept(_srcPath, _trgPath);
             } catch (final IOException _ex) {

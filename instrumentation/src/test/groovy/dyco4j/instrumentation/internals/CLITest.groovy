@@ -9,21 +9,14 @@
 package dyco4j.instrumentation.internals
 
 import dyco4j.instrumentation.AbstractCLITest
-import org.junit.After
 import org.junit.BeforeClass
 import org.junit.Test
 
-import java.nio.file.Files
 import java.nio.file.Paths
 
 import static dyco4j.instrumentation.logging.Logger.*
 
 class CLITest extends AbstractCLITest {
-    private static final GET_ARRAY = ArrayAction.GETA.toString()
-    private static final PUT_ARRAY = ArrayAction.PUTA.toString()
-    private static final GET_FIELD = FieldAction.GETF.toString()
-    private static final PUT_FIELD = FieldAction.PUTF.toString()
-
     @BeforeClass
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file = Paths.get("dyco4j", "instrumentation", "internals", "CLITestSubject.class")
@@ -32,64 +25,12 @@ class CLITest extends AbstractCLITest {
         copyResourceIntoInFolder(_file2)
     }
 
-    private static assertNestingOfCallsIsValid(traceLines, numOfCalls) {
-        final _stack = []
-        def _cnt = 0
-        for (String l in traceLines) {
-            if (l =~ /$METHOD_ENTRY_TAG/) {
-                _stack << l
-            } else if (l =~ /$METHOD_EXIT_TAG/) {
-                final String _tmp1 = _stack.pop()
-                assert _tmp1.split(',')[1] == l.split(',')[1]
-                _cnt++
-            }
-        }
-        assert !_stack
-        assert _cnt == numOfCalls: "${traceLines}"
-    }
-
-    private static assertTraceLengthIs(_executionResult, _numOfLines) {
-        assert _executionResult.traceLines.size == _numOfLines
-    }
-
-    private static commonCheck(String[] traceLines, numOfCalls, numOfArgLogs = 0, numOfReturnLogs = 0,
-                               numOfExceptionLogs = 0, numOfGetArrayLogs = 0, numOfPutArrayLogs = 0,
-                               numOfGetFieldLogs = 0, numOfPutFieldLogs = 0) {
-        // should not raise exception
-        Date.parseToStringDate(traceLines[0])
-
-        final _numOfLines = traceLines.length - 1
-        assertNestingOfCallsIsValid(traceLines[1.._numOfLines], numOfCalls)
-
-        assert traceLines.count { it =~ /^$METHOD_ARG_TAG/ } == numOfArgLogs
-        assert traceLines.count { it =~ /^$METHOD_RETURN_TAG/ } == numOfReturnLogs
-        assert traceLines.count { it =~ /^$METHOD_EXCEPTION_TAG/ } == numOfExceptionLogs
-        assert traceLines.count { it =~ /^$GET_ARRAY/ } == numOfGetArrayLogs
-        assert traceLines.count { it =~ /^$PUT_ARRAY/ } == numOfPutArrayLogs
-        assert traceLines.count { it =~ /^$GET_FIELD/ } == numOfGetFieldLogs
-        assert traceLines.count { it =~ /^$PUT_FIELD/ } == numOfPutFieldLogs
+    protected static final instrumentCode(args) {
+        instrumentCode(CLI, args)
     }
 
     private static executeInstrumentedCode() {
         executeInstrumentedCode(CLITestSubject)
-    }
-
-    private static instrumentCode(args) {
-        instrumentCode(CLI, args)
-    }
-
-    private static removeThreadIdFromLog(final traceLines) {
-        traceLines.collect { it.replaceAll(/^\d+,/, "") }
-    }
-
-    @After
-    final void deleteAuxiliaryFiles() {
-        final _tmp1 = Paths.get("auxiliary_data.json")
-        if (Files.exists(_tmp1))
-            Files.delete(_tmp1)
-        final _tmp2 = Paths.get("auxiliary_data.json.bak")
-        if (Files.exists(_tmp2))
-            Files.delete(_tmp2)
     }
 
     @Test
@@ -117,7 +58,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 55)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 0, 0, 4)
+        checkFreqOfLogs(_traceLines, 25, 0, 0, 4)
 
         assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
@@ -140,7 +81,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 5)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 2)
+        checkFreqOfLogs(_traceLines, 2)
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
@@ -161,7 +102,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 5)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 1, 0, 0, 0, 1, 1)
+        checkFreqOfLogs(_traceLines, 1, 0, 0, 0, 1, 1)
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
@@ -182,7 +123,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 5)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 1, 0, 0, 0, 0, 0, 1, 1)
+        checkFreqOfLogs(_traceLines, 1, 0, 0, 0, 0, 0, 1, 1)
 
         final _tmp1 = _traceLines[1].split(',')[1]
         assert _traceLines[1] ==~ /^$METHOD_ENTRY_TAG,$_tmp1$/
@@ -202,7 +143,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 30)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 10, 7, 0, 2)
+        checkFreqOfLogs(_traceLines, 10, 7, 0, 2)
 
         assert _traceLines[2] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[3] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
@@ -229,7 +170,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 30)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 10, 0, 7, 2)
+        checkFreqOfLogs(_traceLines, 10, 0, 7, 2)
 
         assert _traceLines[2] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[3] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
@@ -255,7 +196,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 59)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 0, 0, 4, 2, 2)
+        checkFreqOfLogs(_traceLines, 25, 0, 0, 4, 2, 2)
 
         assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
@@ -287,7 +228,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 65)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 0, 0, 4, 2, 2, 4, 2)
+        checkFreqOfLogs(_traceLines, 25, 0, 0, 4, 2, 2, 4, 2)
 
         assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
@@ -332,7 +273,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 91)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 32, 0, 4, 2, 2)
+        checkFreqOfLogs(_traceLines, 25, 32, 0, 4, 2, 2)
 
         assert _traceLines[2] ==~ /^$METHOD_ARG_TAG,0,$ARRAY_TYPE_TAG\d+$/
         assert _traceLines[5] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
@@ -353,7 +294,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[33].split(',')[2] == _traceLines[34].split(',')[2]
 
         assert _traceLines[37] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
-        final def _objId = _traceLines[37].split(",")[2]
+        final _objId = _traceLines[37].split(",")[2]
         assert _traceLines[38] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
 
         assert _traceLines[41] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
@@ -401,7 +342,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 73)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 0, 14, 4, 2, 2)
+        checkFreqOfLogs(_traceLines, 25, 0, 14, 4, 2, 2)
 
         assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
@@ -448,7 +389,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 61)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 0, 0, 4, 0, 0, 4, 2)
+        checkFreqOfLogs(_traceLines, 25, 0, 0, 4, 0, 0, 4, 2)
 
         assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
@@ -487,7 +428,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 93)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 32, 0, 4, 0, 0, 4, 2)
+        checkFreqOfLogs(_traceLines, 25, 32, 0, 4, 0, 0, 4, 2)
 
         assert _traceLines[2] ==~ /^$METHOD_ARG_TAG,0,$ARRAY_TYPE_TAG\d+$/
         assert _traceLines[5] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
@@ -510,7 +451,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[35] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
 
         assert _traceLines[38] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
-        final def _objId = _traceLines[38].split(",")[2]
+        final _objId = _traceLines[38].split(",")[2]
         assert _traceLines[39] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
 
         assert _traceLines[42] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
@@ -562,7 +503,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 75)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 0, 14, 4, 0, 0, 4, 2)
+        checkFreqOfLogs(_traceLines, 25, 0, 14, 4, 0, 0, 4, 2)
 
         assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
@@ -616,7 +557,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 87)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 32, 0, 4)
+        checkFreqOfLogs(_traceLines, 25, 32, 0, 4)
 
         assert _traceLines[2] ==~ /^$METHOD_ARG_TAG,0,$ARRAY_TYPE_TAG\d+$/
         assert _traceLines[5] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
@@ -633,7 +574,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[31] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
 
         assert _traceLines[35] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
-        final def _objId = _traceLines[35].split(",")[2]
+        final _objId = _traceLines[35].split(",")[2]
         assert _traceLines[36] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
 
         assert _traceLines[39] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
@@ -676,7 +617,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 101)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 32, 14, 4)
+        checkFreqOfLogs(_traceLines, 25, 32, 14, 4)
 
         assert _traceLines[2] ==~ /^$METHOD_ARG_TAG,0,$ARRAY_TYPE_TAG\d+$/
         assert _traceLines[5] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
@@ -700,7 +641,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[38] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
 
         assert _traceLines[42] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
-        final def _objId = _traceLines[42].split(",")[2]
+        final _objId = _traceLines[42].split(",")[2]
         assert _traceLines[43] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
 
         assert _traceLines[46] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
@@ -751,7 +692,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 69)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        commonCheck(_traceLines, 25, 0, 14, 4)
+        checkFreqOfLogs(_traceLines, 25, 0, 14, 4)
 
         assert _traceLines[4] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.io.IOException$/
         assert _traceLines[5] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/

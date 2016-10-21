@@ -13,8 +13,16 @@ import org.apache.commons.cli.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,29 +43,55 @@ public final class CLI {
     final static int ASM_VERSION = ASM5;
     private static final Path AUXILIARY_DATA_FILE_NAME = Paths.get("auxiliary_data.json");
     private static final String METHOD_NAME_REGEX = ".*";
+    private static final Logger LOGGER = LoggerFactory.getLogger(CLI.class);
 
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
         _options.addOption(Option.builder().longOpt("in-folder").required().hasArg(true)
-                                 .desc("Folder containing the classes (as descendants) to be instrumented.").build());
+                .desc("Folders containing the classes to be instrumented.").build());
         _options.addOption(Option.builder().longOpt("out-folder").required().hasArg(true)
-                                 .desc("Folder containing the classes (as descendants) with instrumentation.").build());
-        final String _msg = MessageFormat
-                .format("Regex identifying the methods to be instrumented. Default: {0}.", METHOD_NAME_REGEX);
+                .desc("Folder containing the classes (as descendants) with instrumentation.").build());
+        _options.addOption(Option.builder().longOpt("classpath-config").hasArg(true)
+                .desc("File containing class path (1 entry per line) used by classes to be instrumented.")
+                .build());
+        final String _msg = MessageFormat.format("Regex identifying the methods to be instrumented. Default: {0}.",
+                METHOD_NAME_REGEX);
         _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg(true).desc(_msg).build());
         _options.addOption(Option.builder().longOpt("traceFieldAccess").hasArg(false)
-                                 .desc("Instrument classes to trace field access.").build());
+                .desc("Instrument classes to trace field access.").build());
         _options.addOption(Option.builder().longOpt("traceArrayAccess").hasArg(false)
-                                 .desc("Instrument classes to trace array access.").build());
+                .desc("Instrument classes to trace array access.").build());
         _options.addOption(Option.builder().longOpt("traceMethodArgs").hasArg(false)
-                                 .desc("Instrument classes to trace method arguments.").build());
+                .desc("Instrument classes to trace method arguments.").build());
         _options.addOption(Option.builder().longOpt("traceMethodReturnValue").hasArg(false)
-                                 .desc("Instrument classes to trace method return values.").build());
+                .desc("Instrument classes to trace method return values.").build());
 
         try {
-            processCommandLine(new DefaultParser().parse(_options, args));
+            final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
+            addToClassPath(_cmdLine.getOptionValue("classpath-config"));
+            processCommandLine(_cmdLine);
         } catch (final ParseException _ex1) {
             new HelpFormatter().printHelp(CLI.class.getName(), _options);
+        }
+    }
+
+    private static void addToClassPath(final String classpathConfig) throws IOException {
+        if (classpathConfig != null) {
+            try {
+                final URLClassLoader _urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+                final Class<URLClassLoader> _urlClass = URLClassLoader.class;
+                for (final String _s : Files.readAllLines(Paths.get(classpathConfig))) {
+                    final File _f = new File(_s);
+                    final URL _u = _f.toURI().toURL();
+                    final Method _method = _urlClass.getDeclaredMethod("addURL", URL.class);
+                    _method.setAccessible(true);
+                    _method.invoke(_urlClassLoader, _u);
+                    LOGGER.info(MessageFormat.format("Adding {0} to classpath", _s));
+                }
+            } catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException |
+                    MalformedURLException _e) {
+                throw new RuntimeException(_e);
+            }
         }
     }
 
@@ -99,7 +133,7 @@ public final class CLI {
                 final ClassVisitor _cv2 =
                         new TracingClassVisitor(_cv1, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
                                 _methodNameRegex, _cmdLineOptions);
-                _cr.accept(_cv2, 0);
+                _cr.accept(_cv2, ClassReader.SKIP_FRAMES);
 
                 Files.write(trgPath, _cw.toByteArray());
             } catch (final IOException _ex) {
@@ -107,6 +141,7 @@ public final class CLI {
             }
         };
         processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
+
         AuxiliaryData.saveData(_auxiliaryData, AUXILIARY_DATA_FILE_NAME);
     }
 
