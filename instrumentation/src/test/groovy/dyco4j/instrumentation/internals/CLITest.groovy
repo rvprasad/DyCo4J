@@ -8,6 +8,7 @@
 
 package dyco4j.instrumentation.internals
 
+import com.google.gson.Gson
 import dyco4j.instrumentation.AbstractCLITest
 import org.junit.BeforeClass
 import org.junit.Test
@@ -31,6 +32,23 @@ class CLITest extends AbstractCLITest {
 
     private static executeInstrumentedCode() {
         executeInstrumentedCode(CLITestSubject)
+    }
+
+    private static assertAllAndOnlyMatchingMethodsAreTraced(traceLines, methodNameRegex) {
+        def _methodIds = traceLines.findAll { it ==~ /^$METHOD_ENTRY_TAG,.*/ }.collect { it.split(',')[1] }
+        _methodIds += traceLines.findAll { it ==~ /^$METHOD_EXIT_TAG,.*/ }.collect { it.split(',')[1] }
+
+        new File("auxiliary_data.json").withReader { rdr ->
+            final _aux_data = new Gson().fromJson(rdr, AuxiliaryData.class)
+
+            _methodIds.each {
+                assert _aux_data.methodId2Name[it] ==~ methodNameRegex
+            }
+
+            _aux_data.methodId2Name.each { methodId, name ->
+                assert !(name ==~ methodNameRegex) || methodId in _methodIds
+            }
+        }
     }
 
     @Test
@@ -72,8 +90,9 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withMethodNameRegexOption() {
+        final _methodNameRegex = ".*exercise.*"
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*exercise.*"]) == [1L, 1L]
+                               "--methodNameRegex", _methodNameRegex]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -89,12 +108,15 @@ class CLITest extends AbstractCLITest {
         final _tmp2 = _traceLines[3].split(',')[1]
         assert _traceLines[3] ==~ /^$METHOD_ENTRY_TAG,$_tmp2$/
         assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp2,N$/
+
+        assertAllAndOnlyMatchingMethodsAreTraced(_traceLines, _methodNameRegex)
     }
 
     @Test
     void withMethodNameRegexAndTraceArrayAccessOptions() {
+        final _methodNameRegex = ".*exerciseStatic.*"
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*exerciseStatic.*", "--traceArrayAccess"]) == [1L, 1L]
+                               "--methodNameRegex", _methodNameRegex, "--traceArrayAccess"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -110,12 +132,15 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[3] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$NULL_VALUE$/
         assert _traceLines[2].split(',')[2] == _traceLines[3].split(',')[2]
         assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp1,N$/
+
+        assertAllAndOnlyMatchingMethodsAreTraced(_traceLines, _methodNameRegex)
     }
 
     @Test
     void withMethodNameRegexAndTraceFieldAccessOptions() {
+        final _methodNameRegex = ".*exerciseStatic.*"
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*exerciseStatic.*", "--traceFieldAccess"]) == [1L, 1L]
+                               "--methodNameRegex", _methodNameRegex, "--traceFieldAccess"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -130,12 +155,15 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[2] ==~ /^$PUT_FIELD,f\d,,${INT_TYPE_TAG}4$/
         assert _traceLines[3] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[4] ==~ /^$METHOD_EXIT_TAG,$_tmp1,N$/
+
+        assertAllAndOnlyMatchingMethodsAreTraced(_traceLines, _methodNameRegex)
     }
 
     @Test
     void withMethodNameRegexAndTraceMethodArgsOptions() {
+        final _methodNameRegex = ".*publishedStatic.*"
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*publishedStatic.*", "--traceMethodArgs"]) == [1L, 1L]
+                               "--methodNameRegex", _methodNameRegex, "--traceMethodArgs"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -157,12 +185,15 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[22] ==~ /^$METHOD_ARG_TAG,0,${BOOLEAN_TYPE_TAG}t$/
         assert _traceLines[25] ==~ /^$METHOD_ARG_TAG,0,${STRING_TYPE_TAG}\d+$/
         assert _traceLines[28] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
+
+        assertAllAndOnlyMatchingMethodsAreTraced(_traceLines, _methodNameRegex)
     }
 
     @Test
     void withMethodNameRegexAndTraceMethodReturnValueOptions() {
+        final _methodNameRegex = ".*publishedInstance.*"
         assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--methodNameRegex", ".*publishedStatic.*", "--traceMethodReturnValue"]) == [1L, 1L]
+                               "--methodNameRegex", _methodNameRegex, "--traceMethodReturnValue"]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -177,13 +208,15 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[5] ==~ /^$METHOD_EXCEPTION_TAG,$THROWABLE_TYPE_TAG\d+,java.lang.IllegalStateException$/
         assert _traceLines[6] ==~ /^$METHOD_EXIT_TAG,m\d+,E$/
 
-        assert _traceLines[8] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}f$/
+        assert _traceLines[8] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}t$/
         assert _traceLines[11] ==~ /^$METHOD_RETURN_TAG,${FLOAT_TYPE_TAG}27.0$/
-        assert _traceLines[14] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}t$/
+        assert _traceLines[14] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}f$/
         assert _traceLines[17] ==~ /^$METHOD_RETURN_TAG,${CHAR_TYPE_TAG}323$/
         assert _traceLines[20] ==~ /^$METHOD_RETURN_TAG,${INT_TYPE_TAG}2694$/
         assert _traceLines[25] ==~ /^$METHOD_RETURN_TAG,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[28] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
+
+        assertAllAndOnlyMatchingMethodsAreTraced(_traceLines, _methodNameRegex)
     }
 
     @Test
