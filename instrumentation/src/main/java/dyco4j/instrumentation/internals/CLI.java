@@ -35,36 +35,43 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
     final static int ASM_VERSION = ASM5;
+    static final String IN_FOLDER_OPTION = "in-folder";
+    static final String OUT_FOLDER_OPTION = "out-folder";
+    static final String CLASSPATH_CONFIG_OPTION = "classpath-config";
+    static final String METHOD_NAME_REGEX_OPTION = "method-name-regex";
+    static final String TRACE_FIELD_ACCESS_OPTION = "trace-field-access";
+    static final String TRACE_ARRAY_ACCESS_OPTION = "trace-array-access";
+    static final String TRACE_METHOD_ARGUMENTS_OPTION = "trace-method-arguments";
+    static final String TRACE_METHOD_RETURN_VALUE_OPTION = "trace-method-return-value";
     private static final Path AUXILIARY_DATA_FILE_NAME = Paths.get("auxiliary_data.json");
     private static final String METHOD_NAME_REGEX = ".*";
     private static final Logger LOGGER = LoggerFactory.getLogger(CLI.class);
 
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
-        _options.addOption(Option.builder().longOpt("in-folder").required().hasArg(true)
+        _options.addOption(Option.builder().longOpt(IN_FOLDER_OPTION).required().hasArg(true)
                 .desc("Folders containing the classes to be instrumented.").build());
-        _options.addOption(Option.builder().longOpt("out-folder").required().hasArg(true)
+        _options.addOption(Option.builder().longOpt(OUT_FOLDER_OPTION).required().hasArg(true)
                 .desc("Folder containing the classes (as descendants) with instrumentation.").build());
-        _options.addOption(Option.builder().longOpt("classpath-config").hasArg(true)
+        _options.addOption(Option.builder().longOpt(CLASSPATH_CONFIG_OPTION).hasArg(true)
                 .desc("File containing class path (1 entry per line) used by classes to be instrumented.")
                 .build());
         final String _msg = MessageFormat.format("Regex identifying the methods to be instrumented. Default: {0}.",
                 METHOD_NAME_REGEX);
-        _options.addOption(Option.builder().longOpt("methodNameRegex").hasArg(true).desc(_msg).build());
-        _options.addOption(Option.builder().longOpt("traceFieldAccess").hasArg(false)
+        _options.addOption(Option.builder().longOpt(METHOD_NAME_REGEX_OPTION).hasArg(true).desc(_msg).build());
+        _options.addOption(Option.builder().longOpt(TRACE_FIELD_ACCESS_OPTION).hasArg(false)
                 .desc("Instrument classes to trace field access.").build());
-        _options.addOption(Option.builder().longOpt("traceArrayAccess").hasArg(false)
+        _options.addOption(Option.builder().longOpt(TRACE_ARRAY_ACCESS_OPTION).hasArg(false)
                 .desc("Instrument classes to trace array access.").build());
-        _options.addOption(Option.builder().longOpt("traceMethodArgs").hasArg(false)
+        _options.addOption(Option.builder().longOpt(TRACE_METHOD_ARGUMENTS_OPTION).hasArg(false)
                 .desc("Instrument classes to trace method arguments.").build());
-        _options.addOption(Option.builder().longOpt("traceMethodReturnValue").hasArg(false)
+        _options.addOption(Option.builder().longOpt(TRACE_METHOD_RETURN_VALUE_OPTION).hasArg(false)
                 .desc("Instrument classes to trace method return values.").build());
 
         try {
@@ -82,8 +89,8 @@ public final class CLI {
             final Class<URLClassLoader> _urlClass = URLClassLoader.class;
             final Method _method = _urlClass.getDeclaredMethod("addURL", URL.class);
             _method.setAccessible(true);
-            addEntryToClassPath(_urlClassLoader, _method, cmdLine.getOptionValue("in-folder"));
-            final String _classpathConfig = cmdLine.getOptionValue("classpath-config");
+            addEntryToClassPath(_urlClassLoader, _method, cmdLine.getOptionValue(IN_FOLDER_OPTION));
+            final String _classpathConfig = cmdLine.getOptionValue(CLASSPATH_CONFIG_OPTION);
             if (_classpathConfig != null) {
                 for (final String _s : Files.readAllLines(Paths.get(_classpathConfig))) {
                     addEntryToClassPath(_urlClassLoader, _method, _s);
@@ -106,8 +113,8 @@ public final class CLI {
     }
 
     private static void processCommandLine(final CommandLine cmdLine) throws IOException {
-        final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
-        final Path _trgRoot = Paths.get(cmdLine.getOptionValue("out-folder"));
+        final Path _srcRoot = Paths.get(cmdLine.getOptionValue(IN_FOLDER_OPTION));
+        final Path _trgRoot = Paths.get(cmdLine.getOptionValue(OUT_FOLDER_OPTION));
 
         final Predicate<Path> _nonClassFileSelector = p -> !p.toString().endsWith(".class") && Files.isRegularFile(p);
         final BiConsumer<Path, Path> _fileCopier = (srcPath, trgPath) -> {
@@ -120,15 +127,16 @@ public final class CLI {
         processFiles(_srcRoot, _trgRoot, _nonClassFileSelector, _fileCopier);
 
         final CommandLineOptions _cmdLineOptions =
-                new CommandLineOptions(cmdLine.hasOption("traceArrayAccess"), cmdLine.hasOption("traceFieldAccess"),
-                        cmdLine.hasOption("traceMethodArgs"),
-                        cmdLine.hasOption("traceMethodReturnValue"));
+                new CommandLineOptions(cmdLine.hasOption(TRACE_ARRAY_ACCESS_OPTION),
+                        cmdLine.hasOption(TRACE_FIELD_ACCESS_OPTION),
+                        cmdLine.hasOption(TRACE_METHOD_ARGUMENTS_OPTION),
+                        cmdLine.hasOption(TRACE_METHOD_RETURN_VALUE_OPTION));
         final Set<Path> _filenames = getFilenames(_srcRoot);
         final AuxiliaryData _auxiliaryData = AuxiliaryData.loadData(AUXILIARY_DATA_FILE_NAME);
         getMemberId2NameMapping(_filenames, _auxiliaryData, _cmdLineOptions.traceFieldAccess);
 
         final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
-        final String _methodNameRegex = cmdLine.getOptionValue("methodNameRegex", METHOD_NAME_REGEX);
+        final String _methodNameRegex = cmdLine.getOptionValue(METHOD_NAME_REGEX_OPTION, METHOD_NAME_REGEX);
         final BiConsumer<Path, Path> _classInstrumenter = (srcPath, trgPath) -> {
             try {
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(srcPath));

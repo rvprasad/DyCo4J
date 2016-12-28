@@ -15,6 +15,12 @@ import org.junit.Test
 import java.nio.file.Paths
 
 class CLITest extends AbstractCLITest {
+
+    static final String IN_FOLDER_OPTION = "--$CLI.IN_FOLDER_OPTION"
+    static final String OUT_FOLDER_OPTION = "--$CLI.OUT_FOLDER_OPTION"
+    static final String METHOD_NAME_REGEX_OPTION = "--$CLI.METHOD_NAME_REGEX_OPTION"
+    static final String ONLY_ANNOTATED_TESTS_OPTION = "--$CLI.ONLY_ANNOTATED_TESTS_OPTION"
+
     @BeforeClass
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file1 = Paths.get("dyco4j", "instrumentation", "entry", "CLITestSubject.class")
@@ -38,17 +44,17 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withOnlyInFolderOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER]) == [0L, 0L]
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER]) == [0L, 0L]
     }
 
     @Test
     void withOnlyOutFolderOption() {
-        assert instrumentCode(["--out-folder", OUT_FOLDER]) == [0L, 0L]
+        assert instrumentCode([OUT_FOLDER_OPTION, OUT_FOLDER]) == [0L, 0L]
     }
 
     @Test
     void withOnlyInFolderAndOutFolderOptions() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER]) == [1L, 1L]
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER]) == [1L, 1L]
 
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -67,8 +73,8 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withMethodNameRegexOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
-                               '.*Suffix.$']) == [1L, 1L]
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               METHOD_NAME_REGEX_OPTION, '.*Suffix.$']) == [1L, 1L]
 
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -85,8 +91,9 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withMethodNameRegexAndOnlyAnnotatedTestsOptions() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER, "--method-name-regex",
-                               '.*Suffix.$', '--only-annotated-tests']) == [1L, 1L]
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION,
+                               OUT_FOLDER, METHOD_NAME_REGEX_OPTION,
+                               '.*Suffix.$', ONLY_ANNOTATED_TESTS_OPTION]) == [1L, 1L]
 
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -102,8 +109,8 @@ class CLITest extends AbstractCLITest {
 
     @Test
     void withAnnotatedTestsOption() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               '--only-annotated-tests']) == [1L, 1L]
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               ONLY_ANNOTATED_TESTS_OPTION]) == [1L, 1L]
 
         final _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0

@@ -13,12 +13,17 @@ import dyco4j.instrumentation.logging.Logger
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
+
+import static dyco4j.instrumentation.internals.CLITest.IN_FOLDER_OPTION
+import static dyco4j.instrumentation.internals.CLITest.OUT_FOLDER_OPTION
 import static groovy.test.GroovyAssert.shouldFail
 
 import java.nio.file.Files
 import java.nio.file.Paths
 
 class CLIClassPathConfigTest extends AbstractCLITest {
+
+    private static final String CLASSPATH_CONFIG_OPTION = "--$CLI.CLASSPATH_CONFIG_OPTION"
 
     private static classpathConfigFile
     private static sourceFile
@@ -61,20 +66,21 @@ class CLIClassPathConfigTest extends AbstractCLITest {
     @Test
     void withOutClassPathConfig() {
         final _e = shouldFail RuntimeException, {
-            instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER])
+            instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER])
         }
         assert _e.message ==~ /java.lang.ClassNotFoundException.*dyco4j.instrumentation.internals.Pair/
     }
 
     @Test
     void withClassPathConfig() {
-        assert instrumentCode(["--in-folder", IN_FOLDER, "--out-folder", OUT_FOLDER,
-                               "--classpath-config", classpathConfigFile.toString()]) == [1L, 0L]
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               CLASSPATH_CONFIG_OPTION, classpathConfigFile.toString()]) == [1L, 0L]
 
         Files.move(targetFile, sourceFile) // move Pair class back into build/classes/test
         final ExecutionResult _executionResult = executeInstrumentedCode()
         Files.move(sourceFile, targetFile) // move Pair class back into build/tmp/extra_classes
         assert _executionResult.exitCode == 0
+
         assertTraceLengthIs(_executionResult, 3)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)

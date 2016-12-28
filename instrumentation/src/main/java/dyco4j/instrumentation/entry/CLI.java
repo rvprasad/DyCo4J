@@ -26,18 +26,22 @@ import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
     final static int ASM_VERSION = ASM5;
+    static final String IN_FOLDER_OPTION = "in-folder";
+    static final String OUT_FOLDER_OPTION = "out-folder";
+    static final String METHOD_NAME_REGEX_OPTION = "method-name-regex";
+    static final String ONLY_ANNOTATED_TESTS_OPTION = "only-annotated-tests";
     private final static String METHOD_NAME_REGEX = "^test.*";
 
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
-        _options.addOption(Option.builder().longOpt("in-folder").required().hasArg()
+        _options.addOption(Option.builder().longOpt(IN_FOLDER_OPTION).required().hasArg()
                                  .desc("Folder containing the classes (as descendants) to be instrumented.").build());
-        _options.addOption(Option.builder().longOpt("out-folder").required().hasArg()
+        _options.addOption(Option.builder().longOpt(OUT_FOLDER_OPTION).required().hasArg()
                                  .desc("Folder containing the classes (as descendants) with instrumentation.").build());
         final String _msg = MessageFormat
                 .format("Regex identifying the methods to be instrumented. Default: {0}.", METHOD_NAME_REGEX);
-        _options.addOption(Option.builder().longOpt("method-name-regex").hasArg(true).desc(_msg).build());
-        _options.addOption(Option.builder().longOpt("only-annotated-tests").hasArg(false)
+        _options.addOption(Option.builder().longOpt(METHOD_NAME_REGEX_OPTION).hasArg(true).desc(_msg).build());
+        _options.addOption(Option.builder().longOpt(ONLY_ANNOTATED_TESTS_OPTION).hasArg(false)
                                  .desc("Instrument only tests identified by annotations.").build());
 
         try {
@@ -48,8 +52,8 @@ public final class CLI {
     }
 
     private static void processCommandLine(final CommandLine cmdLine) throws IOException {
-        final Path _srcRoot = Paths.get(cmdLine.getOptionValue("in-folder"));
-        final Path _trgRoot = Paths.get(cmdLine.getOptionValue("out-folder"));
+        final Path _srcRoot = Paths.get(cmdLine.getOptionValue(IN_FOLDER_OPTION));
+        final Path _trgRoot = Paths.get(cmdLine.getOptionValue(OUT_FOLDER_OPTION));
 
         final Predicate<Path> _nonClassFileSelector = p -> !p.toString().endsWith(".class") && Files.isRegularFile(p);
         final BiConsumer<Path, Path> _fileCopier = (srcPath, trgPath) -> {
@@ -62,8 +66,8 @@ public final class CLI {
         processFiles(_srcRoot, _trgRoot, _nonClassFileSelector, _fileCopier);
 
         final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
-        final String _methodNameRegex = cmdLine.getOptionValue("method-name-regex", METHOD_NAME_REGEX);
-        final Boolean _onlyAnnotatedTests = cmdLine.hasOption("only-annotated-tests");
+        final String _methodNameRegex = cmdLine.getOptionValue(METHOD_NAME_REGEX_OPTION, METHOD_NAME_REGEX);
+        final Boolean _onlyAnnotatedTests = cmdLine.hasOption(ONLY_ANNOTATED_TESTS_OPTION);
         final BiConsumer<Path, Path> _classInstrumenter = (srcPath, trgPath) -> {
             try {
                 final byte[] _bytecode = Files.readAllBytes(srcPath);
