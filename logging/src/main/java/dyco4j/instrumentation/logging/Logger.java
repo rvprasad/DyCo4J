@@ -4,7 +4,9 @@
  * BSD 3-clause License
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
+ *
  */
+
 package dyco4j.instrumentation.logging;
 
 
@@ -45,7 +47,7 @@ public final class Logger {
     private volatile int msgFreq = 1;
 
     private Logger(final PrintWriter pw) {
-        logWriter = pw;
+        this.logWriter = pw;
         writeLog((new Date()).toString());
     }
 
@@ -147,53 +149,48 @@ public final class Logger {
     static void initialize(final PrintWriter logWriter) {
         logger = new Logger(logWriter);
 
-        java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    logger.cleanup();
-                } catch (final Throwable _e) {
-                    throw new RuntimeException(_e);
-                }
+        java.lang.Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                logger.cleanup();
+            } catch (final Throwable _e) {
+                throw new RuntimeException(_e);
             }
-        });
+        }));
     }
 
-    /**
-     * This method is intended for testing purpose only.
-     */
+    // This method is intended for testing purpose only.
     static void cleanupForTest() {
         logger.cleanup();
     }
 
     @Override
     protected void finalize() throws Throwable {
-        cleanup();
+        this.cleanup();
         super.finalize();
     }
 
     private synchronized void cleanup() {
         if (!this.clean) {
-            if (msgFreq > 1) {
-                logWriter.println(String.format("%d,%s", msgFreq - 1, prevMsg));
+            if (this.msgFreq > 1) {
+                this.logWriter.println(String.format("%d,%s", this.msgFreq - 1, this.prevMsg));
             }
-            logWriter.flush();
-            logWriter.close();
-            clean = true;
+            this.logWriter.flush();
+            this.logWriter.close();
+            this.clean = true;
         }
     }
 
     private synchronized void writeLog(final String msg) {
-        if (Objects.equals(prevMsg, msg)) {
-            msgFreq++;
+        if (Objects.equals(this.prevMsg, msg)) {
+            this.msgFreq++;
         } else {
-            if (msgFreq > 1) {
-                logWriter.println(String.format("%d,%s", msgFreq - 1, prevMsg));
+            if (this.msgFreq > 1) {
+                this.logWriter.println(String.format("%d,%s", this.msgFreq - 1, this.prevMsg));
             }
 
-            logWriter.println(String.format("%s", msg));
-            prevMsg = msg;
-            msgFreq = 1;
+            this.logWriter.println(String.format("%s", msg));
+            this.prevMsg = msg;
+            this.msgFreq = 1;
         }
     }
 

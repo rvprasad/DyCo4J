@@ -21,6 +21,7 @@ import java.util.zip.GZIPInputStream;
 public class LoggerInitializerTest {
     @Test
     public void testInitializeWithPropertiesFile() throws Exception {
+        LoggerInitializer.reenableInitialize(); // used only for testing
         LoggerInitializer.initialize();
         final String _msg = "test initialize with properties file";
         Logger.log(_msg);
@@ -38,6 +39,7 @@ public class LoggerInitializerTest {
 
     @Test
     public void testInitializeWithoutPropertiesFile() throws Exception {
+        LoggerInitializer.reenableInitialize(); // used only for testing
         // change the name of build/resources/test/dyco4j/instrumentation/logging/logging.properties
         final Path _srcPropFilePath =
                 Paths.get("build", "resources", "test", "dyco4j", "instrumentation", "logging", "logging.properties");
