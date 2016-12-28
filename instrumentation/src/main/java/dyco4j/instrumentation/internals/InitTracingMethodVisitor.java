@@ -248,7 +248,7 @@ final class InitTracingMethodVisitor extends MethodVisitor {
     @Override
     public void visitFieldInsn(final int opcode, final String owner,
                                final String name, final String desc) {
-        mv.visitFieldInsn(opcode, owner, name, desc);
+        this.mv.visitFieldInsn(opcode, owner, name, desc);
         final char _c = desc.charAt(0);
         final boolean _longOrDouble = _c == 'J' || _c == 'D';
         switch (opcode) {
@@ -277,14 +277,14 @@ final class InitTracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitIntInsn(final int opcode, final int operand) {
-        mv.visitIntInsn(opcode, operand);
+        this.mv.visitIntInsn(opcode, operand);
         if (opcode != Opcodes.NEWARRAY)
             this.stackFrame.push(OTHER);
     }
 
     @Override
     public void visitLdcInsn(final Object cst) {
-        mv.visitLdcInsn(cst);
+        this.mv.visitLdcInsn(cst);
         this.stackFrame.push(OTHER);
         if (cst instanceof Double || cst instanceof Long)
             this.stackFrame.push(OTHER);
@@ -292,7 +292,7 @@ final class InitTracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitMultiANewArrayInsn(final String desc, final int dims) {
-        mv.visitMultiANewArrayInsn(desc, dims);
+        this.mv.visitMultiANewArrayInsn(desc, dims);
         for (int _i = 0; _i < dims; _i++)
             this.stackFrame.pop();
         this.stackFrame.push(OTHER);
@@ -309,7 +309,7 @@ final class InitTracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitTypeInsn(final int opcode, final String type) {
-        mv.visitTypeInsn(opcode, type);
+        this.mv.visitTypeInsn(opcode, type);
         // ANEWARRAY, CHECKCAST or INSTANCEOF don't change stack
         if (opcode == Opcodes.NEW) {
             this.stackFrame.push(OTHER);
@@ -357,7 +357,7 @@ final class InitTracingMethodVisitor extends MethodVisitor {
     @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
                                        Object... bsmArgs) {
-        mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
+        this.mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         final Type[] _types = Type.getArgumentTypes(desc);
         for (final Type _type : _types) {
             this.stackFrame.pop();
@@ -394,7 +394,7 @@ final class InitTracingMethodVisitor extends MethodVisitor {
 
     private void processVisitMethodInsn(final int opcode, final String owner, final String name, final String desc,
                                         final boolean itf) {
-        mv.visitMethodInsn(opcode, owner, name, desc, itf);
+        this.mv.visitMethodInsn(opcode, owner, name, desc, itf);
         final Type[] _types = Type.getArgumentTypes(desc);
         for (final Type _type : _types) {
             this.stackFrame.pop();
@@ -402,8 +402,8 @@ final class InitTracingMethodVisitor extends MethodVisitor {
                 this.stackFrame.pop();
         }
         switch (opcode) {
-            // case INVOKESTATIC:
-            // break;
+            case Opcodes.INVOKESTATIC:
+                break;
             case Opcodes.INVOKEINTERFACE:
             case Opcodes.INVOKEVIRTUAL:
                 this.stackFrame.pop(); // objectref

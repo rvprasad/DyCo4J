@@ -45,7 +45,7 @@ final class TracingClassVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature,
                                      final String[] exceptions) {
-        final MethodVisitor _mv1 = cv.visitMethod(access, name, desc, signature, exceptions);
+        final MethodVisitor _mv1 = this.cv.visitMethod(access, name, desc, signature, exceptions);
         if (_mv1 != null && shouldInstrumentMethod(name)) {
             final TracingMethodVisitor _mv2 = new TracingMethodVisitor(access, name, desc, _mv1, this);
             return name.equals("<init>") ? new InitTracingMethodVisitor(access, name, _mv2) : _mv2;

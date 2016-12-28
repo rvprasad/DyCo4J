@@ -44,11 +44,11 @@ final class TracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitCode() {
-        mv.visitCode();
+        this.mv.visitCode();
 
         if (this.shouldInstrument()) {
-            final String _msg = "marker:" + this.cv.getClassName() + "/" + name + desc;
-            LoggingHelper.emitLogString(mv, _msg);
+            final String _msg = "marker:" + this.cv.getClassName() + "/" + this.name + this.desc;
+            LoggingHelper.emitLogString(this.mv, _msg);
         }
     }
 
