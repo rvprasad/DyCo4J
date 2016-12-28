@@ -35,6 +35,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -68,30 +69,39 @@ public final class CLI {
 
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
-            addToClassPath(_cmdLine.getOptionValue("classpath-config"));
+            extendClassPath(_cmdLine);
             processCommandLine(_cmdLine);
         } catch (final ParseException _ex1) {
             new HelpFormatter().printHelp(CLI.class.getName(), _options);
         }
     }
 
-    private static void addToClassPath(final String classpathConfig) throws IOException {
-        if (classpathConfig != null) {
-            try {
-                final URLClassLoader _urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-                final Class<URLClassLoader> _urlClass = URLClassLoader.class;
-                for (final String _s : Files.readAllLines(Paths.get(classpathConfig))) {
-                    final File _f = new File(_s);
-                    final URL _u = _f.toURI().toURL();
-                    final Method _method = _urlClass.getDeclaredMethod("addURL", URL.class);
-                    _method.setAccessible(true);
-                    _method.invoke(_urlClassLoader, _u);
-                    LOGGER.info(MessageFormat.format("Adding {0} to classpath", _s));
+    private static void extendClassPath(final CommandLine cmdLine) throws IOException {
+        try {
+            final URLClassLoader _urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+            final Class<URLClassLoader> _urlClass = URLClassLoader.class;
+            final Method _method = _urlClass.getDeclaredMethod("addURL", URL.class);
+            _method.setAccessible(true);
+            addEntryToClassPath(_urlClassLoader, _method, cmdLine.getOptionValue("in-folder"));
+            final String _classpathConfig = cmdLine.getOptionValue("classpath-config");
+            if (_classpathConfig != null) {
+                for (final String _s : Files.readAllLines(Paths.get(_classpathConfig))) {
+                    addEntryToClassPath(_urlClassLoader, _method, _s);
                 }
-            } catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException |
-                    MalformedURLException _e) {
-                throw new RuntimeException(_e);
             }
+        } catch (final NoSuchMethodException _e) {
+            throw new RuntimeException(_e);
+        }
+    }
+
+    private static void addEntryToClassPath(final URLClassLoader urlClassLoader, final Method method, final String s) {
+        final File _f = new File(s);
+        try {
+            final URL _u = _f.toURI().toURL();
+            method.invoke(urlClassLoader, _u);
+            LOGGER.info(MessageFormat.format("Adding {0} to classpath", s));
+        } catch (MalformedURLException | IllegalAccessException | InvocationTargetException _e) {
+            throw new RuntimeException(_e);
         }
     }
 
