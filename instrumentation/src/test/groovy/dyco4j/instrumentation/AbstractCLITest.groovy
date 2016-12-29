@@ -8,6 +8,7 @@
 
 package dyco4j.instrumentation
 
+import dyco4j.instrumentation.internals.CLI
 import dyco4j.logging.Logger
 import groovy.io.FileType
 import org.junit.After
@@ -163,10 +164,10 @@ abstract class AbstractCLITest {
 
     @After
     void deleteAuxiliaryFiles() {
-        final _tmp1 = Paths.get("auxiliary_data.json")
+        final _tmp1 = Paths.get(CLI.PROGRAM_DATA_FILE_NAME)
         if (Files.exists(_tmp1))
             Files.delete(_tmp1)
-        final _tmp2 = Paths.get("auxiliary_data.json.bak")
+        final _tmp2 = Paths.get(CLI.PROGRAM_DATA_FILE_NAME + ".bak")
         if (Files.exists(_tmp2))
             Files.delete(_tmp2)
     }

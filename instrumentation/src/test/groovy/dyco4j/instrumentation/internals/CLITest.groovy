@@ -10,6 +10,7 @@ package dyco4j.instrumentation.internals
 
 import com.google.gson.Gson
 import dyco4j.instrumentation.AbstractCLITest
+import dyco4j.utility.ProgramData
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -47,14 +48,14 @@ class CLITest extends AbstractCLITest {
         def _methodIds = traceLines.findAll { it ==~ /^$METHOD_ENTRY_TAG,.*/ }.collect { it.split(',')[1] }
         _methodIds += traceLines.findAll { it ==~ /^$METHOD_EXIT_TAG,.*/ }.collect { it.split(',')[1] }
 
-        new File("auxiliary_data.json").withReader { rdr ->
-            final _aux_data = new Gson().fromJson(rdr, AuxiliaryData.class)
+        new File(CLI.PROGRAM_DATA_FILE_NAME).withReader { rdr ->
+            final _prog_data = new Gson().fromJson(rdr, ProgramData.class)
 
             _methodIds.each {
-                assert _aux_data.methodId2Name[it] ==~ methodNameRegex
+                assert _prog_data.methodId2Name[it] ==~ methodNameRegex
             }
 
-            _aux_data.methodId2Name.each { methodId, name ->
+            _prog_data.methodId2Name.each { methodId, name ->
                 assert !(name ==~ methodNameRegex) || methodId in _methodIds
             }
         }

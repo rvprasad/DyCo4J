@@ -4,9 +4,10 @@
  * BSD 3-clause License
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
+ *
  */
 
-package dyco4j.instrumentation.internals;
+package dyco4j.utility;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,23 +20,23 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 
-final class AuxiliaryData {
-    final Map<String, String> fieldId2Name = new HashMap<>();
-    final Map<String, String> shortFieldName2Id = new HashMap<>();
-    final Map<String, String> methodId2Name = new HashMap<>();
-    final Map<String, String> shortMethodName2Id = new HashMap<>();
-    final Map<String, String> class2superClass = new HashMap<>();
+public final class ProgramData {
+    public final Map<String, String> fieldId2Name = new HashMap<>();
+    public final Map<String, String> shortFieldName2Id = new HashMap<>();
+    public final Map<String, String> methodId2Name = new HashMap<>();
+    public final Map<String, String> shortMethodName2Id = new HashMap<>();
+    public final Map<String, String> class2superClass = new HashMap<>();
 
-    static AuxiliaryData loadData(final Path dataFile) throws IOException {
+    public static ProgramData loadData(final Path dataFile) throws IOException {
         if (Files.exists(dataFile)) {
             try (final Reader _rdr = new FileReader(dataFile.toFile())) {
-                return new Gson().fromJson(_rdr, AuxiliaryData.class);
+                return new Gson().fromJson(_rdr, ProgramData.class);
             }
         } else
-            return new AuxiliaryData();
+            return new ProgramData();
     }
 
-    static void saveData(final AuxiliaryData staticData, final Path dataFile) throws IOException {
+    public static void saveData(final ProgramData staticData, final Path dataFile) throws IOException {
         if (Files.exists(dataFile))
             Files.move(dataFile, Paths.get(dataFile.toString() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
 
@@ -48,10 +49,10 @@ final class AuxiliaryData {
     public boolean equals(final Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof AuxiliaryData))
+        if (!(o instanceof ProgramData))
             return false;
 
-        final AuxiliaryData _that = (AuxiliaryData) o;
+        final ProgramData _that = (ProgramData) o;
 
         if (!fieldId2Name.equals(_that.fieldId2Name))
             return false;

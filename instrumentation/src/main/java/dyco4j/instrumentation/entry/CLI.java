@@ -25,7 +25,7 @@ import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
-    final static int ASM_VERSION = ASM5;
+    static final int ASM_VERSION = ASM5;
     static final String IN_FOLDER_OPTION = "in-folder";
     static final String OUT_FOLDER_OPTION = "out-folder";
     static final String METHOD_NAME_REGEX_OPTION = "method-name-regex";

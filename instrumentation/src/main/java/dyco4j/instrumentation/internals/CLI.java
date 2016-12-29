@@ -9,6 +9,7 @@
 package dyco4j.instrumentation.internals;
 
 import dyco4j.instrumentation.LoggerInitializingClassVisitor;
+import dyco4j.utility.ProgramData;
 import org.apache.commons.cli.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -40,7 +41,8 @@ import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
-    final static int ASM_VERSION = ASM5;
+    public static final String PROGRAM_DATA_FILE_NAME = "program_data.json";
+    static final int ASM_VERSION = ASM5;
     static final String IN_FOLDER_OPTION = "in-folder";
     static final String OUT_FOLDER_OPTION = "out-folder";
     static final String CLASSPATH_CONFIG_OPTION = "classpath-config";
@@ -49,7 +51,6 @@ public final class CLI {
     static final String TRACE_ARRAY_ACCESS_OPTION = "trace-array-access";
     static final String TRACE_METHOD_ARGUMENTS_OPTION = "trace-method-arguments";
     static final String TRACE_METHOD_RETURN_VALUE_OPTION = "trace-method-return-value";
-    private static final Path AUXILIARY_DATA_FILE_NAME = Paths.get("auxiliary_data.json");
     private static final String METHOD_NAME_REGEX = ".*";
     private static final Logger LOGGER = LoggerFactory.getLogger(CLI.class);
 
@@ -132,8 +133,9 @@ public final class CLI {
                         cmdLine.hasOption(TRACE_METHOD_ARGUMENTS_OPTION),
                         cmdLine.hasOption(TRACE_METHOD_RETURN_VALUE_OPTION));
         final Set<Path> _filenames = getFilenames(_srcRoot);
-        final AuxiliaryData _auxiliaryData = AuxiliaryData.loadData(AUXILIARY_DATA_FILE_NAME);
-        getMemberId2NameMapping(_filenames, _auxiliaryData, _cmdLineOptions.traceFieldAccess);
+        final Path _programDataFile = Paths.get(PROGRAM_DATA_FILE_NAME);
+        final ProgramData _programData = ProgramData.loadData(_programDataFile);
+        getMemberId2NameMapping(_filenames, _programData, _cmdLineOptions.traceFieldAccess);
 
         final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
         final String _methodNameRegex = cmdLine.getOptionValue(METHOD_NAME_REGEX_OPTION, METHOD_NAME_REGEX);
@@ -142,11 +144,11 @@ public final class CLI {
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(srcPath));
                 final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_FRAMES);
                 final Map<String, String> _shortFieldName2Id =
-                        Collections.unmodifiableMap(_auxiliaryData.shortFieldName2Id);
+                        Collections.unmodifiableMap(_programData.shortFieldName2Id);
                 final Map<String, String> _shortMethodName2Id =
-                        Collections.unmodifiableMap(_auxiliaryData.shortMethodName2Id);
+                        Collections.unmodifiableMap(_programData.shortMethodName2Id);
                 final Map<String, String> _class2superClass =
-                        Collections.unmodifiableMap(_auxiliaryData.class2superClass);
+                        Collections.unmodifiableMap(_programData.class2superClass);
                 final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
                 final ClassVisitor _cv2 =
                         new TracingClassVisitor(_cv1, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
@@ -160,7 +162,7 @@ public final class CLI {
         };
         processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
 
-        AuxiliaryData.saveData(_auxiliaryData, AUXILIARY_DATA_FILE_NAME);
+        ProgramData.saveData(_programData, _programDataFile);
     }
 
     private static Set<Path> getFilenames(final Path folder) throws IOException {
@@ -168,12 +170,12 @@ public final class CLI {
         return _tmp1.collect(Collectors.toSet());
     }
 
-    private static void getMemberId2NameMapping(final Collection<Path> filenames, final AuxiliaryData auxiliaryData,
+    private static void getMemberId2NameMapping(final Collection<Path> filenames, final ProgramData programData,
                                                 final boolean collectFieldInfo) {
         for (final Path _arg : filenames) {
             try {
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(_arg));
-                final ClassVisitor _cv = new AuxiliaryDataCollectingClassVisitor(auxiliaryData, collectFieldInfo);
+                final ClassVisitor _cv = new ProgramDataCollectingClassVisitor(programData, collectFieldInfo);
                 _cr.accept(_cv, 0);
             } catch (final Exception _ex) {
                 throw new RuntimeException(_ex);

@@ -8,6 +8,7 @@
 
 package dyco4j.utility;
 
+@SuppressWarnings("unused")
 public class ClassNameHelper {
     public static String createJavaName(final String name, final String owner) {
         return owner.replace("/", ".") + "." + name;
