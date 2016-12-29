@@ -6,7 +6,7 @@ repositories {
     }
 }
 
-version = '0.6'
+version = '0.7'
 
 // Apply the java plugin to add support for Java
 apply plugin: 'java'

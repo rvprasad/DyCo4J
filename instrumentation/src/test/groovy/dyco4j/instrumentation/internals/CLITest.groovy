@@ -15,7 +15,7 @@ import org.junit.Test
 
 import java.nio.file.Paths
 
-import static dyco4j.instrumentation.logging.Logger.*
+import static dyco4j.logging.Logger.*
 
 class CLITest extends AbstractCLITest {
 

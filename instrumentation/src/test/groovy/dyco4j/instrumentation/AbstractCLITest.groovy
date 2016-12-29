@@ -8,7 +8,7 @@
 
 package dyco4j.instrumentation
 
-import dyco4j.instrumentation.logging.Logger
+import dyco4j.logging.Logger
 import groovy.io.FileType
 import org.junit.After
 import org.junit.AfterClass
@@ -26,7 +26,7 @@ abstract class AbstractCLITest {
     protected static final Path TEST_CLASS_FOLDER = Paths.get("build", "classes", "test")
     private static final Path TEST_RESOURCE_FOLDER = Paths.get("build", "resources", "test")
     private static final Path LOGGING_PROPERTY_FILE = Paths.get(TEST_CLASS_FOLDER.toString(), "dyco4j",
-            "instrumentation", "logging", "logging.properties")
+            "logging", "logging.properties")
     private static final String LOGGING_LIBRARY = System.getProperty('logging.jar').toString()
     protected static final CLASS_FILE_REGEX = /.*class$/
     private static final TRACE_FILE_REGEX = /^trace.*gz/

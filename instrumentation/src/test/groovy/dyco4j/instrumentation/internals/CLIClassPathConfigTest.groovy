@@ -9,7 +9,7 @@
 package dyco4j.instrumentation.internals
 
 import dyco4j.instrumentation.AbstractCLITest
-import dyco4j.instrumentation.logging.Logger
+import dyco4j.logging.Logger
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test

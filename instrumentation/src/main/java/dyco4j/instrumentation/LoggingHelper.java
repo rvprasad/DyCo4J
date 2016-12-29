@@ -8,8 +8,8 @@
 
 package dyco4j.instrumentation;
 
-import dyco4j.instrumentation.logging.Logger;
-import dyco4j.instrumentation.logging.LoggerInitializer;
+import dyco4j.logging.Logger;
+import dyco4j.logging.LoggerInitializer;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;

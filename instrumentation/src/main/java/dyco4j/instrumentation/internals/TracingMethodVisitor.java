@@ -9,7 +9,7 @@
 package dyco4j.instrumentation.internals;
 
 import dyco4j.instrumentation.LoggingHelper;
-import dyco4j.instrumentation.logging.Logger;
+import dyco4j.logging.Logger;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;

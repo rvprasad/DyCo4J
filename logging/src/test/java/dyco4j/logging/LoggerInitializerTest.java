@@ -7,7 +7,7 @@
  *
  */
 
-package dyco4j.instrumentation.logging;
+package dyco4j.logging;
 
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class LoggerInitializerTest {
         LoggerInitializer.reenableInitialize(); // used only for testing
         // change the name of build/resources/test/dyco4j/instrumentation/logging/logging.properties
         final Path _srcPropFilePath =
-                Paths.get("build", "resources", "test", "dyco4j", "instrumentation", "logging", "logging.properties");
+                Paths.get("build", "resources", "test", "dyco4j", "logging", "logging.properties");
         final File _srcPropFile = _srcPropFilePath.toFile();
         final Path _destPropFilePath = _srcPropFilePath.resolveSibling(Paths.get("logging.properties1"));
         final File _destPropFile = _destPropFilePath.toFile();

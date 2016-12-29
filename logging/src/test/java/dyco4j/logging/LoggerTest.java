@@ -4,8 +4,9 @@
  * BSD 3-clause License
  *
  * Author: Venkatesh-Prasad Ranganath (rvprasad)
+ *
  */
-package dyco4j.instrumentation.logging;
+package dyco4j.logging;
 
 import org.junit.After;
 import org.junit.Before;

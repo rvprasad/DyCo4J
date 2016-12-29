@@ -7,7 +7,7 @@
  *
  */
 
-package dyco4j.instrumentation.logging;
+package dyco4j.logging;
 
 
 import java.io.PrintWriter;
