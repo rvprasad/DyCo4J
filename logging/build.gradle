@@ -20,10 +20,12 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "3.2"
+    gradleVersion = "3.2.1"
 }
 
 compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
     options.compilerArgs << "-Xlint"
 }
 
