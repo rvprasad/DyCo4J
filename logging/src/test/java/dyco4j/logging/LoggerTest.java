@@ -47,11 +47,25 @@ public final class LoggerTest {
     }
 
     @Test
-    public void testLogArray() throws Exception {
+    public void testLogGetArray() throws Exception {
         final String[] _array = new String[]{"array"};
         final String _value = "value";
         final int _idx = 1;
         final Logger.ArrayAction _action = Logger.ArrayAction.GETA;
+        Logger.logArray(_array, _idx, _value, _action);
+
+        final String _expected = MessageFormat
+                .format("{0},{1},{2},{3},{4}", Thread.currentThread().getId(), _action, _idx,
+                        Logger.toString(_array), _value);
+        assertEquals(_expected, getContent()[1]);
+    }
+
+    @Test
+    public void testLogPutArray() throws Exception {
+        final String[] _array = new String[]{"array"};
+        final String _value = "value";
+        final int _idx = 1;
+        final Logger.ArrayAction _action = Logger.ArrayAction.PUTA;
         Logger.logArray(_array, _idx, _value, _action);
 
         final String _expected = MessageFormat
