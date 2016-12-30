@@ -14,6 +14,7 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
+import static dyco4j.instrumentation.internals.CLITest.instrumentCode
 import static dyco4j.instrumentation.internals.CLITest.IN_FOLDER_OPTION
 import static dyco4j.instrumentation.internals.CLITest.OUT_FOLDER_OPTION
 import static groovy.test.GroovyAssert.shouldFail
@@ -31,32 +32,27 @@ class CLIClassPathConfigTest extends AbstractCLITest {
 
     @BeforeClass
     static void copyClassesToBeInstrumentedIntoInFolder() {
-        final _file1 = Paths.get("dyco4j", "instrumentation", "internals", "CLIClassPathConfigTestSubject.class")
+        final _file1 = Paths.get('dyco4j', 'instrumentation', 'internals', 'CLIClassPathConfigTestSubject.class')
         copyClassToBeInstrumentedIntoInFolder(_file1)
 
-        final _extra_class_folder = ROOT_FOLDER.resolve("extra_classes")
+        final _extra_class_folder = resolveUnderRootFolder("extra_classes")
         assert Files.createDirectories(_extra_class_folder) != null: "Could not create in folder $_extra_class_folder"
 
-        final _file2 = Paths.get("dyco4j", "instrumentation", "internals", 'Pair.class')
+        final _file2 = Paths.get('dyco4j', 'instrumentation', 'internals',
+                'CLIClassPathConfigTestSubject$SomeClass.class')
         targetFile = _extra_class_folder.resolve(_file2)
         Files.createDirectories(targetFile.parent)
-        sourceFile = TEST_CLASS_FOLDER.resolve(_file2)
+        sourceFile = resolveUnderTestClassFolder(_file2)
         Files.move(sourceFile, targetFile)
 
-        classpathConfigFile = ROOT_FOLDER.resolve("classpath-config.txt")
-        classpathConfigFile.toFile().withWriter { wt ->
-            wt.println(_extra_class_folder.toString())
-        }
+        classpathConfigFile = resolveUnderRootFolder("classpath-config.txt")
+        classpathConfigFile.toFile().withWriter { it.println(_extra_class_folder.toString()) }
     }
 
     @AfterClass
     static void removeExtraClasses() {
         Files.move(targetFile, sourceFile)
         Files.delete(classpathConfigFile)
-    }
-
-    protected static final instrumentCode(args) {
-        instrumentCode(CLI, args)
     }
 
     private static executeInstrumentedCode() {
@@ -68,7 +64,7 @@ class CLIClassPathConfigTest extends AbstractCLITest {
         final _e = shouldFail RuntimeException, {
             instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER])
         }
-        assert _e.message ==~ /java.lang.ClassNotFoundException.*dyco4j.instrumentation.internals.Pair/
+        assert _e.message ==~ '.*java.lang.ClassNotFoundException: dyco4j.instrumentation.internals.CLIClassPathConfigTestSubject\\$SomeClass'
     }
 
     @Test

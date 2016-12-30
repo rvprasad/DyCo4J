@@ -15,7 +15,6 @@ import org.junit.After
 import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
-import org.slf4j.LoggerFactory
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -23,18 +22,17 @@ import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
 
 abstract class AbstractCLITest {
-    private static final LOGGER = LoggerFactory.getLogger(AbstractCLITest.class)
-    protected static final Path TEST_CLASS_FOLDER = Paths.get("build", "classes", "test")
+    private static final String LOGGING_LIBRARY = System.getProperty('logging.jar').toString()
+    private static final Path TEST_CLASS_FOLDER = Paths.get("build", "classes", "test")
     private static final Path TEST_RESOURCE_FOLDER = Paths.get("build", "resources", "test")
     private static final Path LOGGING_PROPERTY_FILE = Paths.get(TEST_CLASS_FOLDER.toString(), "dyco4j",
             "logging", "logging.properties")
-    private static final String LOGGING_LIBRARY = System.getProperty('logging.jar').toString()
-    protected static final CLASS_FILE_REGEX = /.*class$/
     private static final TRACE_FILE_REGEX = /^trace.*gz/
-    protected static final Path ROOT_FOLDER = Paths.get("build", "tmp")
-    private static final Path TRACE_FOLDER = ROOT_FOLDER.resolve("traces")
-    protected static final Path OUT_FOLDER = ROOT_FOLDER.resolve("out_classes")
-    protected static final Path IN_FOLDER = ROOT_FOLDER.resolve("in_classes")
+    private static final CLASS_FILE_REGEX = /.*class$/
+    private static final Path ROOT_FOLDER = Paths.get("build", "tmp")
+    private static final Path TRACE_FOLDER = resolveUnderRootFolder("traces")
+    protected static final Path OUT_FOLDER = resolveUnderRootFolder("out_classes")
+    protected static final Path IN_FOLDER = resolveUnderRootFolder("in_classes")
     protected static final RESOURCE_FILE_NAME = 'resource.txt'
     protected static final RESOURCE_FILE_REGEX = /^${RESOURCE_FILE_NAME}$/
     protected static final GET_ARRAY = Logger.ArrayAction.GETA.toString()
@@ -61,6 +59,14 @@ abstract class AbstractCLITest {
         Files.delete(LOGGING_PROPERTY_FILE)
         deleteFiles(IN_FOLDER, CLASS_FILE_REGEX)
         deleteFiles(IN_FOLDER, RESOURCE_FILE_REGEX)
+    }
+
+    protected static resolveUnderRootFolder(path) {
+        ROOT_FOLDER.resolve(path)
+    }
+
+    protected static resolveUnderTestClassFolder(path) {
+        TEST_CLASS_FOLDER.resolve(path)
     }
 
     protected static assertNestingOfCallsIsValid(traceLines, numOfCalls) {

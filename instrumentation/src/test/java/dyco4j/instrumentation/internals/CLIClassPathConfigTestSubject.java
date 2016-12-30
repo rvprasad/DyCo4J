@@ -17,16 +17,11 @@ public class CLIClassPathConfigTestSubject {
         if (s.length < 3)
             j = new String[5][3];
         else
-            j = new Pair[3][2];
+            j = new SomeClass[3][2];
         System.out.println(j);
     }
-}
 
-class Pair {
-    Pair() {
-        this(System.getProperty("java.class.path").length(), 4);
-    }
-
-    private Pair(final int a, final int b) {
+    class SomeClass {
     }
 }
+

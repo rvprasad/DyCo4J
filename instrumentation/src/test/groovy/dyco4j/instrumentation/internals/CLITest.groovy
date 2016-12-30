@@ -36,7 +36,7 @@ class CLITest extends AbstractCLITest {
         copyResourceIntoInFolder(_file2)
     }
 
-    protected static final instrumentCode(args) {
+    static final instrumentCode(args) {
         instrumentCode(CLI, args)
     }
 
