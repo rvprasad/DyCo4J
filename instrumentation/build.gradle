@@ -1,7 +1,6 @@
 // In this section you declare where to find the dependencies of your project
 repositories {
     jcenter()
-    mavenCentral()
     flatDir {
         dirs 'libs'
     }
@@ -66,7 +65,8 @@ test {
 task entryJar(type: Jar) {
     dependsOn copyLibs, test
     baseName 'dyco4j'
-    appendix 'entry-cli'
+    appendix 'entry'
+    classifier 'cli'
     from sourceSets.main.output
     exclude '**/internals/**'
     manifest {
@@ -77,7 +77,8 @@ task entryJar(type: Jar) {
 task internalsJar(type: Jar) {
     dependsOn copyLibs, test
     baseName 'dyco4j'
-    appendix 'internals-cli'
+    appendix 'internals'
+    classifier 'cli'
     from sourceSets.main.output
     exclude '**/entry/**'
     manifest {
