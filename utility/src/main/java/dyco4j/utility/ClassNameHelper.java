@@ -24,7 +24,7 @@ public class ClassNameHelper {
     }
 
     public static String createShortNameDesc(final String nameDesc) {
-        final String[] tmp = nameDesc.split(":");
-        return tmp[0] + ":" + tmp[1];
+        final String[] _tmp = nameDesc.split(":");
+        return _tmp[0] + ":" + _tmp[1];
     }
 }
