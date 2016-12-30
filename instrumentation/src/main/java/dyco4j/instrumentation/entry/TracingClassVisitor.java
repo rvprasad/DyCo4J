@@ -10,6 +10,7 @@ package dyco4j.instrumentation.entry;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 final class TracingClassVisitor extends ClassVisitor {
     private final String methodNameRegex;
@@ -33,7 +34,8 @@ final class TracingClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(final int access, final String name, final String desc,
                                      final String signature, final String[] exceptions) {
         final MethodVisitor _mv = this.cv.visitMethod(access, name, desc, signature, exceptions);
-        return _mv == null ? null : new TracingMethodVisitor(name, desc, _mv, this);
+        return _mv == null || (access & Opcodes.ACC_PUBLIC) == 0 ? _mv :
+                new TracingMethodVisitor(name, desc, _mv, this);
     }
 
     String getMethodNameRegex() {

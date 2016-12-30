@@ -99,6 +99,9 @@ task entryFatJar(type: Jar) {
     from {
         configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
     }
+    from {
+        configurations.testCompile.filter { it ==~ ".*slf4j.*" }.collect { it.isDirectory() ? it : zipTree(it) }
+    }
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
     with entryJar
 }
@@ -110,6 +113,9 @@ task internalsFatJar(type: Jar) {
     classifier 'all'
     from {
         configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from {
+        configurations.testCompile.filter { it ==~ ".*slf4j.*" }.collect { it.isDirectory() ? it : zipTree(it) }
     }
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
     with internalsJar
