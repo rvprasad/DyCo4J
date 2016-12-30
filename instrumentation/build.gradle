@@ -48,7 +48,7 @@ compileJava {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
     options.compilerArgs << '-Xlint'
-    dependsOn copyLogger, copyUtility
+    dependsOn copyLogging, copyUtility
 }
 
 task copyLibs(type: Copy) {
