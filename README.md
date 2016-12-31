@@ -145,9 +145,9 @@ tools.
 5. Run the tests by executing `bootstrap/bin/ant test`.
 6. Make note of the number of tests that were executed, passed, failed, and 
    skipped along with the time take to run the tests.  This information is
-   available in `build/testcases/reports/index.html`.  Here's a snapshot of the
-   report.
-   [[https://github.com/rvprasad/DyCo4J/misc/images/ant-vanilla-summary.png|alt=octocat]]
+   available in `build/testcases/reports/index.html`.  Here's a [snapshot]
+   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-vanilla-summary.png)
+   of the report.
 
 ### Tracing the Tests
 1. Open the terminal and change the folder to _\<root>_ folder.
@@ -164,9 +164,9 @@ tools.
    by executing `jar xvf <path to dyco4j-logging-1.0.0.jar>`.
 8. Get back to the _\<root>_ folder and execute `bootstrap/bin/ant test`.  This
    will create `trace.*gz` files in _\<root>_ and in 
-   _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a snapshot of the 
-   report in which 1806 events were logged in under 3 minutes.
-   [[https://github.com/rvprasad/DyCo4J/misc/images/ant-tests-instrumented-summary.png|alt=octocat]]
+   _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a [snapshot]
+   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-tests-instrumented-summary.png)
+   of the report in which 1806 events were logged in under 3 minutes.
    
 ### Tracing the Implementation (Internals)
 1. Perform steps 1-7 from _Tracing the Tests_.  If you performed step 8, then 
@@ -184,11 +184,12 @@ tools.
    dyco4j-internals-1.0.0-cli.jar.
 6. Get back to the _\<root>_ folder and execute `bootstrap/bin/ant test`.  This
    will create `trace.*gz` files in _\<root>_ and in 
-   _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a snapshot of the 
-   report in which 613,187,959 events were logged in under 13 minutes. 
-   [[https://github.com/rvprasad/DyCo4J/misc/images/ant-impl-default-options-instrumented-summary.png|alt=octocat]]
+   _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a [snapshot]
+   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-default-options-instrumented-summary.png)
+   of the report in which 613,187,959 events were logged in under 13 minutes.
 
 
 When all tracing options are enable, **TBD** events were logged in under **TBD** minutes.
-Here's a snapshot of that report.
-[[https://github.com/rvprasad/DyCo4J/misc/images/ant-impl-all-options-instrumented-summary.png|alt=octocat]]
+Here's a [snapshot]
+(https://github.com/rvprasad/DyCo4J/misc/images/ant-impl-all-options-instrumented-summary.png) 
+of that report.
