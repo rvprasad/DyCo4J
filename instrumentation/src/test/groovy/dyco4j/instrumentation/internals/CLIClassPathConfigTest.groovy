@@ -14,6 +14,8 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
+import java.nio.file.Path
+
 import static dyco4j.instrumentation.internals.CLITest.instrumentCode
 import static dyco4j.instrumentation.internals.CLITest.IN_FOLDER_OPTION
 import static dyco4j.instrumentation.internals.CLITest.OUT_FOLDER_OPTION
@@ -26,14 +28,14 @@ class CLIClassPathConfigTest extends AbstractCLITest {
 
     private static final String CLASSPATH_CONFIG_OPTION = "--$CLI.CLASSPATH_CONFIG_OPTION"
 
-    private static classpathConfigFile
-    private static sourceFile
-    private static targetFile
+    private static Path classpathConfigFile
+    private static Path sourceFile
+    private static Path targetFile
 
     @BeforeClass
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file1 = Paths.get('dyco4j', 'instrumentation', 'internals', 'CLIClassPathConfigTestSubject.class')
-        copyClassToBeInstrumentedIntoInFolder(_file1)
+        copyClassesToBeInstrumentedIntoInFolder([_file1])
 
         final _extra_class_folder = resolveUnderRootFolder("extra_classes")
         assert Files.createDirectories(_extra_class_folder) != null: "Could not create in folder $_extra_class_folder"

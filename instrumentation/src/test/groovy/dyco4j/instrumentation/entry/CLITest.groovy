@@ -24,9 +24,9 @@ class CLITest extends AbstractCLITest {
     @BeforeClass
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file1 = Paths.get("dyco4j", "instrumentation", "entry", "CLITestSubject.class")
-        copyClassToBeInstrumentedIntoInFolder(_file1)
+        copyClassesToBeInstrumentedIntoInFolder([_file1])
         final _file2 = Paths.get("dyco4j", "instrumentation", "entry", RESOURCE_FILE_NAME)
-        copyResourceIntoInFolder(_file2)
+        copyResourcesIntoInFolder([_file2])
     }
 
     protected static final instrumentCode(args) {

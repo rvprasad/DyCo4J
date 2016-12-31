@@ -111,12 +111,12 @@ abstract class AbstractCLITest {
         traceLines.collect { it.replaceAll(/^\d+,/, "") }
     }
 
-    protected static copyClassToBeInstrumentedIntoInFolder(final Path pathToClass) {
-        copyFileIntoInFolder(pathToClass, TEST_CLASS_FOLDER)
+    protected static copyClassesToBeInstrumentedIntoInFolder(final pathsToClasses) {
+        copyFilesIntoInFolder(pathsToClasses, TEST_CLASS_FOLDER)
     }
 
-    protected static copyResourceIntoInFolder(final Path pathToClass) {
-        copyFileIntoInFolder(pathToClass, TEST_RESOURCE_FOLDER)
+    protected static copyResourcesIntoInFolder(final pathsToResources) {
+        copyFilesIntoInFolder(pathsToResources, TEST_RESOURCE_FOLDER)
     }
 
     protected static instrumentCode(final clazz, final args) {
@@ -143,11 +143,13 @@ abstract class AbstractCLITest {
         _ret
     }
 
-    protected static copyFileIntoInFolder(final Path pathToFile, final Path srcFolder) {
-        final _trg = IN_FOLDER.resolve(pathToFile)
-        Files.createDirectories(_trg.parent)
-        final _src = srcFolder.resolve(pathToFile)
-        Files.copy(_src, _trg)
+    protected static copyFilesIntoInFolder(final pathsToFiles, final Path srcFolder) {
+        for (final Path _pathToFile in pathsToFiles) {
+            final _trg = IN_FOLDER.resolve(_pathToFile)
+            Files.createDirectories(_trg.parent)
+            final _src = srcFolder.resolve(_pathToFile)
+            Files.copy(_src, _trg)
+        }
     }
 
     protected static deleteFiles(final Path folder, final pattern) {
