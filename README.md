@@ -3,115 +3,119 @@
 This project provides instrumentation-based tools to collect dynamic information
 about JVM based code.
 
-- **utility** library contains functionality commonly used in program analysis 
-  efforts.  
-    - Required Runtime Dependences:
-        - [Gson](https://github.com/google/gson) 2.8
+##utility 
+
+This library contains functionality commonly used in program analysis efforts.  
+- Required Runtime Dependences:
+    - [Gson](https://github.com/google/gson) 2.8
         
-  _Note:_ This library may be moved out of this repository/project.  
+_Note:_ This library may be moved out of this repository/project.  
 
 
-- **logging** library contains functionality to log JVM based program 
-  information.
+##logging
+ 
+This library contains functionality to log JVM based program information.
   
-  The library writes log statements to trace files with names conforming to 
-  `^trace.*.gz` regex.  The first line of a trace file will be the time when 
-  the trace file was created.  An execution that involves this logging 
-  library can generate multiple trace files; specifically, one trace file for 
-  each _java.lang.Class_ instance of _Logger_ class.
+The library writes log statements to trace files with names conforming to
+`^trace.*.gz` regex.  The first line of a trace file will be the time when the
+trace file was created.  An execution that involves this logging library can
+generate multiple trace files; specifically, one trace file for each
+_java.lang.Class_ instance of _Logger_ class.
   
-  Each log statement in a trace file is a comma separated list of values.  It 
-  starts with an optional message frequency (if greater than 1) followed by the 
-  thread id of the logger and the logged message.  The logged message will 
-  conform to one of the following formats.
-    - method entry `en,<method>`
-      - This message will be followed by the set of corresponding method 
-        argument messages with the exception in case of constructors.
-    - method argument `ar,<index>,<value>`
-    - method return `re,<value>`
-      - There will be no value in case of return from void methods.
-    - method exception `xp,<value>`
-    - method exit `ex,<method>,(N|E)`
-      - `N` and `E` denote normal and exceptional exit, respectively.
-      - This message will be preceded by the corresponding method return or 
-        exception message.
-    - array access `(GETA|PUTA),<index>,<array>,<value>`
-    - field access `(GETF|PUTF),<field>,<receiver>,<value>`
+Each log statement in a trace file is a comma separated list of values.  It
+starts with an optional message frequency (if greater than 1) followed by the
+thread id of the logger and the logged message.  The logged message will
+conform to one of the following formats.
+- method entry `en,<method>`
+  - This message will be followed by the set of corresponding method 
+    argument messages with the exception in case of constructors.
+- method argument `ar,<index>,<value>`
+- method return `re,<value>`
+  - There will be no value in case of return from void methods.
+- method exception `xp,<value>`
+- method exit `ex,<method>,(N|E)`
+  - `N` and `E` denote normal and exceptional exit, respectively.
+  - This message will be preceded by the corresponding method return or 
+    exception message.
+- array access `(GETA|PUTA),<index>,<array>,<value>`
+- field access `(GETF|PUTF),<field>,<receiver>,<value>`
     
-  Each value (including array and receiver) will have one of the following 
-  prefixes to identify its type.
-    - array `a:`
-    - boolean `b:`
-    - byte `y:`
-    - char `c:`
-    - double `d:`
-    - float `f:`
-    - int `i:`
-    - long `l:`
-    - Object `o:`
-    - short `h:`
-    - String `s:`
-    - Throwable `t:`
+Each value (including array and receiver) will have one of the following
+prefixes to identify its type.
+- array `a:`
+- boolean `b:`
+- byte `y:`
+- char `c:`
+- double `d:`
+- float `f:`
+- int `i:`
+- long `l:`
+- Object `o:`
+- short `h:`
+- String `s:`
+- Throwable `t:`
     
-  True, false, and null values will be represented as `f`, `t`, and `null`.
+True, false, and null values will be represented as `f`, `t`, and `null`.
 
-  Logging library can be configured with the following properties specified in 
-  _logging.properties_ file.
-    - _traceFolder_ where the trace files should be written.
-    - _bufferLength_ to be used during logging.
+Logging library can be configured with the following properties specified in
+_logging.properties_ file.
+  - _traceFolder_ where the trace files should be written.
+  - _bufferLength_ to be used during logging.
   
-  This properties file should be available as _dyco4j/logging/logging.properties_
-  on the classpath.
+This properties file should be available as _dyco4j/logging/logging.properties_
+on the classpath.
   
-    - Required Runtime Dependences:
-        - [ASM](http://asm.ow2.org/) 5.2
+- Required Runtime Dependences:
+    - [ASM](http://asm.ow2.org/) 5.2
 
 
-- **instrumentation** tools instrument code of interest with logging statements 
-  (based on above _logging_ library) to collect information.  
-  
-  The **entry** tool is intended to instrument the entry points in the program 
-  of interest.  The instrumentation adds code to log a _marker_ statement each 
-  time an entry point is executed.  This statement includes the fully qualified
-  name (in JVM format) of the entry point.
-  
-  Out of the box, it instruments entry points of test cases, i.e., methods 
-  whose names match `^test.*` regex and methods annotated with _JUnit 
-  (`org.junit.{Test,After,Before,AfterClass,BeforeClass}`)_ and _TestNG 
-  (`org.testng.annotations.{Test,AfterTest,BeforeTest,AfterClass,BeforeClass,
-  AfterMethod,BeforeMethod}`)_ annotations. (Note: We have not tested the tools 
-  with TestNG annotations.)  
-  
-  The **internals** tool is intended to instrument the internals of the program
-  of interest.  The instrumentation adds code to log information about
-    - method entries including arguments,
-    - method exits including return value and thrown exception, 
-    - field reads and writes, and 
-    - array reads and writes.
+##instrumentation
     
-  To curb the size of the generated traces, this tool maps FQNs (in JVM format) 
-  of classes, methods, and fields to short ids during instrumentation and 
-  writes the mapping into _program_data.json_ file. The injected logging 
-  statements use the short ids instead of FQNs.  So, to make sense of the data 
-  in the traces generated from the execution of the instrumented program, it 
-  should be decoded using _program_data.json_, which can be deserialized via
-  `utility:dyco4j.utility.ProgramData.loadData` method.
-   
-  In both tools, the scope of instrumentation can be configured via 
-  `--method-name-regex` command-line option, i.e., only instrument methods 
-  with matching unqualified name.
+These tools instrument code of interest with logging statements (based on above
+_logging_ library) to collect information.  
   
-    - Required Runtime Dependences:
-        - [ASM](http://asm.ow2.org/) 5.2 
-        - [ASM Commons](http://asm.ow2.org/) 5.2
-        - [ASM Tree](http://asm.ow2.org/) 5.2
-        - [Commons CLI](http://commons.apache.org/proper/commons-cli/) 1.3.1
-        - [SLF4J API](http://www.slf4j.org/) 1.7.22
-        - [Gson](https://github.com/google/gson) 2.8
-        - [DyCO4J Logging](https://github.com/rvprasad/DyCo4J) 1.0
-        - [DyCO4J Utility](https://github.com/rvprasad/DyCo4J) 1.0
-    - Optional Depednences:
-        - [SLF4J Simple](http://www.slf4j.org/) 1.7.22
+The **entry** tool is intended to instrument the entry points in the program of
+interest.  The instrumentation adds code to log a _marker_ statement each time
+an entry point is executed.  This statement includes the fully qualified name
+(in JVM format) of the entry point.
+  
+Out of the box, it instruments entry points of test cases, i.e., methods whose
+names match `^test.*` regex and methods annotated with _JUnit
+(`org.junit.{Test,After,Before,AfterClass,BeforeClass}`)_ and _TestNG
+(`org.testng.annotations.{Test,AfterTest,BeforeTest,AfterClass,BeforeClass,
+AfterMethod,BeforeMethod}`)_ annotations. (Note: We have not tested the tools
+with TestNG annotations.)  
+  
+The **internals** tool is intended to instrument the internals of the program
+of interest.  The instrumentation adds code to log information about
+- method entries including arguments,
+- method exits including return value and thrown exception, 
+- field reads and writes, and 
+- array reads and writes.
+    
+To curb the size of the generated traces, this tool maps FQNs (in JVM format)
+of classes, methods, and fields to short ids during instrumentation and writes
+the mapping into _program_data.json_ file. The injected logging statements use
+the short ids instead of FQNs.  So, to make sense of the data in the traces
+generated from the execution of the instrumented program, it should be decoded
+using _program_data.json_, which can be deserialized via
+`utility:dyco4j.utility.ProgramData.loadData` method.  
+
+In both tools, the scope of instrumentation can be configured via
+`--method-name-regex` command-line option, i.e., only instrument methods with
+matching unqualified name.
+  
+- Required Runtime Dependences:
+    - [ASM](http://asm.ow2.org/) 5.2 
+    - [ASM Commons](http://asm.ow2.org/) 5.2
+    - [ASM Tree](http://asm.ow2.org/) 5.2
+    - [Commons CLI](http://commons.apache.org/proper/commons-cli/) 1.3.1
+    - [SLF4J API](http://www.slf4j.org/) 1.7.22
+    - [Gson](https://github.com/google/gson) 2.8
+    - [DyCO4J Logging](https://github.com/rvprasad/DyCo4J) 1.0
+    - [DyCO4J Utility](https://github.com/rvprasad/DyCo4J) 1.0
+- Optional Depednences:
+    - [SLF4J Simple](http://www.slf4j.org/) 1.7.22
         
         
 ## Requirements
