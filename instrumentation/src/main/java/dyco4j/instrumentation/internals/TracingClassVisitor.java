@@ -38,14 +38,14 @@ final class TracingClassVisitor extends ClassVisitor {
     public void visit(final int version, final int access, final String name, final String signature,
                       final String superName, final String[] interfaces) {
         // force the class version to be 52 (Java 8 compliant)
-        this.cv.visit(52, access, name, signature, superName, interfaces);
+        super.visit(52, access, name, signature, superName, interfaces);
         this.className = name;
     }
 
     @Override
     public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature,
                                      final String[] exceptions) {
-        final MethodVisitor _mv1 = this.cv.visitMethod(access, name, desc, signature, exceptions);
+        final MethodVisitor _mv1 = super.visitMethod(access, name, desc, signature, exceptions);
         if (_mv1 != null && shouldInstrumentMethod(name)) {
             final TracingMethodVisitor _mv2 = new TracingMethodVisitor(access, name, desc, _mv1, this);
             return name.equals("<init>") ? new InitTracingMethodVisitor(access, name, _mv2) : _mv2;

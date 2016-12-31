@@ -33,7 +33,7 @@ final class TracingClassVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(final int access, final String name, final String desc,
                                      final String signature, final String[] exceptions) {
-        final MethodVisitor _mv = this.cv.visitMethod(access, name, desc, signature, exceptions);
+        final MethodVisitor _mv = super.visitMethod(access, name, desc, signature, exceptions);
         return _mv == null || (access & Opcodes.ACC_PUBLIC) == 0 ? _mv :
                 new TracingMethodVisitor(name, desc, _mv, this);
     }

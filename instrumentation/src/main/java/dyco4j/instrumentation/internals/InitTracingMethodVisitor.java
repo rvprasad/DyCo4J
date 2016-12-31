@@ -47,7 +47,6 @@ final class InitTracingMethodVisitor extends MethodVisitor {
         }
     }
 
-
     @Override
     public void visitInsn(final int opcode) {
         super.visitInsn(opcode);
@@ -273,7 +272,6 @@ final class InitTracingMethodVisitor extends MethodVisitor {
                     this.stackFrame.push(OTHER);
         }
     }
-
 
     @Override
     public void visitIntInsn(final int opcode, final int operand) {

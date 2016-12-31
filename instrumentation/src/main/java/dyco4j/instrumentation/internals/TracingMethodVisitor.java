@@ -46,23 +46,23 @@ final class TracingMethodVisitor extends MethodVisitor {
             if (this.cv.cmdLineOptions.traceMethodRetValue)
                 LoggingHelper.emitLogReturn(this.mv, method.getReturnType());
             LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.NORMAL);
-            this.mv.visitInsn(opcode);
+            super.visitInsn(opcode);
         } else if (opcode == Opcodes.AASTORE || opcode == Opcodes.BASTORE || opcode == Opcodes.CASTORE ||
                 opcode == Opcodes.DASTORE || opcode == Opcodes.FASTORE || opcode == Opcodes.IASTORE ||
                 opcode == Opcodes.LASTORE || opcode == Opcodes.SASTORE) {
             if (this.cv.cmdLineOptions.traceArrayAccess)
                 visitArrayStoreInsn(opcode);
             else
-                this.mv.visitInsn(opcode);
+                super.visitInsn(opcode);
         } else if (opcode == Opcodes.AALOAD || opcode == Opcodes.BALOAD || opcode == Opcodes.CALOAD ||
                 opcode == Opcodes.DALOAD || opcode == Opcodes.FALOAD || opcode == Opcodes.IALOAD ||
                 opcode == Opcodes.LALOAD || opcode == Opcodes.SALOAD) {
             if (this.cv.cmdLineOptions.traceArrayAccess)
                 visitArrayLoadInsn(opcode);
             else
-                this.mv.visitInsn(opcode);
+                super.visitInsn(opcode);
         } else
-            this.mv.visitInsn(opcode);
+            super.visitInsn(opcode);
     }
 
     @Override
@@ -73,48 +73,48 @@ final class TracingMethodVisitor extends MethodVisitor {
             final boolean _isFieldStatic = opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC;
             if (opcode == Opcodes.GETSTATIC || opcode == Opcodes.GETFIELD) {
                 if (_isFieldStatic)
-                    this.mv.visitInsn(Opcodes.ACONST_NULL);
+                    super.visitInsn(Opcodes.ACONST_NULL);
                 else
-                    this.mv.visitInsn(Opcodes.DUP);
+                    super.visitInsn(Opcodes.DUP);
 
-                this.mv.visitFieldInsn(opcode, owner, name, desc);
+                super.visitFieldInsn(opcode, owner, name, desc);
                 LoggingHelper.emitLogField(this.mv, _fieldId, _fieldType, Logger.FieldAction.GETF);
             } else if (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD) {
                 if (_isFieldStatic) {
-                    this.mv.visitInsn(Opcodes.ACONST_NULL);
+                    super.visitInsn(Opcodes.ACONST_NULL);
                 } else {
                     LoggingHelper.emitSwapTwoWordsAndOneWord(this.mv, _fieldType);
                     final int _fieldSort = _fieldType.getSort();
                     if (_fieldSort == Type.LONG || _fieldSort == Type.DOUBLE)
-                        this.mv.visitInsn(Opcodes.DUP_X2);
+                        super.visitInsn(Opcodes.DUP_X2);
                     else
-                        this.mv.visitInsn(Opcodes.DUP_X1);
+                        super.visitInsn(Opcodes.DUP_X1);
                 }
 
                 LoggingHelper.emitSwapOneWordAndTwoWords(this.mv, _fieldType);
                 LoggingHelper.emitLogField(this.mv, _fieldId, _fieldType, Logger.FieldAction.PUTF);
-                this.mv.visitFieldInsn(opcode, owner, name, desc);
+                super.visitFieldInsn(opcode, owner, name, desc);
             }
         } else {
-            this.mv.visitFieldInsn(opcode, owner, name, desc);
+            super.visitFieldInsn(opcode, owner, name, desc);
         }
     }
 
     @Override
     public final void visitMaxs(final int maxStack, final int maxLocals) {
         final Label _endLabel = new Label();
-        this.mv.visitLabel(_endLabel);
-        this.mv.visitTryCatchBlock(this.beginOutermostHandler, _endLabel, _endLabel, "java/lang/Throwable");
+        super.visitLabel(_endLabel);
+        super.visitTryCatchBlock(this.beginOutermostHandler, _endLabel, _endLabel, "java/lang/Throwable");
         LoggingHelper.emitLogException(this.mv);
         LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.EXCEPTIONAL);
-        this.mv.visitInsn(Opcodes.ATHROW);
+        super.visitInsn(Opcodes.ATHROW);
 
-        this.mv.visitMaxs(maxStack, maxLocals);
+        super.visitMaxs(maxStack, maxLocals);
     }
 
     void emitLogMethodEntry() {
-        this.mv.visitCode();
-        this.mv.visitLabel(this.beginOutermostHandler);
+        super.visitCode();
+        super.visitLabel(this.beginOutermostHandler);
         LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
     }
 
@@ -137,19 +137,19 @@ final class TracingMethodVisitor extends MethodVisitor {
 
     private void visitArrayStoreInsn(final int opcode) {
         if (opcode == Opcodes.LASTORE || opcode == Opcodes.DASTORE) {
-            this.mv.visitInsn(Opcodes.DUP2_X2);
-            this.mv.visitInsn(Opcodes.POP2);
-            this.mv.visitInsn(Opcodes.DUP2_X2);
-            this.mv.visitInsn(Opcodes.DUP2_X2);
-            this.mv.visitInsn(Opcodes.POP2);
-            this.mv.visitInsn(Opcodes.DUP2_X2);
+            super.visitInsn(Opcodes.DUP2_X2);
+            super.visitInsn(Opcodes.POP2);
+            super.visitInsn(Opcodes.DUP2_X2);
+            super.visitInsn(Opcodes.DUP2_X2);
+            super.visitInsn(Opcodes.POP2);
+            super.visitInsn(Opcodes.DUP2_X2);
         } else {
-            this.mv.visitInsn(Opcodes.DUP_X2);
-            this.mv.visitInsn(Opcodes.POP);
-            this.mv.visitInsn(Opcodes.DUP2_X1);
-            this.mv.visitInsn(Opcodes.DUP2_X1);
-            this.mv.visitInsn(Opcodes.POP2);
-            this.mv.visitInsn(Opcodes.DUP_X2);
+            super.visitInsn(Opcodes.DUP_X2);
+            super.visitInsn(Opcodes.POP);
+            super.visitInsn(Opcodes.DUP2_X1);
+            super.visitInsn(Opcodes.DUP2_X1);
+            super.visitInsn(Opcodes.POP2);
+            super.visitInsn(Opcodes.DUP_X2);
         }
 
         switch (opcode) {
@@ -181,18 +181,18 @@ final class TracingMethodVisitor extends MethodVisitor {
 
         LoggingHelper.emitLogArray(this.mv, Logger.ArrayAction.PUTA);
 
-        this.mv.visitInsn(opcode);
+        super.visitInsn(opcode);
     }
 
     private void visitArrayLoadInsn(final int opcode) {
-        this.mv.visitInsn(Opcodes.DUP2);
+        super.visitInsn(Opcodes.DUP2);
 
-        this.mv.visitInsn(opcode);
+        super.visitInsn(opcode);
 
         if (opcode == Opcodes.LALOAD || opcode == Opcodes.DALOAD)
-            this.mv.visitInsn(Opcodes.DUP2_X2);
+            super.visitInsn(Opcodes.DUP2_X2);
         else
-            this.mv.visitInsn(Opcodes.DUP_X2);
+            super.visitInsn(Opcodes.DUP_X2);
 
         switch (opcode) {
             case Opcodes.AALOAD:
