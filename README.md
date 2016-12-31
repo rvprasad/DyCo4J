@@ -3,7 +3,7 @@
 This project provides instrumentation-based tools to collect dynamic information
 about JVM based code.
 
-##utility 
+##Utility Library
 
 This library contains functionality commonly used in program analysis efforts.  
 - Required Runtime Dependences:
@@ -12,7 +12,7 @@ This library contains functionality commonly used in program analysis efforts.
 _Note:_ This library may be moved out of this repository/project.  
 
 
-##logging
+##Logging Library
  
 This library contains functionality to log JVM based program information.
   
@@ -69,7 +69,7 @@ on the classpath.
     - [ASM](http://asm.ow2.org/) 5.2
 
 
-##instrumentation
+##Instrumentation Tools
     
 These tools instrument code of interest with logging statements (based on above
 _logging_ library) to collect information.  
