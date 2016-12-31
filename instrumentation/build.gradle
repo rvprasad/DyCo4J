@@ -70,7 +70,10 @@ task entryJar(type: Jar) {
     from sourceSets.main.output
     exclude '**/internals/**'
     manifest {
-        attributes 'Main-Class': 'dyco4j/instrumentation/entry/CLI'
+        attributes (
+            'Main-Class': 'dyco4j/instrumentation/entry/CLI',
+            'Class-Path': configurations.runtime.collect { it.getName() }.join(' ')
+        )
     }
 }
 
@@ -82,7 +85,10 @@ task internalsJar(type: Jar) {
     from sourceSets.main.output
     exclude '**/entry/**'
     manifest {
-        attributes 'Main-Class': 'dyco4j/instrumentation/internals/CLI'
+        attributes (
+            'Main-Class': 'dyco4j/instrumentation/internals/CLI',
+            'Class-Path': configurations.runtime.collect { it.getName() }.join(' ')
+        )
     }
 }
 
