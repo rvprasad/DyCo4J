@@ -72,9 +72,9 @@ class CLIClassPathConfigTest extends AbstractCLITest {
         assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
                                CLASSPATH_CONFIG_OPTION, classpathConfigFile.toString()]) == [1L, 0L]
 
-        Files.move(targetFile, sourceFile) // move Pair class back into build/classes/test
+        Files.move(targetFile, sourceFile) // move SomeClass class back into build/classes/test
         final ExecutionResult _executionResult = executeInstrumentedCode()
-        Files.move(sourceFile, targetFile) // move Pair class back into build/tmp/extra_classes
+        Files.move(sourceFile, targetFile) // move SomeClass class back into build/tmp/extra_classes
         assert _executionResult.exitCode == 0
 
         assertTraceLengthIs(_executionResult, 3)

@@ -34,7 +34,9 @@ final class InitTracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitCode() {
-        ((TracingMethodVisitor) this.mv).emitLogMethodEntry();
+        final TracingMethodVisitor _mv = (TracingMethodVisitor) this.mv;
+        _mv.emitLogMethodEntry();
+        _mv.beginOutermostHandlerRegion();
     }
 
     @Override
@@ -392,13 +394,12 @@ final class InitTracingMethodVisitor extends MethodVisitor {
 
     private void processVisitMethodInsn(final int opcode, final String owner, final String name, final String desc,
                                         final boolean itf) {
-        this.mv.visitMethodInsn(opcode, owner, name, desc, itf);
-        final Type[] _types = Type.getArgumentTypes(desc);
-        for (final Type _type : _types) {
+        for (final Type _type : Type.getArgumentTypes(desc)) {
             this.stackFrame.pop();
             if (_type.getSize() == 2)
                 this.stackFrame.pop();
         }
+        boolean _flag = false;
         switch (opcode) {
             case Opcodes.INVOKESTATIC:
                 break;
@@ -407,13 +408,21 @@ final class InitTracingMethodVisitor extends MethodVisitor {
                 this.stackFrame.pop(); // objectref
                 break;
             case Opcodes.INVOKESPECIAL:
-                Object type = this.stackFrame.pop(); // objectref
-                if (type == THIS && !superInitialized) {
-                    ((TracingMethodVisitor) this.mv).emitLogMethodArguments();
-                    this.superInitialized = true;
-                }
+                _flag = this.stackFrame.pop() == THIS && !superInitialized;  // objectref
                 break;
         }
+
+        if (_flag) {
+            this.superInitialized = true;
+            final TracingMethodVisitor _mv = (TracingMethodVisitor) this.mv;
+            _mv.endOutermostHandlerRegion();
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            _mv.beginOutermostHandlerRegion();
+            _mv.emitLogMethodArguments();
+        } else {
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+        }
+
 
         final Type _returnType = Type.getReturnType(desc);
         if (_returnType != Type.VOID_TYPE) {

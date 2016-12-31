@@ -16,19 +16,23 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 final class TracingMethodVisitor extends MethodVisitor {
     private final String methodId;
-    private final Label beginOutermostHandler;
+    private final Map<Label, Label> outermostHandlerRegions;
     private final Method method;
     private final boolean isStatic;
     private final TracingClassVisitor cv;
+    private Label startLabel;
 
     TracingMethodVisitor(final int access, final String name, final String desc, final MethodVisitor mv,
                          final TracingClassVisitor owner) {
         super(CLI.ASM_VERSION, mv);
         this.method = new Method(name, desc);
         this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
-        this.beginOutermostHandler = new Label();
+        this.outermostHandlerRegions = new LinkedHashMap<>();
         this.methodId = owner.getMethodId(name, desc);
         this.cv = owner;
     }
@@ -36,6 +40,7 @@ final class TracingMethodVisitor extends MethodVisitor {
     @Override
     public void visitCode() {
         emitLogMethodEntry();
+        beginOutermostHandlerRegion();
         emitLogMethodArguments();
     }
 
@@ -102,19 +107,23 @@ final class TracingMethodVisitor extends MethodVisitor {
 
     @Override
     public final void visitMaxs(final int maxStack, final int maxLocals) {
-        final Label _endLabel = new Label();
-        super.visitLabel(_endLabel);
-        super.visitTryCatchBlock(this.beginOutermostHandler, _endLabel, _endLabel, "java/lang/Throwable");
-        LoggingHelper.emitLogException(this.mv);
-        LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.EXCEPTIONAL);
-        super.visitInsn(Opcodes.ATHROW);
-
+        // We break up the outermost handler into multiple segments to deal with super calls in constructors.
+        Label _handlerLabel = endOutermostHandlerRegion();
+        for (final Map.Entry<Label, Label> _e : this.outermostHandlerRegions.entrySet()) {
+            final Label _beginLabel = _e.getKey();
+            final Label _endLabel = _e.getValue();
+            super.visitTryCatchBlock(_beginLabel, _endLabel, _handlerLabel, "java/lang/Throwable");
+            LoggingHelper.emitLogException(this.mv);
+            LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.EXCEPTIONAL);
+            super.visitInsn(Opcodes.ATHROW);
+            _handlerLabel = new Label();
+            super.visitLabel(_handlerLabel);
+        }
         super.visitMaxs(maxStack, maxLocals);
     }
 
     void emitLogMethodEntry() {
         super.visitCode();
-        super.visitLabel(this.beginOutermostHandler);
         LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
     }
 
@@ -133,6 +142,21 @@ final class TracingMethodVisitor extends MethodVisitor {
                 _position++;
             }
         }
+    }
+
+    void beginOutermostHandlerRegion() {
+        final Label _lbl = new Label();
+        super.visitLabel(_lbl);
+        this.startLabel = _lbl;
+    }
+
+    Label endOutermostHandlerRegion() {
+        final Label _lbl = new Label();
+        super.visitLabel(_lbl);
+        assert this.startLabel != null;
+        this.outermostHandlerRegions.put(this.startLabel, _lbl);
+        this.startLabel = null;
+        return _lbl;
     }
 
     private void visitArrayStoreInsn(final int opcode) {
