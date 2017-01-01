@@ -112,6 +112,16 @@ public final class LoggerTest {
     }
 
     @Test
+    public void testLogMethodCall() throws Exception {
+        final String _msg = "test message";
+        Logger.logMethodCall(_msg);
+
+        final String _expected = MessageFormat.format("{0},{1},{2}", Thread.currentThread().getId(),
+                Logger.METHOD_CALL_TAG, _msg);
+        assertEquals(_expected, getContent()[1]);
+    }
+
+    @Test
     public void testLogMethodEntry() throws Exception {
         final String _msg = "test message";
         Logger.logMethodEntry(_msg);

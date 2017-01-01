@@ -10,10 +10,8 @@ package dyco4j.instrumentation.internals;
 
 import dyco4j.instrumentation.LoggingHelper;
 import dyco4j.logging.Logger;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import dyco4j.utility.ClassNameHelper;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
 
 import java.util.LinkedHashMap;
@@ -120,6 +118,23 @@ final class TracingMethodVisitor extends MethodVisitor {
             super.visitLabel(_handlerLabel);
         }
         super.visitMaxs(maxStack, maxLocals);
+    }
+
+    @Override
+    public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc,
+                                final boolean itf) {
+        if (this.cv.cmdLineOptions.traceMethodCall)
+            LoggingHelper.emitLogMethodCall(this.mv, this.cv.getMethodId(name, owner, desc));
+        super.visitMethodInsn(opcode, owner, name, desc, itf);
+    }
+
+    @Override
+    public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm,
+                                       final Object... bsmArgs) {
+        if (this.cv.cmdLineOptions.traceMethodCall)
+            LoggingHelper.emitLogMethodCall(this.mv,
+                    this.cv.getMethodId(name, ClassNameHelper.DYNAMIC_METHOD_OWNER, desc));
+        super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
     }
 
     void emitLogMethodEntry() {

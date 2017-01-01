@@ -1,12 +1,8 @@
 // In this section you declare where to find the dependencies of your project
 repositories {
     jcenter()
-    flatDir {
-        dirs 'libs'
-    }
+    flatDir dirs: ['../utility/build/libs/', '../logging/build/libs/']
 }
-
-version = '0.7'
 
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
@@ -21,8 +17,8 @@ dependencies {
     compile 'org.ow2.asm:asm-tree:5.2'
     compile 'commons-cli:commons-cli:1.3.1'
     compile 'org.slf4j:slf4j-api:1.7.22'
-    compile name: "$JVM_DYN_INFO_COLLECTION_LOGGING"
-    compile name: "$JVM_DYN_INFO_COLLECTION_UTILITY"
+    compile ":dyco4j-logging:$DYCO4J_LOGGING_VERSION"
+    compile ":dyco4j-utility:$DYCO4J_UTILITY_VERSION"
     runtime 'com.google.code.gson:gson:2.8.0'
 
     testCompile 'org.slf4j:slf4j-simple:1.7.22'
@@ -31,23 +27,10 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-task copyUtility(type: Copy) {
-    from '../utility/build/libs/'
-    into './libs'
-    include("${JVM_DYN_INFO_COLLECTION_UTILITY}.jar")
-}
-
-task copyLogging(type: Copy) {
-    from '../logging/build/libs/'
-    into './libs'
-    include("${JVM_DYN_INFO_COLLECTION_LOGGING}.jar")
-}
-
 compileJava {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
     options.compilerArgs << '-Xlint'
-    dependsOn copyLogging, copyUtility
 }
 
 task copyLibs(type: Copy) {
@@ -56,7 +39,7 @@ task copyLibs(type: Copy) {
 }
 
 test {
-    systemProperty 'logging.jar', "libs/${JVM_DYN_INFO_COLLECTION_LOGGING}.jar"
+    systemProperty 'logging.jar', configurations.compile.files { it ==~ /.*dyco4j-logging.*/ }[0]
     exclude '**/CLITestSubject.class'
     exclude '**/CLIClassPathConfigTestSubject.class'
     exclude '**/Pair.class'
@@ -85,9 +68,9 @@ task internalsJar(type: Jar) {
     from sourceSets.main.output
     exclude '**/entry/**'
     manifest {
-        attributes (
-            'Main-Class': 'dyco4j/instrumentation/internals/CLI',
-            'Class-Path': configurations.runtime.collect { it.getName() }.join(' ')
+        attributes(
+                'Main-Class': 'dyco4j/instrumentation/internals/CLI',
+                'Class-Path': configurations.runtime.collect { it.getName() }.join(' ')
         )
     }
 }
@@ -149,4 +132,6 @@ jacocoTestReport {
 task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
 }
+
+version = '0.8'
 

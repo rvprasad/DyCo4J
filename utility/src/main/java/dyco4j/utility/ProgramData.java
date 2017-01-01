@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class ProgramData {
+    // INFO: Refer to ClassNameHelper for info about format of names
     public final Map<String, String> fieldId2Name = new HashMap<>();
     public final Map<String, String> shortFieldName2Id = new HashMap<>();
     public final Map<String, String> methodId2Name = new HashMap<>();

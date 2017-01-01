@@ -23,6 +23,7 @@ public class LoggingHelper {
     private static final Method LOG_ARRAY;
     private static final Method LOG_EXCEPTION;
     private static final Method LOG_FIELD;
+    private static final Method LOG_METHOD_CALL;
     private static final Method LOG_METHOD_ENTRY;
     private static final Method LOG_METHOD_EXIT;
     private static final Method LOG_RETURN;
@@ -36,6 +37,7 @@ public class LoggingHelper {
             LOG_METHOD_EXIT = Method.getMethod(Logger.class.getMethod("logMethodExit", String.class, String.class));
             LOG_ARGUMENT = Method.getMethod(Logger.class.getMethod("logArgument", Byte.TYPE, String.class));
             LOG_RETURN = Method.getMethod(Logger.class.getMethod("logReturn", String.class));
+            LOG_METHOD_CALL = Method.getMethod(Logger.class.getMethod("logMethodCall", String.class));
             LOG_FIELD = Method.getMethod(Logger.class.getMethod("logField", Object.class, String.class, String.class,
                     Logger.FieldAction.class));
             LOG_ARRAY = Method.getMethod(Logger.class.getMethod("logArray", Object.class, Integer.TYPE, String.class,
@@ -154,6 +156,11 @@ public class LoggingHelper {
         final String _name = action.toString();
         mv.visitFieldInsn(Opcodes.GETSTATIC, _a.getInternalName(), _name, _a.getDescriptor());
         emitInvokeLog(mv, LOG_FIELD);
+    }
+
+    public static void emitLogMethodCall(final MethodVisitor mv, final String methodId) {
+        mv.visitLdcInsn(methodId);
+        emitInvokeLog(mv, LOG_METHOD_CALL);
     }
 
     public static void emitLogMethodEntry(final MethodVisitor mv, final String methodId) {

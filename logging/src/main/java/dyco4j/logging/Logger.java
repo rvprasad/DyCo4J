@@ -22,6 +22,7 @@ public final class Logger {
     public static final String METHOD_EXCEPTION_TAG = "xp";
     public static final String METHOD_ARG_TAG = "ar";
     public static final String METHOD_RETURN_TAG = "re";
+    public static final String METHOD_CALL_TAG = "ca";
 
     public static final String ARRAY_TYPE_TAG = "a:";
     public static final String BOOLEAN_TYPE_TAG = "b:";
@@ -67,6 +68,10 @@ public final class Logger {
 
     public static void logArray(final Object array, final int index, final String value, final ArrayAction action) {
         log(action.toString(), Integer.toString(index), toString(array), value);
+    }
+
+    public static void logMethodCall(final String methodId) {
+        log(METHOD_CALL_TAG, methodId);
     }
 
     public static void logException(final Throwable exception) {

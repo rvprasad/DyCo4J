@@ -8,8 +8,10 @@
 
 package dyco4j.instrumentation
 
+import com.google.gson.Gson
 import dyco4j.instrumentation.internals.CLI
 import dyco4j.logging.Logger
+import dyco4j.utility.ProgramData
 import groovy.io.FileType
 import org.junit.After
 import org.junit.AfterClass
@@ -69,7 +71,7 @@ abstract class AbstractCLITest {
         TEST_CLASS_FOLDER.resolve(path)
     }
 
-    protected static assertNestingOfCallsIsValid(traceLines, numOfCalls) {
+    protected static assertNestingOfCallsIsValid(traceLines, numOfMethodEntries) {
         final _stack = []
         def _cnt = 0
         for (String l in traceLines) {
@@ -82,21 +84,21 @@ abstract class AbstractCLITest {
             }
         }
         assert !_stack
-        assert _cnt == numOfCalls: "${traceLines}"
+        assert _cnt == numOfMethodEntries: "${traceLines}"
     }
 
     protected static assertTraceLengthIs(_executionResult, _numOfLines) {
         assert _executionResult.traceLines.size == _numOfLines
     }
 
-    protected static checkFreqOfLogs(String[] traceLines, numOfCalls, numOfArgLogs = 0, numOfReturnLogs = 0,
-                                     numOfExceptionLogs = 0, numOfGetArrayLogs = 0, numOfPutArrayLogs = 0,
-                                     numOfGetFieldLogs = 0, numOfPutFieldLogs = 0) {
+    protected static assertFreqOfLogs(String[] traceLines, numOfMethodEntries, numOfArgLogs = 0, numOfReturnLogs = 0,
+                                      numOfExceptionLogs = 0, numOfGetArrayLogs = 0, numOfPutArrayLogs = 0,
+                                      numOfGetFieldLogs = 0, numOfPutFieldLogs = 0) {
         // should not raise exception
         Date.parseToStringDate(traceLines[0])
 
         final _numOfLines = traceLines.length - 1
-        assertNestingOfCallsIsValid(traceLines[1.._numOfLines], numOfCalls)
+        assertNestingOfCallsIsValid(traceLines[1.._numOfLines], numOfMethodEntries)
 
         assert traceLines.count { it =~ /^$Logger.METHOD_ARG_TAG/ } == numOfArgLogs
         assert traceLines.count { it =~ /^$Logger.METHOD_RETURN_TAG/ } == numOfReturnLogs
@@ -105,6 +107,46 @@ abstract class AbstractCLITest {
         assert traceLines.count { it =~ /^$PUT_ARRAY/ } == numOfPutArrayLogs
         assert traceLines.count { it =~ /^$GET_FIELD/ } == numOfGetFieldLogs
         assert traceLines.count { it =~ /^$PUT_FIELD/ } == numOfPutFieldLogs
+    }
+
+    protected static assertAllAndOnlyMatchingMethodsAreTraced(traceLines, methodNameRegex) {
+        def _methodIds = traceLines.findAll { it ==~ /^$Logger.METHOD_ENTRY_TAG,.*/ }.collect { it.split(',')[1] }
+        _methodIds += traceLines.findAll { it ==~ /^$Logger.METHOD_EXIT_TAG,.*/ }.collect { it.split(',')[1] }
+
+        new File(CLI.PROGRAM_DATA_FILE_NAME).withReader { rdr ->
+            final _prog_data = new Gson().fromJson(rdr, ProgramData.class)
+
+            _methodIds.each {
+                assert _prog_data.methodId2Name[it].split(':')[0].split('/')[-1] ==~ methodNameRegex
+            }
+
+            _prog_data.methodId2Name.each { methodId, name ->
+                assert !(name.split(':')[0].split('/')[-1] ==~ methodNameRegex) || methodId in _methodIds
+            }
+        }
+    }
+
+    protected static assertPropertiesAboutExit(traceLines) {
+        def _prev = null
+        for (final l in traceLines.tail()) {
+            // Every exceptional exit is preceded by an exception
+            if (l ==~ /^$Logger.METHOD_EXIT_TAG,.*,E$/ && _prev) {
+                final _tmp1 = _prev.split(',')
+                assert _tmp1[0] == Logger.METHOD_EXCEPTION_TAG
+            }
+            _prev = l
+        }
+
+        _prev = null
+        for (final l in traceLines.tail()) {
+            // Every return should be followed by a normal exit
+            if (l ==~ /^$Logger.METHOD_RETURN_TAG,.*$/) {
+                _prev = l
+            } else if (_prev) {
+                assert l ==~ /^$Logger.METHOD_EXIT_TAG,.*,N$/
+                _prev = null
+            }
+        }
     }
 
     protected static removeThreadIdFromLog(final traceLines) {

@@ -43,7 +43,7 @@ class CLIInitializerInstrumentationTest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 9)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        checkFreqOfLogs(_traceLines, 4)
+        assertFreqOfLogs(_traceLines, 4)
     }
 }
 

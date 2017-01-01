@@ -9,7 +9,6 @@
 package dyco4j.instrumentation.internals
 
 import dyco4j.instrumentation.AbstractCLITest
-import dyco4j.logging.Logger
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
@@ -82,8 +81,8 @@ class CLIClassPathConfigTest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 3)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        checkFreqOfLogs(_traceLines, 1)
+        assertFreqOfLogs(_traceLines, 1)
 
-        assert _traceLines[2] ==~ /^$Logger.METHOD_EXIT_TAG,m1,N$/
+        assertPropertiesAboutExit(_traceLines)
     }
 }

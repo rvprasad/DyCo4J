@@ -21,7 +21,7 @@ public class CLIClassPathConfigTestSubject {
         System.out.println(j);
     }
 
-    class SomeClass {
+    private class SomeClass {
     }
 }
 

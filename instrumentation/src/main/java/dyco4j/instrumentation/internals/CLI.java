@@ -47,9 +47,10 @@ public final class CLI {
     static final String OUT_FOLDER_OPTION = "out-folder";
     static final String CLASSPATH_CONFIG_OPTION = "classpath-config";
     static final String METHOD_NAME_REGEX_OPTION = "method-name-regex";
-    static final String TRACE_FIELD_ACCESS_OPTION = "trace-field-access";
     static final String TRACE_ARRAY_ACCESS_OPTION = "trace-array-access";
+    static final String TRACE_FIELD_ACCESS_OPTION = "trace-field-access";
     static final String TRACE_METHOD_ARGUMENTS_OPTION = "trace-method-arguments";
+    static final String TRACE_METHOD_CALL_OPTION = "trace-method-call";
     static final String TRACE_METHOD_RETURN_VALUE_OPTION = "trace-method-return-value";
     private static final String METHOD_NAME_REGEX = ".*";
     private static final Logger LOGGER = LoggerFactory.getLogger(CLI.class);
@@ -66,14 +67,16 @@ public final class CLI {
         final String _msg = MessageFormat.format("Regex identifying the methods to be instrumented. Default: {0}.",
                 METHOD_NAME_REGEX);
         _options.addOption(Option.builder().longOpt(METHOD_NAME_REGEX_OPTION).hasArg(true).desc(_msg).build());
-        _options.addOption(Option.builder().longOpt(TRACE_FIELD_ACCESS_OPTION).hasArg(false)
-                .desc("Instrument classes to trace field access.").build());
         _options.addOption(Option.builder().longOpt(TRACE_ARRAY_ACCESS_OPTION).hasArg(false)
-                .desc("Instrument classes to trace array access.").build());
+                .desc("Instrument to trace array access.").build());
+        _options.addOption(Option.builder().longOpt(TRACE_FIELD_ACCESS_OPTION).hasArg(false)
+                .desc("Instrument to trace field access.").build());
         _options.addOption(Option.builder().longOpt(TRACE_METHOD_ARGUMENTS_OPTION).hasArg(false)
-                .desc("Instrument classes to trace method arguments.").build());
+                .desc("Instrument to trace method arguments.").build());
+        _options.addOption(Option.builder().longOpt(TRACE_METHOD_CALL_OPTION).hasArg(false)
+                .desc("Instrument to trace method calls (compile-time signatures).").build());
         _options.addOption(Option.builder().longOpt(TRACE_METHOD_RETURN_VALUE_OPTION).hasArg(false)
-                .desc("Instrument classes to trace method return values.").build());
+                .desc("Instrument to trace method return values.").build());
 
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
@@ -131,11 +134,12 @@ public final class CLI {
                 new CommandLineOptions(cmdLine.hasOption(TRACE_ARRAY_ACCESS_OPTION),
                         cmdLine.hasOption(TRACE_FIELD_ACCESS_OPTION),
                         cmdLine.hasOption(TRACE_METHOD_ARGUMENTS_OPTION),
+                        cmdLine.hasOption(TRACE_METHOD_CALL_OPTION),
                         cmdLine.hasOption(TRACE_METHOD_RETURN_VALUE_OPTION));
         final Set<Path> _filenames = getFilenames(_srcRoot);
         final Path _programDataFile = Paths.get(PROGRAM_DATA_FILE_NAME);
         final ProgramData _programData = ProgramData.loadData(_programDataFile);
-        getMemberId2NameMapping(_filenames, _programData, _cmdLineOptions.traceFieldAccess);
+        getMemberId2NameMapping(_filenames, _programData);
 
         final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
         final String _methodNameRegex = cmdLine.getOptionValue(METHOD_NAME_REGEX_OPTION, METHOD_NAME_REGEX);
@@ -170,12 +174,11 @@ public final class CLI {
         return _tmp1.collect(Collectors.toSet());
     }
 
-    private static void getMemberId2NameMapping(final Collection<Path> filenames, final ProgramData programData,
-                                                final boolean collectFieldInfo) {
+    private static void getMemberId2NameMapping(final Collection<Path> filenames, final ProgramData programData) {
         for (final Path _arg : filenames) {
             try {
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(_arg));
-                final ClassVisitor _cv = new ProgramDataCollectingClassVisitor(programData, collectFieldInfo);
+                final ClassVisitor _cv = new ProgramDataCollectingClassVisitor(programData);
                 _cr.accept(_cv, 0);
             } catch (final Exception _ex) {
                 throw new RuntimeException(_ex);
@@ -187,13 +190,16 @@ public final class CLI {
         final boolean traceArrayAccess;
         final boolean traceFieldAccess;
         final boolean traceMethodArgs;
+        final boolean traceMethodCall;
         final boolean traceMethodRetValue;
 
         CommandLineOptions(final boolean traceArrayAccess, final boolean traceFieldAccess,
-                           final boolean traceMethodArgs, final boolean traceMethodRetValue) {
+                           final boolean traceMethodArgs, final boolean traceMethodCall,
+                           final boolean traceMethodRetValue) {
             this.traceArrayAccess = traceArrayAccess;
             this.traceFieldAccess = traceFieldAccess;
             this.traceMethodArgs = traceMethodArgs;
+            this.traceMethodCall = traceMethodCall;
             this.traceMethodRetValue = traceMethodRetValue;
         }
     }
