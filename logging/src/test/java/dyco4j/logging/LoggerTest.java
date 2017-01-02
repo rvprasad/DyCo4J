@@ -208,11 +208,11 @@ public final class LoggerTest {
         final String[] _tmp1 = getContent();
         final String _expected1 = MessageFormat.format("{0},{1}", Thread.currentThread().getId(), _msg1);
         assertEquals(_expected1, _tmp1[1]);
-        final String _expected2 = MessageFormat.format("2,{0},{1}", Thread.currentThread().getId(), _msg1);
+        final String _expected2 = MessageFormat.format("{0},{1},2", Thread.currentThread().getId(), _msg1);
         assertEquals(_expected2, _tmp1[2]);
         final String _expected3 = MessageFormat.format("{0},{1}", Thread.currentThread().getId(), _msg2);
         assertEquals(_expected3, _tmp1[3]);
-        final String _expected4 = MessageFormat.format("1,{0},{1}", Thread.currentThread().getId(), _msg2);
+        final String _expected4 = MessageFormat.format("{0},{1},1", Thread.currentThread().getId(), _msg2);
         assertEquals(_expected4, _tmp1[4]);
     }
 

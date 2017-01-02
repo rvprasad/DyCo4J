@@ -9,6 +9,7 @@
 package dyco4j.instrumentation.internals;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Date;
 
 public class CLITestSubject {
@@ -92,6 +93,8 @@ public class CLITestSubject {
     }
 
     private void additionalFeatures(long l, byte i, short i1) {
+        for (int j = 0; j < 10; j++)
+            Integer.bitCount(j);
     }
 
     private void exerciseInstanceFeatures() {

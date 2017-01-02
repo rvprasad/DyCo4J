@@ -150,7 +150,17 @@ abstract class AbstractCLITest {
     }
 
     protected static removeThreadIdFromLog(final traceLines) {
-        traceLines.collect { it.replaceAll(/^\d+,/, "") }
+        traceLines.collect {
+            if (it ==~ /^\d+,[a-zA-Z]+,.*/)
+                it.replaceAll(/^\d+,/, "")
+            else {
+                final _tmp = it =~ /^(\d+),\d+,(.*)/
+                if (_tmp) {
+                    _tmp.replaceFirst('$1,$2')
+                } else
+                    it
+            }
+        }
     }
 
     protected static copyClassesToBeInstrumentedIntoInFolder(final pathsToClasses) {

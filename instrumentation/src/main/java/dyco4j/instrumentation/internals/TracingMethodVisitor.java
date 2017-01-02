@@ -24,6 +24,7 @@ final class TracingMethodVisitor extends MethodVisitor {
     private final boolean isStatic;
     private final TracingClassVisitor cv;
     private Label startLabel;
+    private int callsiteId;
 
     TracingMethodVisitor(final int access, final String name, final String desc, final MethodVisitor mv,
                          final TracingClassVisitor owner) {
@@ -124,7 +125,7 @@ final class TracingMethodVisitor extends MethodVisitor {
     public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc,
                                 final boolean itf) {
         if (this.cv.cmdLineOptions.traceMethodCall)
-            LoggingHelper.emitLogMethodCall(this.mv, this.cv.getMethodId(name, owner, desc));
+            LoggingHelper.emitLogMethodCall(this.mv, this.cv.getMethodId(name, owner, desc), this.callsiteId++);
         super.visitMethodInsn(opcode, owner, name, desc, itf);
     }
 
@@ -133,7 +134,7 @@ final class TracingMethodVisitor extends MethodVisitor {
                                        final Object... bsmArgs) {
         if (this.cv.cmdLineOptions.traceMethodCall)
             LoggingHelper.emitLogMethodCall(this.mv,
-                    this.cv.getMethodId(name, ClassNameHelper.DYNAMIC_METHOD_OWNER, desc));
+                    this.cv.getMethodId(name, ClassNameHelper.DYNAMIC_METHOD_OWNER, desc), this.callsiteId++);
         super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
     }
 

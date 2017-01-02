@@ -57,6 +57,24 @@ class CLITest extends AbstractCLITest {
         }
     }
 
+    private static assertCallSitesOccurOnlyOnce(traceLines) {
+        def _seen = []
+        def _stack = []
+        traceLines.each {
+            println(it)
+            if (it ==~ /^$METHOD_ENTRY_TAG,.*/) {
+                _stack << _seen
+                _seen = []
+            } else if (it ==~ /^$METHOD_EXIT_TAG,.*/) {
+                _seen = _stack.pop()
+            } else if (it ==~ /^$METHOD_CALL_TAG,.*/) {
+                final _tmp = it.split(',')[2]
+                assert !(_tmp in _seen)
+                _seen << _tmp
+            }
+        }
+    }
+
     private static executeInstrumentedCode() {
         executeInstrumentedCode(CLITestSubject)
     }
@@ -255,6 +273,8 @@ class CLITest extends AbstractCLITest {
             }
             _prev = l
         }
+
+        assertCallSitesOccurOnlyOnce(_traceLines)
     }
 
     @Test
@@ -450,7 +470,7 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        assertTraceLengthIs(_executionResult, 99)
+        assertTraceLengthIs(_executionResult, 101)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         assertFreqOfLogs(_traceLines, 25, 0, 0, 4, 2, 2)
@@ -470,9 +490,12 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[92] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,${INT_TYPE_TAG}0$/
         assert _traceLines[91].split(',')[2] == _traceLines[92].split(',')[2]
 
-        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 40
+        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 42
 
-        assertPropertiesAboutExit(_traceLines)
+        assertCallSitesOccurOnlyOnce(_traceLines[0..-5])
+
+        assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
+        assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
     }
 
     @Test
@@ -645,7 +668,7 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        assertTraceLengthIs(_executionResult, 127)
+        assertTraceLengthIs(_executionResult, 129)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         assertFreqOfLogs(_traceLines, 25, 32, 0, 4)
@@ -695,9 +718,14 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[123] ==~ /^$METHOD_ARG_TAG,2,${BYTE_TYPE_TAG}1$/
         assert _traceLines[124] ==~ /^$METHOD_ARG_TAG,3,${SHORT_TYPE_TAG}2$/
 
-        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 40
+        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 42
 
         assertCallEntryCoupling(_traceLines)
+
+        assertCallSitesOccurOnlyOnce(_traceLines[0..-5])
+
+        assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
+        assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
     }
 
     @Test
@@ -840,7 +868,7 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        assertTraceLengthIs(_executionResult, 127)
+        assertTraceLengthIs(_executionResult, 129)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         assertFreqOfLogs(_traceLines, 25, 32, 0, 4)
@@ -890,9 +918,14 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[123] ==~ /^$METHOD_ARG_TAG,2,${BYTE_TYPE_TAG}1$/
         assert _traceLines[124] ==~ /^$METHOD_ARG_TAG,3,${SHORT_TYPE_TAG}2$/
 
-        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 40
+        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 42
 
         assertCallEntryCoupling(_traceLines)
+
+        assertCallSitesOccurOnlyOnce(_traceLines[0..-5])
+
+        assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
+        assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
     }
 
     @Test
@@ -940,7 +973,7 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        assertTraceLengthIs(_executionResult, 109)
+        assertTraceLengthIs(_executionResult, 111)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         assertFreqOfLogs(_traceLines, 25, 0, 14, 4)
@@ -968,9 +1001,14 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[95] ==~ /^$METHOD_RETURN_TAG,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[101] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
 
-        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 40
+        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 42
 
         assertCallEntryCoupling(_traceLines)
+
+        assertCallSitesOccurOnlyOnce(_traceLines[0..-5])
+
+        assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
+        assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
     }
 
     @Test
@@ -981,7 +1019,7 @@ class CLITest extends AbstractCLITest {
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        assertTraceLengthIs(_executionResult, 95)
+        assertTraceLengthIs(_executionResult, 97)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
         assertFreqOfLogs(_traceLines, 25, 0, 0, 4)
@@ -993,8 +1031,13 @@ class CLITest extends AbstractCLITest {
                                           54: 'java.io.IOException',
                                           59: 'java.lang.IllegalStateException'])
 
-        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 40
+        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 42
 
         assertCallEntryCoupling(_traceLines)
+
+        assertCallSitesOccurOnlyOnce(_traceLines[0..-5])
+
+        assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
+        assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
     }
 }

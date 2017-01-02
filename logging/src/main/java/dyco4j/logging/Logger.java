@@ -11,6 +11,7 @@ package dyco4j.logging;
 
 
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Objects;
 
@@ -176,9 +177,7 @@ public final class Logger {
 
     private synchronized void cleanup() {
         if (!this.clean) {
-            if (this.msgFreq > 1) {
-                this.logWriter.println(String.format("%d,%s", this.msgFreq - 1, this.prevMsg));
-            }
+            writeLogHelper();
             this.logWriter.flush();
             this.logWriter.close();
             this.clean = true;
@@ -189,13 +188,17 @@ public final class Logger {
         if (Objects.equals(this.prevMsg, msg)) {
             this.msgFreq++;
         } else {
-            if (this.msgFreq > 1) {
-                this.logWriter.println(String.format("%d,%s", this.msgFreq - 1, this.prevMsg));
-            }
+            writeLogHelper();
 
-            this.logWriter.println(String.format("%s", msg));
+            this.logWriter.println(msg);
             this.prevMsg = msg;
             this.msgFreq = 1;
+        }
+    }
+
+    private void writeLogHelper() {
+        if (this.msgFreq > 1) {
+            this.logWriter.println(MessageFormat.format("{0},{1}", this.prevMsg, this.msgFreq - 1));
         }
     }
 

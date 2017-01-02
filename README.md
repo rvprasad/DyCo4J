@@ -23,13 +23,15 @@ generate multiple trace files; specifically, one trace file for each
 _java.lang.Class_ instance of _Logger_ class.
   
 Each log statement in a trace file is a comma separated list of values.  It
-starts with an optional message frequency (if greater than 1) followed by the
-thread id of the logger and the logged message.  The logged message will
+starts with the thread id of the logger followed by the log message and an 
+optional message frequency (if greater than 1).  The log message will
 conform to one of the following formats.
 - method entry `en,<method>`
   - This message will be followed by the set of corresponding method 
     argument messages with the exception in case of constructors.
 - method argument `ar,<index>,<value>`
+- method call `ca,<method>,<call-site-id>`
+  - call-site-id is local to the caller method. 
 - method return `re,<value>`
   - There will be no value in case of return from void methods.
 - method exception `xp,<value>`
@@ -192,8 +194,21 @@ tools.
    (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-default-options-instrumented-summary.png)
    of the report in which 613,187,959 events were logged in under 13 minutes.
 
-
-When all tracing options are enable, **TBD** events were logged in under **TBD** minutes.
-Here's a [snapshot]
+For the performance curious souls, when all tracing options are enabled, 
+**TBD** events were logged in under **TBD** minutes. Here's a [snapshot]
 (https://github.com/rvprasad/DyCo4J/misc/images/ant-impl-all-options-instrumented-summary.png) 
 of that report.
+
+
+## Info for Developers
+
+ - If you dive into the source of this project, then search for the strings 
+   "INFO" and "ASSUMPTION" to uncover various bits of information not captured 
+   elsewhere.
+ - If you want to run _instrumentation_ tests using tools other than Gradle,
+   then remember to add `-ea 
+   -Dlogging.jar=../logging/build/libs/dyco4j-logging-0.9.jar` to VM options.
+ - If you want to add new tests, then look at the flow in _CLITest_,
+   _AbstractCLITest_, and _CLIClassPathConfigTest_ to understand how to set up
+   and tear down artifacts.
+

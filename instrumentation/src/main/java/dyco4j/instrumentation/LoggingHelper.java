@@ -15,6 +15,8 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
+import java.text.MessageFormat;
+
 public class LoggingHelper {
     private static final String LOGGER;
     private static final String LOGGER_INITIALIZER;
@@ -158,8 +160,9 @@ public class LoggingHelper {
         emitInvokeLog(mv, LOG_FIELD);
     }
 
-    public static void emitLogMethodCall(final MethodVisitor mv, final String methodId) {
-        mv.visitLdcInsn(methodId);
+    public static void emitLogMethodCall(final MethodVisitor mv, final String methodId, final int callsiteId) {
+        final String _stmt = MessageFormat.format("{0},{1}", methodId, callsiteId);
+        mv.visitLdcInsn(_stmt);
         emitInvokeLog(mv, LOG_METHOD_CALL);
     }
 
