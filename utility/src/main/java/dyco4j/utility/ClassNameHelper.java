@@ -36,7 +36,7 @@ public class ClassNameHelper {
     }
 
     public static String createShortNameDesc(final String name, final Optional<String> owner, final String desc) {
-        return owner.orElse("<dynamic>") + "/" + name + ":" + desc;
+        return owner.orElse(DYNAMIC_METHOD_OWNER) + "/" + name + ":" + desc;
     }
 
     public static String createShortNameDesc(final String nameDesc) {
