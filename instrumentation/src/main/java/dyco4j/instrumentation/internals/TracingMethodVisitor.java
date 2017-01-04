@@ -14,32 +14,35 @@ import dyco4j.utility.ClassNameHelper;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalInt;
 
 final class TracingMethodVisitor extends MethodVisitor {
     private final String methodId;
-    private final Map<Label, Label> outermostHandlerRegions;
     private final Method method;
     private final boolean isStatic;
     private final TracingClassVisitor cv;
-    private Label startLabel;
+    private final Map<Label, Label> beginLabel2endLabel;
     private int callsiteId;
+    private boolean thisInitialized;
+    private Label outermostExceptionHandlerBeginLabel;
 
     TracingMethodVisitor(final int access, final String name, final String desc, final MethodVisitor mv,
-                         final TracingClassVisitor owner) {
+                         final TracingClassVisitor owner, final boolean thisInitialized) {
         super(CLI.ASM_VERSION, mv);
         this.method = new Method(name, desc);
         this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
-        this.outermostHandlerRegions = new LinkedHashMap<>();
         this.methodId = owner.getMethodId(name, desc);
         this.cv = owner;
+        this.thisInitialized = thisInitialized;
+        this.beginLabel2endLabel = new HashMap<>();
     }
 
     @Override
     public void visitCode() {
+        beginOutermostExceptionHandler();
         emitLogMethodEntry();
-        beginOutermostHandlerRegion();
         emitLogMethodArguments();
     }
 
@@ -78,45 +81,47 @@ final class TracingMethodVisitor extends MethodVisitor {
             if (opcode == Opcodes.GETSTATIC || opcode == Opcodes.GETFIELD) {
                 if (_isFieldStatic)
                     super.visitInsn(Opcodes.ACONST_NULL);
-                else
+                else if (this.thisInitialized)
                     super.visitInsn(Opcodes.DUP);
+                else {
+                    super.visitLdcInsn(LoggingHelper.UNINITIALIZED_THIS);
+                    super.visitInsn(Opcodes.SWAP);
+                }
 
                 super.visitFieldInsn(opcode, owner, name, desc);
                 LoggingHelper.emitLogField(this.mv, _fieldId, _fieldType, Logger.FieldAction.GETF);
             } else if (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD) {
                 if (_isFieldStatic) {
                     super.visitInsn(Opcodes.ACONST_NULL);
-                } else {
+                } else if (this.thisInitialized) {
                     LoggingHelper.emitSwapTwoWordsAndOneWord(this.mv, _fieldType);
                     final int _fieldSort = _fieldType.getSort();
                     if (_fieldSort == Type.LONG || _fieldSort == Type.DOUBLE)
                         super.visitInsn(Opcodes.DUP_X2);
                     else
                         super.visitInsn(Opcodes.DUP_X1);
+                } else {
+                    super.visitLdcInsn(LoggingHelper.UNINITIALIZED_THIS);
                 }
 
                 LoggingHelper.emitSwapOneWordAndTwoWords(this.mv, _fieldType);
                 LoggingHelper.emitLogField(this.mv, _fieldId, _fieldType, Logger.FieldAction.PUTF);
                 super.visitFieldInsn(opcode, owner, name, desc);
             }
-        } else {
+        } else
             super.visitFieldInsn(opcode, owner, name, desc);
-        }
     }
 
     @Override
     public final void visitMaxs(final int maxStack, final int maxLocals) {
-        // We break up the outermost handler into multiple segments to deal with super calls in constructors.
-        Label _handlerLabel = endOutermostHandlerRegion();
-        for (final Map.Entry<Label, Label> _e : this.outermostHandlerRegions.entrySet()) {
-            final Label _beginLabel = _e.getKey();
-            final Label _endLabel = _e.getValue();
-            super.visitTryCatchBlock(_beginLabel, _endLabel, _handlerLabel, "java/lang/Throwable");
+        endOutermostExceptionHandler();
+        for (final Map.Entry<Label, Label> _e : beginLabel2endLabel.entrySet()) {
+            final Label _handlerLabel = new Label();
+            super.visitLabel(_handlerLabel);
+            super.visitTryCatchBlock(_e.getKey(), _e.getValue(), _handlerLabel, "java/lang/Throwable");
             LoggingHelper.emitLogException(this.mv);
             LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.EXCEPTIONAL);
             super.visitInsn(Opcodes.ATHROW);
-            _handlerLabel = new Label();
-            super.visitLabel(_handlerLabel);
         }
         super.visitMaxs(maxStack, maxLocals);
     }
@@ -138,41 +143,46 @@ final class TracingMethodVisitor extends MethodVisitor {
         super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
     }
 
-    void emitLogMethodEntry() {
+    void setThisInitialized() {
+        this.thisInitialized = true;
+    }
+
+    void beginOutermostExceptionHandler() {
+        this.outermostExceptionHandlerBeginLabel = new Label();
+        super.visitLabel(this.outermostExceptionHandlerBeginLabel);
+    }
+
+    void endOutermostExceptionHandler() {
+        assert this.outermostExceptionHandlerBeginLabel != null;
+        final Label _l = new Label();
+        super.visitLabel(_l);
+        this.beginLabel2endLabel.put(this.outermostExceptionHandlerBeginLabel, _l);
+        this.outermostExceptionHandlerBeginLabel = null;
+    }
+
+    private void emitLogMethodEntry() {
         super.visitCode();
         LoggingHelper.emitLogMethodEntry(this.mv, this.methodId);
     }
 
-    void emitLogMethodArguments() {
+    private void emitLogMethodArguments() {
         if (this.cv.cmdLineOptions.traceMethodArgs) {
             // emit code to trace each arg
             int _position = 0;
-            int _index = 0;
+            int _localVarIndex = 0;
             if (!this.isStatic) {
-                _index += LoggingHelper.emitLogArgument(this.mv, _position, _index, Type.getType(Object.class));
+                final OptionalInt _tmp1 = this.thisInitialized ? OptionalInt.of(_localVarIndex) : OptionalInt.empty();
+                _localVarIndex += LoggingHelper.emitLogArgument(this.mv, _position, _tmp1,
+                        Type.getType(Object.class));
                 _position++;
             }
 
             for (final Type _argType : this.method.getArgumentTypes()) {
-                _index += LoggingHelper.emitLogArgument(this.mv, _position, _index, _argType);
+                _localVarIndex += LoggingHelper.emitLogArgument(this.mv, _position, OptionalInt.of(_localVarIndex),
+                        _argType);
                 _position++;
             }
         }
-    }
-
-    void beginOutermostHandlerRegion() {
-        final Label _lbl = new Label();
-        super.visitLabel(_lbl);
-        this.startLabel = _lbl;
-    }
-
-    Label endOutermostHandlerRegion() {
-        final Label _lbl = new Label();
-        super.visitLabel(_lbl);
-        assert this.startLabel != null;
-        this.outermostHandlerRegions.put(this.startLabel, _lbl);
-        this.startLabel = null;
-        return _lbl;
     }
 
     private void visitArrayStoreInsn(final int opcode) {
@@ -263,4 +273,5 @@ final class TracingMethodVisitor extends MethodVisitor {
 
         LoggingHelper.emitLogArray(this.mv, Logger.ArrayAction.GETA);
     }
+
 }

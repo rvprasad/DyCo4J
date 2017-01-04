@@ -9,7 +9,6 @@
 
 package dyco4j.logging;
 
-
 import java.io.PrintWriter;
 import java.text.MessageFormat;
 import java.util.Date;
@@ -41,7 +40,9 @@ public final class Logger {
     public static final String FALSE_VALUE = BOOLEAN_TYPE_TAG + "f";
     public static final String TRUE_VALUE = BOOLEAN_TYPE_TAG + "t";
     public static final String NULL_VALUE = "null";
-
+    public static final String UNINITIALIZED_THIS = "<uninitializedThis>";
+    public static final String UNINITIALIZED_THIS_REP = MessageFormat.format("{0}{1}", OBJECT_TYPE_TAG,
+            UNINITIALIZED_THIS);
     private static Logger logger;
     private final PrintWriter logWriter;
     private volatile String prevMsg = null;
@@ -81,7 +82,7 @@ public final class Logger {
 
     public static void logField(final Object receiver, final String fieldValue, final String fieldName,
                                 final FieldAction action) {
-        log(action.toString(), fieldName, (receiver == null) ? "" : toString(receiver), fieldValue);
+        log(action.toString(), fieldName, receiver == null ? "" : toString(receiver), fieldValue);
     }
 
     public static void logMethodEntry(final String methodId) {
@@ -133,7 +134,9 @@ public final class Logger {
     }
 
     public static String toString(final Object o) {
-        if (o == null) {
+        if (o == UNINITIALIZED_THIS) {
+            return UNINITIALIZED_THIS_REP;
+        } else if (o == null) {
             return NULL_VALUE;
         } else {
             final String _tmp;

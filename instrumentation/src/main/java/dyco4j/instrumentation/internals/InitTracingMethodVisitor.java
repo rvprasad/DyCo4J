@@ -22,21 +22,14 @@ final class InitTracingMethodVisitor extends MethodVisitor {
     private static final Object THIS = new Object();
     private static final Object OTHER = new Object();
     private final Map<Label, Stack<Object>> branchTarget2frame = new HashMap<>();
-    private boolean superInitialized;
+    private boolean thisIsInitialized;
     private Stack<Object> stackFrame = new Stack<>();
 
     InitTracingMethodVisitor(final int access, final String name, final TracingMethodVisitor mv) {
         super(CLI.ASM_VERSION, mv);
         assert name.equals("<init>");
 
-        this.superInitialized = false;
-    }
-
-    @Override
-    public void visitCode() {
-        final TracingMethodVisitor _mv = (TracingMethodVisitor) this.mv;
-        _mv.emitLogMethodEntry();
-        _mv.beginOutermostHandlerRegion();
+        this.thisIsInitialized = false;
     }
 
     @Override
@@ -319,7 +312,47 @@ final class InitTracingMethodVisitor extends MethodVisitor {
     @Override
     public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc,
                                 final boolean itf) {
-        processVisitMethodInsn(opcode, owner, name, desc, itf);
+        for (final Type _type : Type.getArgumentTypes(desc)) {
+            this.stackFrame.pop();
+            if (_type.getSize() == 2)
+                this.stackFrame.pop();
+        }
+        boolean _flag = false;
+        switch (opcode) {
+            case Opcodes.INVOKESTATIC:
+                break;
+            case Opcodes.INVOKEINTERFACE:
+            case Opcodes.INVOKEVIRTUAL:
+                this.stackFrame.pop(); // objectref
+                break;
+            case Opcodes.INVOKESPECIAL:
+                _flag = this.stackFrame.pop() == THIS && !this.thisIsInitialized;  // objectref
+                break;
+        }
+
+        /*
+         * FIXME-1
+         *
+         * After bug #9046671 in JDK is fixed, delete lines with DELETE-ME-1 markers to ensure the call to super
+         * constructor is covered by the exception handler.
+         */
+        if (_flag) {
+            this.thisIsInitialized = true;
+            ((TracingMethodVisitor) this.mv).setThisInitialized();
+            ((TracingMethodVisitor) this.mv).endOutermostExceptionHandler();   // DELETE-ME-1
+        }
+        super.visitMethodInsn(opcode, owner, name, desc, itf);
+
+        if (_flag) {                                                           // DELETE-ME-1
+            ((TracingMethodVisitor) this.mv).beginOutermostExceptionHandler(); // DELETE-ME-1
+        }                                                                      // DELETE-ME-1
+
+        final Type _returnType = Type.getReturnType(desc);
+        if (_returnType != Type.VOID_TYPE) {
+            this.stackFrame.push(OTHER);
+            if (_returnType.getSize() == 2)
+                this.stackFrame.push(OTHER);
+        }
     }
 
     @Override
@@ -355,15 +388,16 @@ final class InitTracingMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
-                                       Object... bsmArgs) {
-        this.mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
+    public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm,
+                                       final Object... bsmArgs) {
         final Type[] _types = Type.getArgumentTypes(desc);
         for (final Type _type : _types) {
             this.stackFrame.pop();
             if (_type.getSize() == 2)
                 this.stackFrame.pop();
         }
+
+        super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
 
         final Type _returnType = Type.getReturnType(desc);
         if (_returnType != Type.VOID_TYPE) {
@@ -390,46 +424,6 @@ final class InitTracingMethodVisitor extends MethodVisitor {
         this.addBranch(dflt);
         for (final Label l : labels)
             this.addBranch(l);
-    }
-
-    private void processVisitMethodInsn(final int opcode, final String owner, final String name, final String desc,
-                                        final boolean itf) {
-        for (final Type _type : Type.getArgumentTypes(desc)) {
-            this.stackFrame.pop();
-            if (_type.getSize() == 2)
-                this.stackFrame.pop();
-        }
-        boolean _flag = false;
-        switch (opcode) {
-            case Opcodes.INVOKESTATIC:
-                break;
-            case Opcodes.INVOKEINTERFACE:
-            case Opcodes.INVOKEVIRTUAL:
-                this.stackFrame.pop(); // objectref
-                break;
-            case Opcodes.INVOKESPECIAL:
-                _flag = this.stackFrame.pop() == THIS && !superInitialized;  // objectref
-                break;
-        }
-
-        if (_flag) {
-            this.superInitialized = true;
-            final TracingMethodVisitor _mv = (TracingMethodVisitor) this.mv;
-            _mv.endOutermostHandlerRegion();
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
-            _mv.beginOutermostHandlerRegion();
-            _mv.emitLogMethodArguments();
-        } else {
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
-        }
-
-
-        final Type _returnType = Type.getReturnType(desc);
-        if (_returnType != Type.VOID_TYPE) {
-            this.stackFrame.push(OTHER);
-            if (_returnType.getSize() == 2)
-                this.stackFrame.push(OTHER);
-        }
     }
 
     private void addBranch(final Label label) {

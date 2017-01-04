@@ -91,22 +91,21 @@ abstract class AbstractCLITest {
         assert _executionResult.traceLines.size == _numOfLines
     }
 
-    protected static assertFreqOfLogs(String[] traceLines, numOfMethodEntries, numOfArgLogs = 0, numOfReturnLogs = 0,
-                                      numOfExceptionLogs = 0, numOfGetArrayLogs = 0, numOfPutArrayLogs = 0,
-                                      numOfGetFieldLogs = 0, numOfPutFieldLogs = 0) {
+    protected static assertFreqOfLogs(Map freq = [:], String[] traceLines, numOfMethodEntries) {
         // should not raise exception
         Date.parseToStringDate(traceLines[0])
 
         final _numOfLines = traceLines.length - 1
         assertNestingOfCallsIsValid(traceLines[1.._numOfLines], numOfMethodEntries)
 
-        assert traceLines.count { it =~ /^$Logger.METHOD_ARG_TAG/ } == numOfArgLogs
-        assert traceLines.count { it =~ /^$Logger.METHOD_RETURN_TAG/ } == numOfReturnLogs
-        assert traceLines.count { it =~ /^$Logger.METHOD_EXCEPTION_TAG/ } == numOfExceptionLogs
-        assert traceLines.count { it =~ /^$GET_ARRAY/ } == numOfGetArrayLogs
-        assert traceLines.count { it =~ /^$PUT_ARRAY/ } == numOfPutArrayLogs
-        assert traceLines.count { it =~ /^$GET_FIELD/ } == numOfGetFieldLogs
-        assert traceLines.count { it =~ /^$PUT_FIELD/ } == numOfPutFieldLogs
+        assert traceLines.count { it =~ /^$Logger.METHOD_ARG_TAG/ } == (freq['numOfArgLogs'] ?: 0)
+        assert traceLines.count { it =~ /^$Logger.METHOD_RETURN_TAG/ } == (freq['numOfReturnLogs'] ?: 0)
+        assert traceLines.count { it =~ /^$Logger.METHOD_EXCEPTION_TAG/ } == (freq['numOfExceptionLogs'] ?: 0)
+        assert traceLines.count { it =~ /^$GET_ARRAY/ } == (freq['numOfGetArrayLogs'] ?: 0)
+        assert traceLines.count { it =~ /^$PUT_ARRAY/ } == (freq['numOfPutArrayLogs'] ?: 0)
+        assert traceLines.count { it =~ /^$GET_FIELD/ } == (freq['numOfGetFieldLogs'] ?: 0)
+        assert traceLines.count { it =~ /^$PUT_FIELD/ } == (freq['numOfPutFieldLogs'] ?: 0)
+        assert traceLines.count { it =~ /^$Logger.METHOD_CALL_TAG/ } == (freq['numOfCallLogs'] ?: 0)
     }
 
     protected static assertAllAndOnlyMatchingMethodsAreTraced(traceLines, methodNameRegex) {

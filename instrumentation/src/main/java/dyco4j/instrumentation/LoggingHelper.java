@@ -16,8 +16,10 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
 import java.text.MessageFormat;
+import java.util.OptionalInt;
 
 public class LoggingHelper {
+    public static final String UNINITIALIZED_THIS = "<uninitializedThis>";
     private static final String LOGGER;
     private static final String LOGGER_INITIALIZER;
     private static final Method LOGGER_INITIALIZER_INITIALIZE;
@@ -94,37 +96,42 @@ public class LoggingHelper {
         }
     }
 
-    public static int emitLogArgument(final MethodVisitor mv, final int position, final int index,
+    public static int emitLogArgument(final MethodVisitor mv, final int position, final OptionalInt localVarIndex,
                                       final Type argType) {
         mv.visitLdcInsn(position);
 
         int _typeLength = 1;
-        switch (argType.getSort()) {
-            case Type.BOOLEAN:
-            case Type.BYTE:
-            case Type.CHAR:
-            case Type.INT:
-            case Type.SHORT:
-                mv.visitVarInsn(Opcodes.ILOAD, index);
-                break;
-            case Type.LONG:
-                mv.visitVarInsn(Opcodes.LLOAD, index);
-                _typeLength++;
-                break;
-            case Type.FLOAT:
-                mv.visitVarInsn(Opcodes.FLOAD, index);
-                break;
-            case Type.DOUBLE:
-                mv.visitVarInsn(Opcodes.DLOAD, index);
-                _typeLength++;
-                break;
-            case Type.ARRAY:
-            case Type.OBJECT:
-                mv.visitVarInsn(Opcodes.ALOAD, index);
-                break;
+        if (localVarIndex.isPresent()) {
+            final int _tmp = localVarIndex.getAsInt();
+            switch (argType.getSort()) {
+                case Type.BOOLEAN:
+                case Type.BYTE:
+                case Type.CHAR:
+                case Type.INT:
+                case Type.SHORT:
+                    mv.visitVarInsn(Opcodes.ILOAD, _tmp);
+                    break;
+                case Type.LONG:
+                    mv.visitVarInsn(Opcodes.LLOAD, _tmp);
+                    _typeLength++;
+                    break;
+                case Type.FLOAT:
+                    mv.visitVarInsn(Opcodes.FLOAD, _tmp);
+                    break;
+                case Type.DOUBLE:
+                    mv.visitVarInsn(Opcodes.DLOAD, _tmp);
+                    _typeLength++;
+                    break;
+                case Type.ARRAY:
+                case Type.OBJECT:
+                    mv.visitVarInsn(Opcodes.ALOAD, _tmp);
+                    break;
+            }
+        } else {
+            mv.visitLdcInsn(Logger.UNINITIALIZED_THIS);
         }
-
         emitConvertToString(mv, argType);
+
         emitInvokeLog(mv, LOG_ARGUMENT);
 
         return _typeLength;
