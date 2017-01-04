@@ -33,4 +33,4 @@ task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
 }
 
-version = '0.3'
+version = '1.0.0'
