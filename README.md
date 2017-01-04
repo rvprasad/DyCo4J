@@ -175,7 +175,7 @@ tools.
 8. Get back to the _\<root>_ folder and execute `bootstrap/bin/ant test`.  This
    will create `trace.*gz` files in _\<root>_ and in 
    _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a [snapshot]
-   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-tests-instrumented-summary.png)
+   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-entry-instrumented-summary.png)
    of the report in which 1,887 events in 81 files (336KB) were logged in under 
    3 minutes.
    
