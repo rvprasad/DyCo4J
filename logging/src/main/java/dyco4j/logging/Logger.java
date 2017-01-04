@@ -40,7 +40,7 @@ public final class Logger {
     public static final String FALSE_VALUE = BOOLEAN_TYPE_TAG + "f";
     public static final String TRUE_VALUE = BOOLEAN_TYPE_TAG + "t";
     public static final String NULL_VALUE = "null";
-    public static final String UNINITIALIZED_THIS = "<uninitializedThis>";
+    public static final String UNINITIALIZED_THIS = "<uninitThis>";
     public static final String UNINITIALIZED_THIS_REP = MessageFormat.format("{0}{1}", OBJECT_TYPE_TAG,
             UNINITIALIZED_THIS);
     private static Logger logger;
