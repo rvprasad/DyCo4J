@@ -333,8 +333,9 @@ final class InitTracingMethodVisitor extends MethodVisitor {
         /*
          * FIXME-1
          *
-         * After bug #9046671 in JDK is fixed, delete lines with DELETE-ME-1 markers to ensure the call to super
-         * constructor is covered by the exception handler.
+         * After bug #8172282 (http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8172282) in JDK is fixed,
+         * delete lines with DELETE-ME-1 markers to ensure the call to super constructor is covered by the exception
+         * handler.
          */
         if (_flag) {
             this.thisIsInitialized = true;
