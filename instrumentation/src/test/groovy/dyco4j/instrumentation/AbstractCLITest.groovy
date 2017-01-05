@@ -42,13 +42,17 @@ abstract class AbstractCLITest {
     protected static final GET_FIELD = Logger.FieldAction.GETF.toString()
     protected static final PUT_FIELD = Logger.FieldAction.PUTF.toString()
 
+    private static fixupPath(final pathStr){
+        pathStr.replaceAll('\\\\', '/')
+    }
+
     @BeforeClass
     static void createFoldersAndCopyPropertyFile() {
         final _propertyFolder = LOGGING_PROPERTY_FILE.getParent()
         assert Files.createDirectories(_propertyFolder) != null: "Could not create property folder $_propertyFolder"
         final _propertyFile = Files.createFile(LOGGING_PROPERTY_FILE)
         assert _propertyFile != null: "Could not create property file $LOGGING_PROPERTY_FILE"
-        _propertyFile.withWriter { it.println("traceFolder=" + TRACE_FOLDER.toString()) }
+        _propertyFile.withWriter { it.println("traceFolder=" + fixupPath(TRACE_FOLDER.toString())) }
 
         assert Files.createDirectories(ROOT_FOLDER) != null: "Could not create root folder $ROOT_FOLDER"
         assert Files.createDirectories(TRACE_FOLDER) != null: "Could not create trace folder $TRACE_FOLDER"
@@ -183,7 +187,7 @@ abstract class AbstractCLITest {
      */
     protected static executeInstrumentedCode(final Class clazz) {
         final _path = Paths.get(System.getProperty("java.home"), "bin", "java").toString()
-        final _cp = [OUT_FOLDER, LOGGING_LIBRARY, TEST_CLASS_FOLDER].join(":")
+        final _cp = fixupPath([OUT_FOLDER, LOGGING_LIBRARY, TEST_CLASS_FOLDER].join(File.pathSeparator))
         final _proc = [_path, "-cp", _cp, clazz.name].execute()
         final _ret = new ExecutionResult(
                 _proc.waitFor(),
