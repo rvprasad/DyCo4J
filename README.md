@@ -98,11 +98,11 @@ For the performance curious peeps,
 
 
 ## Known Issues
- - Due to a bug #9046671 in JDK implementations (from both Oracle and Azul 
-   Systems), exceptions raised in super constructor calls are not logged.  This
-   limitation is captured as issue 
-   [#38](https://github.com/rvprasad/DyCo4J/issues/38). It will be fixed once 
-   the JDK bug is addressed.
+ - Due to a bug #[8172282](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8172282)
+   in JDK implementations (from both Oracle and Azul Systems), exceptions 
+   raised in super constructor calls are not logged.  This limitation is 
+   captured as issue [#38](https://github.com/rvprasad/DyCo4J/issues/38). It 
+   will be fixed once the JDK bug is addressed.
 
 
 ## Info for Developers
