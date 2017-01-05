@@ -350,6 +350,6 @@ public final class LoggerTest {
     }
 
     private String[] getContent() {
-        return logStore.toString().split("\\n");
+        return logStore.toString().split(System.lineSeparator());
     }
 }
