@@ -1,4 +1,4 @@
-#Logging Library
+# Logging Library
 
 This library contains functionality to log JVM based program information.
 
