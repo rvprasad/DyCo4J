@@ -49,7 +49,7 @@ tools.
 5. Instrument the tests by executing `java -jar
    <path to dyco4j-entry-X.Y.Z-cli.jar> --in-folder orig-testcases --out-folder
    testcases` with all the jars required by the tool in the same folder as
-   dyco4j-entry-1.0.0-cli.jar.
+   _dyco4j-entry-1.0.0-cli.jar_.
 6. Execute `cd testcases`.
 7. Place the logging classes in the class path by unpacking logging library jar
    by executing `jar xvf <path to dyco4j-logging-X.Y.Z.jar>`.
