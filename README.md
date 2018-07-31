@@ -1,6 +1,6 @@
 # DyCo4J
 
-This project provides instrumentation-based tools to collect dynamic information
+This project provides instrumentation-based toolkit to collect dynamic information
 about JVM based code.
  - [Utility Library](https://github.com/rvprasad/DyCo4J/tree/master/utility)
  - [Logging Library](https://github.com/rvprasad/DyCo4J/tree/master/logging)
