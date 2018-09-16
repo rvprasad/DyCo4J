@@ -84,16 +84,16 @@ tools.
 For the performance curious peeps,
  - The baseline time for building and executing all tests on ant without any
    instrumentation was under 3 minutes. Here's a [snapshot]
-   (https://github.com/rvprasad/DyCo4J/misc/images/ant-vanilla-summary.png).
+   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-vanilla-summary.png).
  - When all tracing options were enabled, _4,848,544,012 events in 81 files
    (9.7GB) were logged in under 96 minutes._ Here's a [snapshot]
-   (https://github.com/rvprasad/DyCo4J/misc/images/ant-impl-all-options-instrumented-summary.png)
+   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-all-options-instrumented-summary.png)
    of that report.  Interestingly, Bzip related tests contributed the largest
    increase to execution time (~66 minutes).
  - When all tracing options except `--trace-array-access` were enabled
    _2,715,652,923 events in 80 files (3.1GB) amounting to  were logged in
    under 40 minutes._ Here's a [snapshot]
-   (https://github.com/rvprasad/DyCo4J/misc/images/ant-impl-all-but-no-array-access-option-instrumented-summary.png)
+   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-all-but-no-array-access-option-instrumented-summary.png)
    of that report.
 
 
