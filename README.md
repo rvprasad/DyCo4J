@@ -36,9 +36,10 @@ tools.
 5. Run the tests by executing `bootstrap/bin/ant test`.
 6. Make note of the number of tests that were executed, passed, failed, and
    skipped along with the time take to run the tests.  This information is
-   available in `build/testcases/reports/index.html`.  Here's a [snapshot]
-   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-vanilla-summary.png)
+   available in `build/testcases/reports/index.html`.  Here's a [snapshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-vanilla-summary.png)
    of the report.
+
+**Note**: Following tests were executed on a Macbook Pro with Intel 2.6 GHz Intel Core i7 processor, 16GB RAM, and 1TB PCIe Flash drive.
 
 ### Tracing the Tests
 1. Open the terminal and change the folder to _\<root>_ folder.
