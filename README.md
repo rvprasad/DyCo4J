@@ -1,4 +1,4 @@
-# DyCo4J
+# DyCo4J (Dynamic Collector for JVM)
 
 This project provides instrumentation-based toolkit to collect dynamic information
 about JVM based code.
@@ -76,10 +76,9 @@ tools.
    dyco4j-internals-1.0.0-cli.jar.
 6. Get back to the _\<root>_ folder and execute `bootstrap/bin/ant test`.  This
    will create `trace.*gz` files in _\<root>_ and in
-   _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a [snapshot]
-   (https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-default-options-instrumented-summary.png)
-   of the report in which _613,017,601 events in 81 files (55MB)
-   were logged in under 7 minutes._
+   _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a [snapshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-default-options-instrumented-summary.png)
+   of the report in which _613,017,601 events in 81 files (55MB) were logged in
+   under 7 minutes._
 
 For the performance curious peeps,
  - The baseline time for building and executing all tests on ant without any
