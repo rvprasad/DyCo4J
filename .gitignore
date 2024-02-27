@@ -1,7 +1,9 @@
-.gradle
-build
-temp
-libs
-workspace.xml
-copyright
-expt-subjects
+**build
+**temp
+**libs
+**workspace.xml
+**usage.statistics.xml
+**shelf
+**copyright
+**expt-subjects
+**.gradle

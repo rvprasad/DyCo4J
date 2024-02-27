@@ -1,40 +1,37 @@
-// Apply the java plugin to add support for Java
-apply plugin: 'java'
+plugins {
+    id "java"
+    id "jacoco"
+}
 
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
 }
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile 'org.ow2.asm:asm:5.2'
-    compile 'org.ow2.asm:asm-commons:5.2'
+    implementation 'org.ow2.asm:asm:5.2'
+    implementation 'org.ow2.asm:asm-commons:5.2'
 
-    testCompile 'junit:junit:4.12'
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = "3.3"
+    testImplementation 'junit:junit:4.12'
 }
 
 compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
     options.compilerArgs << "-Xlint"
 }
 
-apply plugin: "jacoco"
-
 jacocoTestReport {
     reports {
-        xml.enabled false
-        csv.enabled false
+        xml.required = false
+        csv.required = false
     }
 }
 
