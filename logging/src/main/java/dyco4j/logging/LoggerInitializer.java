@@ -17,8 +17,8 @@ import java.util.zip.GZIPOutputStream;
 
 @SuppressWarnings("unused")
 public final class LoggerInitializer {
-    private static File traceFile;
-    private static volatile boolean initialized;
+    static File traceFile;
+    static volatile boolean initialized;
 
     public static synchronized void initialize() throws IOException {
         if (!initialized) {
@@ -36,16 +36,6 @@ public final class LoggerInitializer {
             Logger.initialize(_logWriter);
             LoggerInitializer.initialized = true;
         }
-    }
-
-    // This method is intended for testing purpose only.
-    static File getTraceFile() {
-        return traceFile;
-    }
-
-    // This method is intended for testing purpose only.
-    static void reenableInitialize() {
-        LoggerInitializer.initialized = false;
     }
 
     private static Properties getProperties() throws IOException {

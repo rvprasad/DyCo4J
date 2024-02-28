@@ -13,10 +13,10 @@ import dyco4j.instrumentation.internals.CLI
 import dyco4j.logging.Logger
 import dyco4j.utility.ProgramData
 import groovy.io.FileType
-import org.junit.After
-import org.junit.AfterClass
-import org.junit.Before
-import org.junit.BeforeClass
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.BeforeAll
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -46,7 +46,7 @@ abstract class AbstractCLITest {
         pathStr.replaceAll('\\\\', '/')
     }
 
-    @BeforeClass
+    @BeforeAll
     static void createFoldersAndCopyPropertyFile() {
         final _propertyFolder = LOGGING_PROPERTY_FILE.getParent()
         assert Files.createDirectories(_propertyFolder) != null: "Could not create property folder $_propertyFolder"
@@ -60,7 +60,7 @@ abstract class AbstractCLITest {
         assert Files.createDirectories(IN_FOLDER) != null: "Could not create in folder $IN_FOLDER"
     }
 
-    @AfterClass
+    @AfterAll
     static void deletePropertyAndClassFiles() {
         Files.delete(LOGGING_PROPERTY_FILE)
         deleteFiles(IN_FOLDER, CLASS_FILE_REGEX)
@@ -80,7 +80,7 @@ abstract class AbstractCLITest {
         def _cnt = 0
         for (String l in traceLines) {
             if (l =~ /$Logger.METHOD_ENTRY_TAG/) {
-                _stack << l
+                _stack.push(l)
             } else if (l =~ /$Logger.METHOD_EXIT_TAG/) {
                 final String _tmp1 = _stack.pop()
                 assert _tmp1.split(',')[1] == l.split(',')[1]
@@ -92,7 +92,7 @@ abstract class AbstractCLITest {
     }
 
     protected static assertTraceLengthIs(_executionResult, _numOfLines) {
-        assert _executionResult.traceLines.size == _numOfLines
+        assert _executionResult.traceLines.size() == _numOfLines
     }
 
     protected static assertFreqOfLogs(Map freq = [:], String[] traceLines, numOfMethodEntries) {
@@ -219,13 +219,13 @@ abstract class AbstractCLITest {
         _ret.flatten()
     }
 
-    @Before
+    @BeforeEach
     void setUpFixture() {
         deleteFiles(OUT_FOLDER, CLASS_FILE_REGEX)
         deleteFiles(OUT_FOLDER, RESOURCE_FILE_REGEX)
     }
 
-    @After
+    @AfterEach
     void deleteAuxiliaryFiles() {
         final _tmp1 = Paths.get(CLI.PROGRAM_DATA_FILE_NAME)
         if (Files.exists(_tmp1))

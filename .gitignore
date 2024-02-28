@@ -1,9 +1,8 @@
 **build
 **temp
 **libs
-**workspace.xml
-**usage.statistics.xml
 **shelf
 **copyright
 **expt-subjects
 **.gradle
+**.idea

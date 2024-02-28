@@ -9,7 +9,7 @@
 
 package dyco4j.logging;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -21,7 +21,6 @@ import java.util.zip.GZIPInputStream;
 public class LoggerInitializerTest {
     @Test
     public void testInitializeWithPropertiesFile() throws Exception {
-        LoggerInitializer.reenableInitialize(); // used only for testing
         LoggerInitializer.initialize();
         final String _msg = "test initialize with properties file";
         Logger.log(_msg);
@@ -35,11 +34,12 @@ public class LoggerInitializerTest {
         assert _tmp.getProperty("traceFolder") != null : "traceFolder property not found";
 
         checkTraceFilesForLogs(_msg);
+        LoggerInitializer.initialized = false;
     }
 
     @Test
     public void testInitializeWithoutPropertiesFile() throws Exception {
-        LoggerInitializer.reenableInitialize(); // used only for testing
+        LoggerInitializer.initialized = false;
         // change the name of build/resources/test/dyco4j/instrumentation/logging/logging.properties
         final Path _srcPropFilePath =
                 Paths.get("build", "resources", "test", "dyco4j", "logging", "logging.properties");
@@ -57,10 +57,11 @@ public class LoggerInitializerTest {
         assert _destPropFile.renameTo(_srcPropFile) : "property file renaming could not be undone.";
 
         checkTraceFilesForLogs(_msg);
+        LoggerInitializer.initialized = false;
     }
 
     private void checkTraceFilesForLogs(final String expectedMessage) throws IOException {
-        final File _traceFile = LoggerInitializer.getTraceFile();
+        final File _traceFile = LoggerInitializer.traceFile;
         try (final BufferedReader _traceReader =
                 new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(_traceFile))))) {
             _traceReader.readLine();

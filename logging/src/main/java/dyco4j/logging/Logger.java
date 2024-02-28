@@ -47,19 +47,18 @@ public final class Logger {
     private final PrintWriter logWriter;
     private volatile String prevMsg = null;
     private volatile boolean clean = false;
-    private volatile int msgFreq = 1;
+    private volatile int msgFreq = 0;
 
     private Logger(final PrintWriter pw) {
-        this.logWriter = pw;
+        logWriter = pw;
         writeLog((new Date()).toString());
     }
 
     public static void log(final String msg) {
-        final String _sb = String.valueOf(Thread.currentThread().getId()) + "," + msg;
+        final String _sb = Thread.currentThread().getId() + "," + msg;
         logger.writeLog(_sb);
     }
 
-    @SuppressWarnings("ConfusingArgumentToVarargsMethod")
     public static void log(final String... args) {
         log(String.join(",", args));
     }
@@ -172,36 +171,30 @@ public final class Logger {
         logger.cleanup();
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        this.cleanup();
-        super.finalize();
-    }
-
     private synchronized void cleanup() {
-        if (!this.clean) {
+        if (!clean) {
             writeLogHelper();
-            this.logWriter.flush();
-            this.logWriter.close();
-            this.clean = true;
+            logWriter.flush();
+            logWriter.close();
+            clean = true;
         }
     }
 
     private synchronized void writeLog(final String msg) {
-        if (Objects.equals(this.prevMsg, msg)) {
-            this.msgFreq++;
+        if (Objects.equals(prevMsg, msg)) {
+            msgFreq++;
         } else {
             writeLogHelper();
 
-            this.logWriter.println(msg);
-            this.prevMsg = msg;
-            this.msgFreq = 1;
+            logWriter.println(msg);
+            prevMsg = msg;
+            msgFreq = 0;
         }
     }
 
     private void writeLogHelper() {
-        if (this.msgFreq > 1) {
-            this.logWriter.println(MessageFormat.format("{0},{1}", this.prevMsg, this.msgFreq - 1));
+        if (msgFreq > 0) {
+            logWriter.println(MessageFormat.format("{0},{1}", prevMsg, msgFreq));
         }
     }
 

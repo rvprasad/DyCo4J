@@ -9,8 +9,8 @@
 package dyco4j.instrumentation.entry
 
 import dyco4j.instrumentation.AbstractCLITest
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import java.nio.file.Paths
 
@@ -21,7 +21,7 @@ class CLITest extends AbstractCLITest {
     static final String METHOD_NAME_REGEX_OPTION = "--$CLI.METHOD_NAME_REGEX_OPTION"
     static final String ONLY_ANNOTATED_TESTS_OPTION = "--$CLI.ONLY_ANNOTATED_TESTS_OPTION"
 
-    @BeforeClass
+    @BeforeAll
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file1 = Paths.get("dyco4j", "instrumentation", "entry", "CLITestSubject.class")
         copyClassesToBeInstrumentedIntoInFolder([_file1])

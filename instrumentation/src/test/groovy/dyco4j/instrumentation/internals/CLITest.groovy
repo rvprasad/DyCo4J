@@ -9,8 +9,8 @@
 package dyco4j.instrumentation.internals
 
 import dyco4j.instrumentation.AbstractCLITest
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import java.nio.file.Paths
 
@@ -26,7 +26,7 @@ class CLITest extends AbstractCLITest {
     static final String TRACE_METHOD_RETURN_VALUE_OPTION = "--$CLI.TRACE_METHOD_RETURN_VALUE_OPTION"
     static final String TRACE_METHOD_CALL_OPTION = "--$CLI.TRACE_METHOD_CALL_OPTION"
 
-    @BeforeClass
+    @BeforeAll
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file = Paths.get("dyco4j", "instrumentation", "internals", "CLITestSubject.class")
         copyClassesToBeInstrumentedIntoInFolder([_file])
@@ -61,14 +61,14 @@ class CLITest extends AbstractCLITest {
         def _stack = []
         traceLines.each {
             if (it ==~ /^$METHOD_ENTRY_TAG,.*/) {
-                _stack << _seen
+                _stack.push(_seen)
                 _seen = []
             } else if (it ==~ /^$METHOD_EXIT_TAG,.*/) {
                 _seen = _stack.pop()
             } else if (it ==~ /^$METHOD_CALL_TAG,.*/) {
                 final _tmp = it.split(',')[2]
                 assert !(_tmp in _seen)
-                _seen << _tmp
+                _seen.push(_tmp)
             }
         }
     }

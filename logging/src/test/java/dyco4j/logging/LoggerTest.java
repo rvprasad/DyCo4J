@@ -8,29 +8,28 @@
  */
 package dyco4j.logging;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.MessageFormat;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("ALL")
 public final class LoggerTest {
     private StringWriter logStore;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         logStore = new StringWriter();
         Logger.initialize(new PrintWriter(logStore));
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         logStore.close();
     }

@@ -38,8 +38,7 @@ final class TracingClassVisitor extends ClassVisitor {
     @Override
     public void visit(final int version, final int access, final String name, final String signature,
                       final String superName, final String[] interfaces) {
-        // INFO: force the class version to be 52 (Java 8 compliant)
-        super.visit(52, access, name, signature, superName, interfaces);
+        super.visit(version, access, name, signature, superName, interfaces);
         this.className = name;
     }
 

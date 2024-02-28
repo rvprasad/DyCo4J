@@ -9,9 +9,9 @@
 package dyco4j.instrumentation.internals
 
 import dyco4j.instrumentation.AbstractCLITest
-import org.junit.AfterClass
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import java.nio.file.Path
 
@@ -31,7 +31,7 @@ class CLIClassPathConfigTest extends AbstractCLITest {
     private static Path sourceFile
     private static Path targetFile
 
-    @BeforeClass
+    @BeforeAll
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _file1 = Paths.get('dyco4j', 'instrumentation', 'internals', 'CLIClassPathConfigTestSubject.class')
         copyClassesToBeInstrumentedIntoInFolder([_file1])
@@ -50,7 +50,7 @@ class CLIClassPathConfigTest extends AbstractCLITest {
         classpathConfigFile.toFile().withWriter { it.println(_extra_class_folder.toString()) }
     }
 
-    @AfterClass
+    @AfterAll
     static void removeExtraClasses() {
         Files.move(targetFile, sourceFile)
         Files.delete(classpathConfigFile)

@@ -9,16 +9,15 @@
 package dyco4j.instrumentation.internals
 
 import dyco4j.instrumentation.AbstractCLITest
-import dyco4j.logging.Logger
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import java.nio.file.Paths
 
 import static dyco4j.instrumentation.internals.CLITest.*
 
 class CLIInitializerInstrumentationTest extends AbstractCLITest {
-    @BeforeClass
+    @BeforeAll
     static void copyClassesToBeInstrumentedIntoInFolder() {
         final _files1 = [Paths.get('dyco4j', 'instrumentation', 'internals',
                 'CLIInitializerInstrumentationTestSubject.class'),
