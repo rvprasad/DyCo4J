@@ -35,16 +35,16 @@ In both tools, the scope of instrumentation can be configured via
 matching unqualified name.
 
 - Required Runtime Dependences:
-    - [ASM](http://asm.ow2.org/) 5.2
-    - [ASM Commons](http://asm.ow2.org/) 5.2
-    - [ASM Tree](http://asm.ow2.org/) 5.2
-    - [Commons CLI](http://commons.apache.org/proper/commons-cli/) 1.3.1
-    - [SLF4J API](http://www.slf4j.org/) 1.7.22
-    - [Gson](https://github.com/google/gson) 2.8
-    - [DyCO4J Logging](https://github.com/rvprasad/DyCo4J) 1.0
-    - [DyCO4J Utility](https://github.com/rvprasad/DyCo4J) 1.0
+    - [ASM](http://asm.ow2.org/) 9.6
+    - [ASM Commons](http://asm.ow2.org/) 9.6
+    - [ASM Tree](http://asm.ow2.org/) 9.6
+    - [Commons CLI](http://commons.apache.org/proper/commons-cli/) 1.6.0
+    - [SLF4J API](http://www.slf4j.org/) 2.0.12
+    - [Gson](https://github.com/google/gson) 2.10.1
+    - [DyCO4J Logging](https://github.com/rvprasad/DyCo4J) 1.1
+    - [DyCO4J Utility](https://github.com/rvprasad/DyCo4J) 1.1
 - Optional Depednences:
-    - [SLF4J Simple](http://www.slf4j.org/) 1.7.22
+    - [SLF4J Simple](http://www.slf4j.org/) 2.0.12
 
 
 ## Attribution

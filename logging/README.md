@@ -58,8 +58,8 @@ This properties file should be available as _dyco4j/logging/logging.properties_
 on the classpath.
 
 - Required Runtime Dependences:
-    - [ASM](http://asm.ow2.org/) 5.2
-    - [ASM Commons](http://asm.ow2.org/) 5.2
+    - [ASM](http://asm.ow2.org/) 9.6
+    - [ASM Commons](http://asm.ow2.org/) 9.6
 
 
 ## Attribution
