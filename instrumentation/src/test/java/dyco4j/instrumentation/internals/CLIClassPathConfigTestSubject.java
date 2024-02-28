@@ -12,7 +12,7 @@ public class CLIClassPathConfigTestSubject {
     public static void main(final String[] s) {
         Object j;
 
-        // The following conditional triggers an exception in ASM that requires all referred types to be
+        // The following conditional triggers an exception as ASM requires all referred types to be
         // included in the class path
         if (s.length < 3)
             j = new String[5][3];

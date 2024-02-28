@@ -14,28 +14,24 @@ import org.apache.commons.cli.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -53,7 +49,6 @@ public final class CLI {
     static final String TRACE_METHOD_CALL_OPTION = "trace-method-call";
     static final String TRACE_METHOD_RETURN_VALUE_OPTION = "trace-method-return-value";
     private static final String METHOD_NAME_REGEX = ".*";
-    private static final Logger LOGGER = LoggerFactory.getLogger(CLI.class);
 
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
@@ -80,40 +75,22 @@ public final class CLI {
 
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
-            extendClassPath(_cmdLine);
             processCommandLine(_cmdLine);
         } catch (final ParseException _ex1) {
             new HelpFormatter().printHelp(CLI.class.getName(), _options);
         }
     }
 
-    private static void extendClassPath(final CommandLine cmdLine) throws IOException {
-        try {
-            final URLClassLoader _urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            final Class<URLClassLoader> _urlClass = URLClassLoader.class;
-            final Method _method = _urlClass.getDeclaredMethod("addURL", URL.class);
-            _method.setAccessible(true);
-            addEntryToClassPath(_urlClassLoader, _method, cmdLine.getOptionValue(IN_FOLDER_OPTION));
-            final String _classpathConfig = cmdLine.getOptionValue(CLASSPATH_CONFIG_OPTION);
-            if (_classpathConfig != null) {
-                for (final String _s : Files.readAllLines(Paths.get(_classpathConfig))) {
-                    addEntryToClassPath(_urlClassLoader, _method, _s);
-                }
+    private static ClassLoader createCustomClassLoader(final CommandLine cmdLine) throws IOException {
+        final List<URL> _urls = new ArrayList<>();
+        _urls.add(new File(cmdLine.getOptionValue(IN_FOLDER_OPTION)).toURI().toURL());
+        final String _classpathConfig = cmdLine.getOptionValue(CLASSPATH_CONFIG_OPTION);
+        if (_classpathConfig != null) {
+            for (String _s: Files.readAllLines(Paths.get(_classpathConfig))) {
+                _urls.add(new File(_s).toURI().toURL());
             }
-        } catch (final NoSuchMethodException _e) {
-            throw new RuntimeException(_e);
         }
-    }
-
-    private static void addEntryToClassPath(final URLClassLoader urlClassLoader, final Method method, final String s) {
-        final File _f = new File(s);
-        try {
-            final URL _u = _f.toURI().toURL();
-            method.invoke(urlClassLoader, _u);
-            LOGGER.info(MessageFormat.format("Adding {0} to classpath", s));
-        } catch (MalformedURLException | IllegalAccessException | InvocationTargetException _e) {
-            throw new RuntimeException(_e);
-        }
+        return new URLClassLoader(_urls.toArray(URL[]::new), ClassLoader.getPlatformClassLoader());
     }
 
     private static void processCommandLine(final CommandLine cmdLine) throws IOException {
@@ -143,10 +120,11 @@ public final class CLI {
 
         final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
         final String _methodNameRegex = cmdLine.getOptionValue(METHOD_NAME_REGEX_OPTION, METHOD_NAME_REGEX);
+        final ClassLoader _customClassLoader = createCustomClassLoader(cmdLine);
         final BiConsumer<Path, Path> _classInstrumenter = (srcPath, trgPath) -> {
             try {
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(srcPath));
-                final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_FRAMES);
+                final ClassWriter _cw = new CustomClassLoadingClassWriter(_cr, ClassWriter.COMPUTE_FRAMES, _customClassLoader);
                 final Map<String, String> _shortFieldName2Id =
                         Collections.unmodifiableMap(_programData.shortFieldName2Id);
                 final Map<String, String> _shortMethodName2Id =
@@ -170,8 +148,7 @@ public final class CLI {
     }
 
     private static Set<Path> getFilenames(final Path folder) throws IOException {
-        final Stream<Path> _tmp1 = Files.walk(folder).filter(p -> p.toString().endsWith(".class"));
-        return _tmp1.collect(Collectors.toSet());
+        return Files.walk(folder).filter(p -> p.toString().endsWith(".class")).collect(Collectors.toSet());
     }
 
     private static void getMemberId2NameMapping(final Collection<Path> filenames, final ProgramData programData) {
@@ -202,5 +179,19 @@ public final class CLI {
             this.traceMethodCall = traceMethodCall;
             this.traceMethodRetValue = traceMethodRetValue;
         }
+    }
+
+    private static class CustomClassLoadingClassWriter extends ClassWriter {
+        private final ClassLoader customClassLoader;
+
+        CustomClassLoadingClassWriter(final ClassReader reader, final int flags, final ClassLoader customClassLoader ) {
+            super(reader, flags);
+            this.customClassLoader = customClassLoader;
+        }
+        @Override
+        protected ClassLoader getClassLoader() {
+            return customClassLoader;
+        }
+
     }
 }

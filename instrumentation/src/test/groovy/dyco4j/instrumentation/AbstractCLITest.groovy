@@ -25,7 +25,7 @@ import java.util.zip.GZIPInputStream
 
 abstract class AbstractCLITest {
     private static final String LOGGING_LIBRARY = System.getProperty('logging.jar').toString()
-    private static final Path TEST_CLASS_FOLDER = Paths.get("build", "classes", "test")
+    private static final Path TEST_CLASS_FOLDER = Paths.get("build", "classes", "java", "test")
     private static final Path TEST_RESOURCE_FOLDER = Paths.get("build", "resources", "test")
     private static final Path LOGGING_PROPERTY_FILE = Paths.get(TEST_CLASS_FOLDER.toString(), "dyco4j",
             "logging", "logging.properties")

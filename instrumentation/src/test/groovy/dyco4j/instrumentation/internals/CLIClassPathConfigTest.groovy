@@ -62,10 +62,10 @@ class CLIClassPathConfigTest extends AbstractCLITest {
 
     @Test
     void withOutClassPathConfig() {
-        final _e = shouldFail RuntimeException, {
+        final _e = shouldFail TypeNotPresentException, {
             instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER])
         }
-        assert _e.message ==~ '.*java.lang.ClassNotFoundException: dyco4j.instrumentation.internals.CLIClassPathConfigTestSubject\\$SomeClass'
+        assert _e.message == 'Type dyco4j/instrumentation/internals/CLIClassPathConfigTestSubject$SomeClass not present'
     }
 
     @Test

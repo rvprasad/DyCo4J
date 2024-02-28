@@ -17,9 +17,9 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    implementation 'org.ow2.asm:asm:5.2'
-    implementation 'org.ow2.asm:asm-commons:5.2'
-    implementation 'org.ow2.asm:asm-tree:5.2'
+    implementation 'org.ow2.asm:asm:6.2.1'
+    implementation 'org.ow2.asm:asm-commons:6.2.1'
+    implementation 'org.ow2.asm:asm-tree:6.2.1'
     implementation 'commons-cli:commons-cli:1.3.1'
     implementation 'org.slf4j:slf4j-api:1.7.22'
     implementation ":dyco4j-logging:$DYCO4J_LOGGING_VERSION"
@@ -38,6 +38,12 @@ compileJava {
     options.compilerArgs << '-Xlint'
 }
 
+compileTestJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    options.compilerArgs << '-Xlint'
+}
+
 tasks.register('copyLibs', Copy) {
     into layout.buildDirectory.dir('libs')
     from configurations.runtimeClasspath
@@ -45,7 +51,7 @@ tasks.register('copyLibs', Copy) {
 
 test {
     systemProperty 'logging.jar', configurations.runtimeClasspath.files { it ==~ /.*dyco4j-logging.*/ }[0]
-    exclude '**/java/test/**.class'
+    exclude '**/*TestSubject.class'
 }
 
 tasks.register('entryJar', Jar) {
@@ -82,41 +88,41 @@ jar {
     dependsOn entryJar, internalsJar
 }
 
-/*
-task entryFatJar(type: Jar) {
+tasks.register('entryFatJar', Jar) {
     manifest.from entryJar.manifest
-    baseName 'dyco4j'
-    appendix 'entry'
-    classifier 'all'
+    archiveBaseName = 'dyco4j'
+    archiveAppendix = 'entry'
+    archiveClassifier = 'all'
     from {
-        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     from {
-        configurations.testCompile.filter { it ==~ ".*slf4j.*" }.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.testRuntimeClasspath.filter { it ==~ ".*slf4j.*" }.collect { it.isDirectory() ? it : zipTree(it) }
     }
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    setDuplicatesStrategy('exclude')
     with entryJar
 }
 
-task internalsFatJar(type: Jar) {
+tasks.register('internalsFatJar', Jar) {
     manifest.from internalsJar.manifest
-    baseName 'dyco4j'
-    appendix 'internals'
-    classifier 'all'
+    archiveBaseName = 'dyco4j'
+    archiveAppendix = 'internals'
+    archiveClassifier = 'all'
     from {
-        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     from {
-        configurations.testCompile.filter { it ==~ ".*slf4j.*" }.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.testRuntimeClasspath.filter { it ==~ ".*slf4j.*" }.collect { it.isDirectory() ? it : zipTree(it) }
     }
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    setDuplicatesStrategy('exclude')
     with internalsJar
 }
 
-task fatJars() {
+tasks.register('fatJars', Jar) {
     dependsOn entryFatJar, internalsFatJar
 }
-*/
 
 artifacts {
     archives entryJar

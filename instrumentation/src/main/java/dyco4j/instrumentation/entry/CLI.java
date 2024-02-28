@@ -67,7 +67,7 @@ public final class CLI {
 
         final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
         final String _methodNameRegex = cmdLine.getOptionValue(METHOD_NAME_REGEX_OPTION, METHOD_NAME_REGEX);
-        final Boolean _onlyAnnotatedTests = cmdLine.hasOption(ONLY_ANNOTATED_TESTS_OPTION);
+        final boolean _onlyAnnotatedTests = cmdLine.hasOption(ONLY_ANNOTATED_TESTS_OPTION);
         final BiConsumer<Path, Path> _classInstrumenter = (srcPath, trgPath) -> {
             try {
                 final byte[] _bytecode = Files.readAllBytes(srcPath);
