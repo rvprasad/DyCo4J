@@ -9,11 +9,12 @@ an entry point is executed.  This statement includes the fully qualified name
 (in JVM format) of the entry point.
 
 Out of the box, it instruments entry points of test cases, i.e., methods whose
-names match `^test.*` regex and methods annotated with _JUnit
-(`org.junit.{Test,After,Before,AfterClass,BeforeClass}`)_ and _TestNG
-(`org.testng.annotations.{Test,AfterTest,BeforeTest,AfterClass,BeforeClass,
-AfterMethod,BeforeMethod}`)_ annotations. (Note: We have not tested the tools
-with TestNG annotations.)
+names match `^test.*` regex and methods annotated with _JUnit4
+(`org.junit.{Test,After,Before,AfterClass,BeforeClass}`)_, _JUnit5
+(`org.junit.jupiter.api.{Test,AfterEach,BeforeEach,AfterAll,BeforeAll}`)_ and
+_TestNG (`org.testng.annotations.{Test,AfterTest,BeforeTest,AfterClass,
+BeforeClass,AfterMethod,BeforeMethod}`)_ annotations. (Note: The tools have not
+been tested against JUnit5 and TestNG annotations.)
 
 The **internals** tool is intended to instrument the internals of the program
 of interest.  The instrumentation adds code to log information about

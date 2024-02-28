@@ -29,16 +29,20 @@ final class TracingMethodVisitor extends MethodVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
         this.isAnnotatedAsTest = desc.matches("Lorg/junit/Test;") ||
-                                 desc.matches("Lorg/junit/After;") || desc.matches("Lorg/junit/Before;") ||
-                                 desc.matches("Lorg/junit/AfterClass;") ||
-                                 desc.matches("Lorg/junit/BeforeClass;") ||
-                                 desc.matches("Lorg/testng/annotations/Test") ||
-                                 desc.matches("Lorg/testng/annotations/AfterTest") ||
-                                 desc.matches("Lorg/testng/annotations/BeforeTest") ||
-                                 desc.matches("Lorg/testng/annotations/AfterClass") ||
-                                 desc.matches("Lorg/testng/annotations/BeforeClass") ||
-                                 desc.matches("Lorg/testng/annotations/AfterMethod") ||
-                                 desc.matches("Lorg/testng/annotations/BeforeMethod");
+                desc.matches("Lorg/junit/After;") || desc.matches("Lorg/junit/Before;") ||
+                desc.matches("Lorg/junit/AfterClass;") ||
+                desc.matches("Lorg/junit/BeforeClass;") ||
+                desc.matches("Lorg/junit/jupiter/apiTest;") ||
+                desc.matches("Lorg/junit/jupiter/api/AfterEach;") || desc.matches("Lorg/junit/jupiter/api/BeforeEach;") ||
+                desc.matches("Lorg/junit/jupiter/api/AfterAll;") ||
+                desc.matches("Lorg/junit/jupiter/api/BeforeAll;") ||
+                desc.matches("Lorg/testng/annotations/Test") ||
+                desc.matches("Lorg/testng/annotations/AfterTest") ||
+                desc.matches("Lorg/testng/annotations/BeforeTest") ||
+                desc.matches("Lorg/testng/annotations/AfterClass") ||
+                desc.matches("Lorg/testng/annotations/BeforeClass") ||
+                desc.matches("Lorg/testng/annotations/AfterMethod") ||
+                desc.matches("Lorg/testng/annotations/BeforeMethod");
         return super.visitAnnotation(desc, visible);
     }
 
