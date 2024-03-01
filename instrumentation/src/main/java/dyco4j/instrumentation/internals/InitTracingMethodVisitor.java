@@ -317,6 +317,7 @@ final class InitTracingMethodVisitor extends MethodVisitor {
             if (_type.getSize() == 2)
                 this.stackFrame.pop();
         }
+
         boolean _flag = false;
         switch (opcode) {
             case Opcodes.INVOKESTATIC:
@@ -330,23 +331,16 @@ final class InitTracingMethodVisitor extends MethodVisitor {
                 break;
         }
 
-        /*
-         * FIXME-1
-         *
-         * After bug #8172282 (http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8172282) in JDK is fixed,
-         * delete lines with DELETE-ME-1 markers to ensure the call to super constructor is covered by the exception
-         * handler.
-         */
         if (_flag) {
             this.thisIsInitialized = true;
             ((TracingMethodVisitor) this.mv).setThisInitialized();
-            ((TracingMethodVisitor) this.mv).endOutermostExceptionHandler();   // DELETE-ME-1
+            ((TracingMethodVisitor) this.mv).endOutermostExceptionHandler();
         }
         super.visitMethodInsn(opcode, owner, name, desc, itf);
 
-        if (_flag) {                                                           // DELETE-ME-1
-            ((TracingMethodVisitor) this.mv).beginOutermostExceptionHandler(); // DELETE-ME-1
-        }                                                                      // DELETE-ME-1
+        if (_flag) {
+            ((TracingMethodVisitor) this.mv).beginOutermostExceptionHandler();
+        }
 
         final Type _returnType = Type.getReturnType(desc);
         if (_returnType != Type.VOID_TYPE) {
