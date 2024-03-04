@@ -1,6 +1,7 @@
 plugins {
     id "java"
     id "jacoco"
+    id "groovy"
 }
 
 java {
@@ -19,6 +20,7 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.6'
     implementation 'org.ow2.asm:asm-commons:9.6'
 
+    testImplementation 'org.apache.groovy:groovy-all:4.0.18'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
