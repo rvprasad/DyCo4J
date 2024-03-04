@@ -8,9 +8,7 @@ about JVM based code.
 
 
 ## Requirements
-- JDK 1.8+. We use the JDKs from the following sources.
-  - [Oracle](http://www.oracle.com/technetwork/java/javase/%20downloads/index.html)
-  - [Azul Systems](https://www.azul.com/products/zulu/)
+- JDK 21+. We use the JDKs from [Azul Systems](https://www.azul.com/products/zulu/) provided via [SDKMan](https://sdkman.io/).
 
 
 ## Build
