@@ -32,7 +32,7 @@ final class LoggerTest {
         final byte _idx = 1
         Logger.logArgument(_idx, _msg)
 
-        final _expected = "${Thread.currentThread().getId()},${Logger.METHOD_ARG_TAG},$_idx,$_msg"
+        final _expected = "${getCurrThreadId()},${Logger.METHOD_ARG_TAG},$_idx,$_msg"
         assert _expected == getContent()[1]
     }
 
@@ -44,7 +44,7 @@ final class LoggerTest {
         final _action = Logger.ArrayAction.GETA
         Logger.logArray(_array, _idx, _value, _action)
 
-        final _expected = "${Thread.currentThread().getId()},$_action,$_idx,${Logger.toString(_array)},$_value"
+        final _expected = "${getCurrThreadId()},$_action,$_idx,${Logger.toString(_array)},$_value"
         assert _expected == getContent()[1]
     }
 
@@ -56,7 +56,7 @@ final class LoggerTest {
         final _action = Logger.ArrayAction.PUTA
         Logger.logArray(_array, _idx, _value, _action)
 
-        final _expected = "${Thread.currentThread().getId()},$_action,$_idx,${Logger.toString(_array)},$_value"
+        final _expected = "${getCurrThreadId()},$_action,$_idx,${Logger.toString(_array)},$_value"
         assert _expected == getContent()[1]
     }
 
@@ -65,7 +65,7 @@ final class LoggerTest {
         final _tmp = new RuntimeException()
         Logger.logException(_tmp)
 
-        final _expected = "${Thread.currentThread().getId()},${Logger.METHOD_EXCEPTION_TAG},${Logger.toString(_tmp)},${_tmp.getClass().getName()}"
+        final _expected = "${getCurrThreadId()},${Logger.METHOD_EXCEPTION_TAG},${Logger.toString(_tmp)},${_tmp.getClass().getName()}"
         assert _expected == getContent()[1]
     }
 
@@ -77,7 +77,7 @@ final class LoggerTest {
         final _action = Logger.FieldAction.GETF
         Logger.logField(_object, _fieldValue, _fieldName, _action)
 
-        final _expected = "${Thread.currentThread().getId()},$_action,$_fieldName,${Logger.toString(_object)},$_fieldValue"
+        final _expected = "${getCurrThreadId()},$_action,$_fieldName,${Logger.toString(_object)},$_fieldValue"
         assert _expected == getContent()[1]
     }
 
@@ -88,7 +88,7 @@ final class LoggerTest {
         final _action = Logger.FieldAction.PUTF
         Logger.logField(null, _fieldValue, _fieldName, _action)
 
-        final _expected = "${Thread.currentThread().getId()},$_action,$_fieldName,,$_fieldValue"
+        final _expected = "${getCurrThreadId()},$_action,$_fieldName,,$_fieldValue"
         assert _expected == getContent()[1]
     }
 
@@ -97,7 +97,7 @@ final class LoggerTest {
         final _msg = "test message"
         Logger.logMethodCall(_msg)
 
-        final _expected = "${Thread.currentThread().getId()},${Logger.METHOD_CALL_TAG},$_msg"
+        final _expected = "${getCurrThreadId()},${Logger.METHOD_CALL_TAG},$_msg"
         assert _expected == getContent()[1]
     }
 
@@ -106,7 +106,7 @@ final class LoggerTest {
         final _msg = "test message"
         Logger.logMethodEntry(_msg)
 
-        final _expected = "${Thread.currentThread().getId()},${Logger.METHOD_ENTRY_TAG},$_msg"
+        final _expected = "${getCurrThreadId()},${Logger.METHOD_ENTRY_TAG},$_msg"
         assert _expected == getContent()[1]
     }
 
@@ -115,7 +115,7 @@ final class LoggerTest {
         final _msg = "test message"
         Logger.logMethodExit(_msg, "N")
 
-        final _expected = "${Thread.currentThread().getId()},${Logger.METHOD_EXIT_TAG},$_msg,N"
+        final _expected = "${getCurrThreadId()},${Logger.METHOD_EXIT_TAG},$_msg,N"
         assert _expected == getContent()[1]
     }
 
@@ -124,7 +124,7 @@ final class LoggerTest {
         final _msg = "test message"
         Logger.logMethodExit(_msg, "E")
 
-        final _expected = "${Thread.currentThread().getId()},${Logger.METHOD_EXIT_TAG},$_msg,E"
+        final _expected = "${getCurrThreadId()},${Logger.METHOD_EXIT_TAG},$_msg,E"
         assert _expected == getContent()[1]
     }
 
@@ -133,7 +133,7 @@ final class LoggerTest {
         final _msg = "test message"
         Logger.logReturn(_msg)
 
-        final _expected = "${Thread.currentThread().getId()},${Logger.METHOD_RETURN_TAG},$_msg"
+        final _expected = "${getCurrThreadId()},${Logger.METHOD_RETURN_TAG},$_msg"
         assert _expected == getContent()[1]
     }
 
@@ -141,7 +141,7 @@ final class LoggerTest {
     void testLogReturnForVoidValue() {
         Logger.logReturn(null)
 
-        final _expected = "${Thread.currentThread().getId()},${Logger.METHOD_RETURN_TAG}"
+        final _expected = "${getCurrThreadId()},${Logger.METHOD_RETURN_TAG}"
         assert _expected == getContent()[1]
     }
 
@@ -153,10 +153,10 @@ final class LoggerTest {
         Logger.log(_msg2)
 
         final _tmp = getContent()
-        final _expected1 = "${Thread.currentThread().getId()},$_msg1"
+        final _expected1 = "${getCurrThreadId()},$_msg1"
         assert _expected1 == _tmp[1]
 
-        final _expected2 = "${Thread.currentThread().getId()},$_msg2"
+        final _expected2 = "${getCurrThreadId()},$_msg2"
         assert _expected2 == _tmp[2]
     }
 
@@ -165,7 +165,7 @@ final class LoggerTest {
         final _msg = "test message"
         Logger.log(_msg)
 
-        final _expected = "${Thread.currentThread().getId()},$_msg"
+        final _expected = "${getCurrThreadId()},$_msg"
         assert _expected == getContent()[1]
     }
 
@@ -181,13 +181,13 @@ final class LoggerTest {
         Logger.cleanupForTest()
 
         final _tmp1 = getContent()
-        final _expected1 = "${Thread.currentThread().getId()},$_msg1"
+        final _expected1 = "${getCurrThreadId()},$_msg1"
         assert _expected1 == _tmp1[1]
-        final _expected2 = "${Thread.currentThread().getId()},$_msg1,2"
+        final _expected2 = "${getCurrThreadId()},$_msg1,2"
         assert _expected2 == _tmp1[2]
-        final _expected3 = "${Thread.currentThread().getId()},$_msg2"
+        final _expected3 = "${getCurrThreadId()},$_msg2"
         assert _expected3 == _tmp1[3]
-        final _expected4 = "${Thread.currentThread().getId()},$_msg2,1"
+        final _expected4 = "${getCurrThreadId()},$_msg2,1"
         assert _expected4 == _tmp1[4]
     }
 
@@ -200,10 +200,10 @@ final class LoggerTest {
         Logger.log(_msg2)
 
         final _tmp = getContent()
-        final _expected1 = "${Thread.currentThread().getId()},${_msg1.join(',')}"
+        final _expected1 = "${getCurrThreadId()},${_msg1.join(',')}"
         assert _expected1 == _tmp[1]
 
-        final _expected2 = "${Thread.currentThread().getId()},${_msg2.join(',')}"
+        final _expected2 = "${getCurrThreadId()},${_msg2.join(',')}"
         assert _expected2 == _tmp[2]
     }
 
@@ -212,7 +212,7 @@ final class LoggerTest {
         final String[] _msg = ["test", "message"]
         Logger.log(_msg)
 
-        final _expected = "${Thread.currentThread().getId()},${_msg.join(',')}"
+        final _expected = "${getCurrThreadId()},${_msg.join(',')}"
         assert _expected == getContent()[1]
     }
 
@@ -225,49 +225,49 @@ final class LoggerTest {
     @Test
     void testToStringWithByte() {
         final byte _tmp = 10
-        assert Logger.toString(_tmp) ==~ "^${Logger.BYTE_TYPE_TAG}$_tmp"
+        assert Logger.toString(_tmp) ==~ /^${Logger.BYTE_TYPE_TAG}$_tmp$/
         assert Logger.toString(_tmp) != Logger.toString(20)
     }
 
     @Test
     void testToStringWithChar() {
         final char _tmp = 'c'
-        assert Logger.toString(_tmp) ==~ "^${Logger.CHAR_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.CHAR_TYPE_TAG}${Character.hashCode(_tmp)}$/
         assert Logger.toString(_tmp) != Logger.toString('d')
     }
 
     @Test
     void testToStringWithDouble() {
         final double _tmp = 10.3d
-        assert Logger.toString(_tmp) ==~ "^${Logger.DOUBLE_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.DOUBLE_TYPE_TAG}$_tmp$/
         assert Logger.toString(_tmp) != Logger.toString(10.4d)
     }
 
     @Test
     void testToStringWithFloat() {
         final float _tmp = 10.3f
-        assert Logger.toString(_tmp) ==~ "^${Logger.FLOAT_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.FLOAT_TYPE_TAG}$_tmp$/
         assert Logger.toString(_tmp) != Logger.toString(10.4f)
     }
 
     @Test
     void testToStringWithInt() {
         final int _tmp = 10
-        assert Logger.toString(_tmp) ==~ "^${Logger.INT_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.INT_TYPE_TAG}$_tmp$/
         assert Logger.toString(_tmp) != Logger.toString(20)
     }
 
     @Test
     void testToStringWithLong() {
         final long _tmp = 10L
-        assert Logger.toString(_tmp) ==~ "^${Logger.LONG_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.LONG_TYPE_TAG}$_tmp$/
         assert Logger.toString(_tmp) != Logger.toString(20L)
     }
 
     @Test
     void testToStringWithObjectForArray() {
         final String[] _tmp = ["array"]
-        assert Logger.toString(_tmp) ==~ "^${Logger.ARRAY_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.ARRAY_TYPE_TAG}\d+$/
         assert Logger.toString(_tmp) != Logger.toString(["array"].toArray())
     }
 
@@ -279,32 +279,36 @@ final class LoggerTest {
     @Test
     void testToStringWithObjectForObject() {
         final _tmp = Logger.class
-        assert Logger.toString(_tmp) ==~ "^${Logger.OBJECT_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.OBJECT_TYPE_TAG}\d+$/
         assert Logger.toString(_tmp) != Logger.toString(Integer.valueOf(4))
     }
 
     @Test
     void testToStringWithObjectForString() {
         final _tmp = "string"
-        assert Logger.toString(_tmp) ==~ "^${Logger.STRING_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.STRING_TYPE_TAG}\d+$/
         assert Logger.toString(_tmp) != Logger.toString("str")
     }
 
     @Test
     void testToStringWithObjectForThrowable() {
         final _tmp = new RuntimeException()
-        assert Logger.toString(_tmp) ==~ "^${Logger.THROWABLE_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.THROWABLE_TYPE_TAG}\d+/
         assert Logger.toString(_tmp) != Logger.toString(new IllegalStateException())
     }
 
     @Test
     void testToStringWithShort() {
         final short _tmp = 10
-        assert Logger.toString(_tmp) ==~ "^${Logger.SHORT_TYPE_TAG}.*"
+        assert Logger.toString(_tmp) ==~ /^${Logger.SHORT_TYPE_TAG}$_tmp$/
         assert Logger.toString(_tmp) != Logger.toString((short) 20)
     }
 
     private String[] getContent() {
         return logStore.toString().split(System.lineSeparator())
+    }
+
+    private static long getCurrThreadId() {
+        return Thread.currentThread().getId()
     }
 }
