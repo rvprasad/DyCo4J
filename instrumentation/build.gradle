@@ -22,8 +22,8 @@ dependencies {
     implementation 'org.ow2.asm:asm-tree:9.6'
     implementation 'commons-cli:commons-cli:1.6.0'
     implementation 'org.slf4j:slf4j-api:2.0.12'
-    implementation ":dyco4j-logging:$DYCO4J_LOGGING_VERSION"
-    implementation ":dyco4j-utility:$DYCO4J_UTILITY_VERSION"
+    implementation project(':dyco4j-logging')
+    implementation project(':dyco4j-utility')
     runtimeOnly 'com.google.code.gson:gson:2.10.1'
 
     testImplementation 'org.slf4j:slf4j-simple:2.0.12'
@@ -144,5 +144,4 @@ jacocoTestReport {
     }
 }
 
-version = '1.0.0'
-
+version = "1.1.0"
