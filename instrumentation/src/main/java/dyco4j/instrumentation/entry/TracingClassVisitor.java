@@ -13,13 +13,17 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 final class TracingClassVisitor extends ClassVisitor {
+    private final String classNameRegex;
     private final String methodNameRegex;
     private final boolean onlyAnnotatedTests;
     private String className;
 
-    TracingClassVisitor(final ClassVisitor cv, final String methodNameRegex,
+    TracingClassVisitor(final ClassVisitor cv,
+                        final String classNameRegex,
+                        final String methodNameRegex,
                         final boolean onlyAnnotatedTests) {
         super(CLI.ASM_VERSION, cv);
+        this.classNameRegex = classNameRegex;
         this.methodNameRegex = methodNameRegex;
         this.onlyAnnotatedTests = onlyAnnotatedTests;
     }
@@ -27,26 +31,28 @@ final class TracingClassVisitor extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         super.visit(version, access, name, signature, superName, interfaces);
-        this.className = name;
+        className = name;
     }
 
     @Override
     public MethodVisitor visitMethod(final int access, final String name, final String desc,
                                      final String signature, final String[] exceptions) {
         final MethodVisitor _mv = super.visitMethod(access, name, desc, signature, exceptions);
-        return _mv == null || (access & Opcodes.ACC_PUBLIC) == 0 ? _mv :
-                new TracingMethodVisitor(name, desc, _mv, this);
+        if (_mv != null && (access & Opcodes.ACC_PUBLIC) != 0 && className.matches(classNameRegex))
+            return new TracingMethodVisitor(name, desc, _mv, this);
+        else
+            return _mv;
     }
 
     String getMethodNameRegex() {
-        return this.methodNameRegex;
+        return methodNameRegex;
     }
 
     boolean instrumentOnlyAnnotatedTests() {
-        return this.onlyAnnotatedTests;
+        return onlyAnnotatedTests;
     }
 
     String getClassName() {
-        return this.className;
+        return className;
     }
 }

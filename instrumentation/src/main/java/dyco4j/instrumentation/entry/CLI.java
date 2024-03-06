@@ -28,21 +28,24 @@ public final class CLI {
     static final int ASM_VERSION = ASM5;
     static final String IN_FOLDER_OPTION = "in-folder";
     static final String OUT_FOLDER_OPTION = "out-folder";
+    static final String CLASS_NAME_REGEX_OPTION = "class-name-regex";
     static final String METHOD_NAME_REGEX_OPTION = "method-name-regex";
     static final String ONLY_ANNOTATED_TESTS_OPTION = "only-annotated-tests";
+    private final static String CLASS_NAME_REGEX = ".*";
     private final static String METHOD_NAME_REGEX = "^test.*";
 
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
         _options.addOption(Option.builder().longOpt(IN_FOLDER_OPTION).required().hasArg()
-                                 .desc("Folder containing the classes (as descendants) to be instrumented.").build());
+                .desc("Folder containing the classes (as descendants) to be instrumented.").build());
         _options.addOption(Option.builder().longOpt(OUT_FOLDER_OPTION).required().hasArg()
-                                 .desc("Folder containing the classes (as descendants) with instrumentation.").build());
+                .desc("Folder containing the classes (as descendants) with instrumentation.").build());
         final String _msg = MessageFormat
                 .format("Regex identifying the methods to be instrumented. Default: {0}.", METHOD_NAME_REGEX);
+        _options.addOption(Option.builder().longOpt(CLASS_NAME_REGEX_OPTION).hasArg(true).desc(_msg).build());
         _options.addOption(Option.builder().longOpt(METHOD_NAME_REGEX_OPTION).hasArg(true).desc(_msg).build());
         _options.addOption(Option.builder().longOpt(ONLY_ANNOTATED_TESTS_OPTION).hasArg(false)
-                                 .desc("Instrument only tests identified by annotations.").build());
+                .desc("Instrument only tests identified by annotations.").build());
 
         try {
             processCommandLine(new DefaultParser().parse(_options, args));
@@ -66,6 +69,7 @@ public final class CLI {
         processFiles(_srcRoot, _trgRoot, _nonClassFileSelector, _fileCopier);
 
         final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
+        final String _classNameRegex = cmdLine.getOptionValue(CLASS_NAME_REGEX_OPTION, CLASS_NAME_REGEX);
         final String _methodNameRegex = cmdLine.getOptionValue(METHOD_NAME_REGEX_OPTION, METHOD_NAME_REGEX);
         final boolean _onlyAnnotatedTests = cmdLine.hasOption(ONLY_ANNOTATED_TESTS_OPTION);
         final BiConsumer<Path, Path> _classInstrumenter = (srcPath, trgPath) -> {
@@ -74,7 +78,7 @@ public final class CLI {
                 final ClassReader _cr = new ClassReader(_bytecode);
                 final ClassWriter _cw = new ClassWriter(_cr, ClassWriter.COMPUTE_MAXS);
                 final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
-                final ClassVisitor _cv2 = new TracingClassVisitor(_cv1, _methodNameRegex, _onlyAnnotatedTests);
+                final ClassVisitor _cv2 = new TracingClassVisitor(_cv1, _classNameRegex, _methodNameRegex, _onlyAnnotatedTests);
                 _cr.accept(_cv2, 0);
                 final byte[] _out = _cw.toByteArray();
                 Files.write(trgPath, _out);

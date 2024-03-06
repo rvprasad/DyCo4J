@@ -18,6 +18,7 @@ class CLITest extends AbstractCLITest {
 
     static final String IN_FOLDER_OPTION = "--$CLI.IN_FOLDER_OPTION"
     static final String OUT_FOLDER_OPTION = "--$CLI.OUT_FOLDER_OPTION"
+    static final String CLASS_NAME_REGEX_OPTION = "--$CLI.CLASS_NAME_REGEX_OPTION"
     static final String METHOD_NAME_REGEX_OPTION = "--$CLI.METHOD_NAME_REGEX_OPTION"
     static final String ONLY_ANNOTATED_TESTS_OPTION = "--$CLI.ONLY_ANNOTATED_TESTS_OPTION"
 
@@ -67,6 +68,39 @@ class CLITest extends AbstractCLITest {
 
         assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
         assert _traceLines[2] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+    }
+
+    @Test
+    void withMatchingClassNameRegexOption1() {
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               CLASS_NAME_REGEX_OPTION, '.*TestSubject$']) == [1L, 1L]
+
+        final _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        final String[] _traceLines = _executionResult.traceLines
+        assert _traceLines.length == 3
+
+        // should not raise exception
+        Date.parseToStringDate(_traceLines[0])
+
+        assert _traceLines[1] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/test2\(\)V/
+        assert _traceLines[2] ==~ /\d+,marker:dyco4j\/instrumentation\/entry\/CLITestSubject\/testSuffix2\(\)V/
+    }
+
+    @Test
+    void withNonMatchingClassNameRegexOption() {
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               CLASS_NAME_REGEX_OPTION, '.*Test$']) == [1L, 1L]
+
+        final _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        final String[] _traceLines = _executionResult.traceLines
+        assert _traceLines.length == 1
+
+        // should not raise exception
+        Date.parseToStringDate(_traceLines[0])
     }
 
     @Test
