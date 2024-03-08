@@ -27,36 +27,38 @@ tools.
 
 ### Setup
 1. Download the source code from [here](http://ant.apache.org/srcdownload.cgi).
-2. Unpack the source bundle.  We will refer to _apache-ant-1.9.7_ folder as the
+2. Unpack the source bundle.  We will refer to _apache-ant-1.10.14_ folder as the
    _\<root>_ folder.
 3. Open the terminal and change the folder to _\<root>_ folder.
-4. Build an bootstrapping version of ant by executing `bootstrap.sh` to
-5. Run the tests by executing `bootstrap/bin/ant test`.
+4. Build an bootstrapping version of ant by executing `./bootstrap.sh` to
+5. Run the tests by executing `./bootstrap/bin/ant test`.
 6. Make note of the number of tests that were executed, passed, failed, and
    skipped along with the time take to run the tests.  This information is
    available in `build/testcases/reports/index.html`.  Here's a [snapshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-vanilla-summary.png)
    of the report.
 
-**Note**: Following tests were executed on a Macbook Pro with Intel 2.6 GHz Intel Core i7 processor, 16GB RAM, and 1TB PCIe Flash drive.
+**Note**
+1. Following tests were executed on a Linux box with 3.8GHz Intel Core i7
+   processor, 64GB RAM, and 2TB flash drive.
+2. `misc/scripts/test-on-apache-ant.sh` automates the below tracings when
+   executed in the _root_ folder. 
 
 ### Tracing the Tests
 1. Open the terminal and change the folder to _\<root>_ folder.
 2. Create a clean copy of ant and its tests by executing
-   `bootstrap/bin/ant clean build compile-tests`.
+   `./bootstrap/bin/ant clean build compile-tests`.
 3. Execute `cd build`.
 4. Make a copy of the compiled tests by executing `mv testcases orig-testcases`.
 5. Instrument the tests by executing `java -jar
    <path to dyco4j-entry-X.Y.Z-cli.jar> --in-folder orig-testcases --out-folder
    testcases` with all the jars required by the tool in the same folder as
-   _dyco4j-entry-1.0.0-cli.jar_.
+   _dyco4j-entry-1.1.0-cli.jar_.
 6. Execute `cd testcases`.
 7. Place the logging classes in the class path by unpacking logging library jar
    by executing `jar xvf <path to dyco4j-logging-X.Y.Z.jar>`.
-8. Get back to the _\<root>_ folder and execute `bootstrap/bin/ant test`.  This
-   will create `trace.*gz` files in _\<root>_ and in
-   _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a [snapshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-entry-instrumented-summary.png)
-   of the report in which 1,887 events in 81 files (336KB) were logged in under
-   3 minutes.
+8. Get back to the _\<root>_ folder and execute `./bootstrap/bin/ant test`.
+   This will create `trace.*gz` files in _\<root>_ and in
+   _\<root>/src/etc/testcases/taskdefs/_ folders. 
 
 ### Tracing the Implementation (Internals)
 1. Perform steps 1-7 from _Tracing the Tests_.  If you performed step 8, then
@@ -71,32 +73,39 @@ tools.
    <path to dyco4j-internals-X.Y.Z-cli.jar> --in-folder orig-classes
    --out-folder classes --classpath-config classpath-config.txt`
    with all the jars required by the tool in the same folder as
-   dyco4j-internals-1.0.0-cli.jar.
-6. Get back to the _\<root>_ folder and execute `bootstrap/bin/ant test`.  This
-   will create `trace.*gz` files in _\<root>_ and in
-   _\<root>/src/etc/testcases/taskdefs/_ folders.  Here's a [snapshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-default-options-instrumented-summary.png)
-   of the report in which _613,017,601 events in 81 files (55MB) were logged in
-   under 7 minutes._
+   dyco4j-internals-1.1.0-cli.jar.
+6. Get back to the _\<root>_ folder and execute `./bootstrap/bin/ant test`.
+   This will create `trace.*gz` files in _\<root>_ and in
+   _\<root>/src/etc/testcases/taskdefs/_ folders.
 
-For the performance curious peeps,
- - The baseline time for building and executing all tests on ant without any
-   instrumentation was under 3 minutes. Here's a [snapshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-vanilla-summary.png).
- - When all tracing options were enabled, _4,848,544,012 events in 81 files
-   (9.7GB) were logged in under 96 minutes._ Here's a [snapshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-all-options-instrumented-summary.png)
-   of that report.  Interestingly, Bzip related tests contributed the largest
-   increase to execution time (~66 minutes).
- - When all tracing options except `--trace-array-access` were enabled
-   _2,715,652,923 events in 80 files (3.1GB) amounting to  were logged in
-   under 40 minutes._ Here's a [snapshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-all-but-no-array-access-option-instrumented-summary.png)
-   of that report.
-
+### Performance
+ - **Baseline**: Without any instrumentation, all tests were executed in 2.5
+   minutes. Here's a
+   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-vanilla-summary.png).
+ - **Test only**: When test entries were logged, _2,221 events were logged into
+   59 files (21KB) in 2.5 minutes._  Here's a
+   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-entry-instrumented-summary.png) of the test report.
+ - **Default instrumentation options**: When method entry and exit were logged,
+   _710,073,781 events were logged into 59 files (75MB) in 5.5 minutes._ Here's a
+   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-default-options-instrumented-summary.png) of the test report.
+ - **All options but array access instrumentation option**: When field access,
+   method entry and exit, method args, method return values, and method calls
+   were logged, _3,089,781,963 events were logged into 59 files (3.5GB) in 32 
+   minutes._ Here's a
+   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-all-but-no-array-access-option-instrumented-summary.png) of the test report.
+ - **All instrumentation options**: When array access, field access, method entry
+   and exit, method args, method return values, and method calls were logged, 
+   _5,250,074,312 events were logged into 59 files (10GB) in 67 minutes._ Here's a
+   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-all-options-instrumented-summary.png)
+   of the test report.  Interestingly, Bzip related tests contributed the largest
+   increase to execution time (~40 minutes).
 
 ## Known Issues
- - Due to a bug #[8172282](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8172282)
-   in JDK implementations (from both Oracle and Azul Systems), exceptions
-   raised in super constructor calls are not logged.  This limitation is
-   captured as issue [#38](https://github.com/rvprasad/DyCo4J/issues/38). It
-   will be fixed once the JDK bug is addressed.
+ - Due to the behavior of JVM that is enforced in response to
+   #[8172282](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8172282),
+   exceptions raised in super constructor calls are not logged.  This
+   limitation was tracked in issue
+   [#38](https://github.com/rvprasad/DyCo4J/issues/38).
 
 
 ## Info for Developers
