@@ -37,6 +37,7 @@ cd ../../
 TRACE_FOLDER=traces/entry-instr
 mkdir -p $TRACE_FOLDER
 mv trace*gz $TRACE_FOLDER
+mv build/program_data.json $TRACE_FOLDER
 find src -name "trace*gz" -exec mv '{}' $TRACE_FOLDER \;
 echo "Logged `find $TRACE_FOLDER -name "trace*gz" -exec zcat '{}' \; | wc -l` statements"
 echo "Files `ls -1 $TRACE_FOLDER/*gz | wc -l`"
@@ -54,6 +55,7 @@ cd ..
 TRACE_FOLDER=traces/basic-instr
 mkdir -p $TRACE_FOLDER
 mv trace*gz $TRACE_FOLDER
+mv build/program_data.json $TRACE_FOLDER
 find src -name "trace*gz" -exec mv '{}' $TRACE_FOLDER \;
 echo "Logged `find $TRACE_FOLDER -name "trace*gz" -exec zcat '{}' \; | wc -l` statements"
 echo "Files `ls -1 $TRACE_FOLDER/*gz | wc -l`"
@@ -70,6 +72,7 @@ cd ..
 TRACE_FOLDER=traces/no-array-instr
 mkdir -p $TRACE_FOLDER
 mv trace*gz $TRACE_FOLDER
+mv build/program_data.json $TRACE_FOLDER
 find src -name "trace*gz" -exec mv '{}' $TRACE_FOLDER \;
 echo "Logged `find $TRACE_FOLDER -name "trace*gz" -exec zcat '{}' \; | wc -l` statements"
 echo "Files `ls -1 $TRACE_FOLDER/*gz | wc -l`"
@@ -86,6 +89,7 @@ cd ..
 TRACE_FOLDER=traces/full-instr
 mkdir -p $TRACE_FOLDER
 mv trace*gz $TRACE_FOLDER
+mv build/program_data.json $TRACE_FOLDER
 find src -name "trace*gz" -exec mv '{}' $TRACE_FOLDER \;
 echo "Logged `find $TRACE_FOLDER -name "trace*gz" -exec zcat '{}' \; | wc -l` statements"
 echo "Files `ls -1 $TRACE_FOLDER/*gz | wc -l`"
