@@ -113,12 +113,12 @@ tools.
    "INFO", "FIXME", and "ASSUMPTION" to uncover various bits of information not
    captured elsewhere.
  - If you want to run _instrumentation_ tests using tools other than Gradle,
-   then remember to add `-ea
-   -Dlogging.jar=../logging/build/libs/dyco4j-logging-X.Y.Z.jar` to VM
-   options.
- - If you want to add new tests, then look at the flow in _CLITest_,
-   _AbstractCLITest_, and _CLIClassPathConfigTest_ to understand how to set up
-   and tear down artifacts.
+   then remember to passing `-ea
+   -Dlogging.jar=../logging/build/libs/dyco4j-logging-X.Y.Z.jar` as a VM
+   option.
+ - If you want to add new tests, then refer to _CLITest_, _AbstractCLITest_,
+   and _CLIClassPathConfigTest_ to understand how to set up and tear down
+   artifacts.
 
 
 ## Attribution
