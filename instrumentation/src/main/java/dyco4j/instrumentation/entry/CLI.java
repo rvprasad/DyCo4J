@@ -7,6 +7,7 @@
  */
 package dyco4j.instrumentation.entry;
 
+import dyco4j.instrumentation.Helper;
 import dyco4j.instrumentation.LoggerInitializingClassVisitor;
 import org.apache.commons.cli.*;
 import org.objectweb.asm.ClassReader;
@@ -21,7 +22,6 @@ import java.text.MessageFormat;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
@@ -58,15 +58,7 @@ public final class CLI {
         final Path _srcRoot = Paths.get(cmdLine.getOptionValue(IN_FOLDER_OPTION));
         final Path _trgRoot = Paths.get(cmdLine.getOptionValue(OUT_FOLDER_OPTION));
 
-        final Predicate<Path> _nonClassFileSelector = p -> !p.toString().endsWith(".class") && Files.isRegularFile(p);
-        final BiConsumer<Path, Path> _fileCopier = (srcPath, trgPath) -> {
-            try {
-                Files.copy(srcPath, trgPath);
-            } catch (final IOException _ex) {
-                throw new RuntimeException(_ex);
-            }
-        };
-        processFiles(_srcRoot, _trgRoot, _nonClassFileSelector, _fileCopier);
+        Helper.copyFiles(_srcRoot, _trgRoot);
 
         final Predicate<Path> _classFileSelector = p -> p.toString().endsWith(".class");
         final String _classNameRegex = cmdLine.getOptionValue(CLASS_NAME_REGEX_OPTION, CLASS_NAME_REGEX);
@@ -86,6 +78,6 @@ public final class CLI {
                 throw new RuntimeException(_ex);
             }
         };
-        processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
+        Helper.processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
     }
 }

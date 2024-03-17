@@ -8,6 +8,7 @@
 
 package dyco4j.instrumentation.internals;
 
+import dyco4j.instrumentation.Helper;
 import dyco4j.instrumentation.LoggerInitializingClassVisitor;
 import dyco4j.utility.ProgramData;
 import org.apache.commons.cli.*;
@@ -33,7 +34,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
@@ -96,16 +96,7 @@ public final class CLI {
     private static void processCommandLine(final CommandLine cmdLine) throws IOException {
         final Path _srcRoot = Paths.get(cmdLine.getOptionValue(IN_FOLDER_OPTION));
         final Path _trgRoot = Paths.get(cmdLine.getOptionValue(OUT_FOLDER_OPTION));
-
-        final Predicate<Path> _nonClassFileSelector = p -> !p.toString().endsWith(".class") && Files.isRegularFile(p);
-        final BiConsumer<Path, Path> _fileCopier = (srcPath, trgPath) -> {
-            try {
-                Files.copy(srcPath, trgPath);
-            } catch (final IOException _ex) {
-                throw new RuntimeException(_ex);
-            }
-        };
-        processFiles(_srcRoot, _trgRoot, _nonClassFileSelector, _fileCopier);
+        Helper.copyFiles(_srcRoot, _trgRoot);
 
         final CommandLineOptions _cmdLineOptions =
                 new CommandLineOptions(cmdLine.hasOption(TRACE_ARRAY_ACCESS_OPTION),
@@ -139,7 +130,7 @@ public final class CLI {
                 throw new RuntimeException(_ex);
             }
         };
-        processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
+        Helper.processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
 
         ProgramData.saveData(_programData, _programDataFile);
     }

@@ -47,4 +47,16 @@ public class Helper {
             });
         }
     }
+
+    public static void copyFiles(final Path srcRoot, final Path trgRoot) throws IOException {
+        final Predicate<Path> _nonClassFileSelector = p -> !p.toString().endsWith(".class") && Files.isRegularFile(p);
+        final BiConsumer<Path, Path> _fileCopier = (srcPath, trgPath) -> {
+            try {
+                Files.copy(srcPath, trgPath);
+            } catch (final IOException _ex) {
+                throw new RuntimeException(_ex);
+            }
+        };
+        processFiles(srcRoot, trgRoot, _nonClassFileSelector, _fileCopier);
+    }
 }
