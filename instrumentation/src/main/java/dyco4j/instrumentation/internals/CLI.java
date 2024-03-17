@@ -25,13 +25,13 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static dyco4j.instrumentation.Helper.processFiles;
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -125,12 +125,9 @@ public final class CLI {
             try {
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(srcPath));
                 final ClassWriter _cw = new CustomClassLoadingClassWriter(_cr, ClassWriter.COMPUTE_FRAMES, _customClassLoader);
-                final Map<String, String> _shortFieldName2Id =
-                        Collections.unmodifiableMap(_programData.shortFieldName2Id);
-                final Map<String, String> _shortMethodName2Id =
-                        Collections.unmodifiableMap(_programData.shortMethodName2Id);
-                final Map<String, String> _class2superClass =
-                        Collections.unmodifiableMap(_programData.class2superClass);
+                final Map<String, String> _shortFieldName2Id = _programData.getImmutableCopyOfShortFieldName2Id();
+                final Map<String, String> _shortMethodName2Id = _programData.getImmutableCopyOfShortMethodName2Id();
+                final Map<String, String> _class2superClass =  _programData.getImmutableCopyOfClass2SuperClass();
                 final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
                 final ClassVisitor _cv2 =
                         new TracingClassVisitor(_cv1, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
@@ -148,37 +145,25 @@ public final class CLI {
     }
 
     private static Set<Path> getFilenames(final Path folder) throws IOException {
-        return Files.walk(folder).filter(p -> p.toString().endsWith(".class")).collect(Collectors.toSet());
+        try (Stream<Path> walker = Files.walk(folder)) {
+            return walker.filter(p -> p.toString().endsWith(".class")).collect(Collectors.toSet());
+        }
     }
 
     private static void getMemberId2NameMapping(final Collection<Path> filenames, final ProgramData programData) {
-        for (final Path _arg : filenames) {
-            try {
+        try {
+            for (final Path _arg : filenames) {
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(_arg));
                 final ClassVisitor _cv = new ProgramDataCollectingClassVisitor(programData);
                 _cr.accept(_cv, 0);
-            } catch (final Exception _ex) {
-                throw new RuntimeException(_ex);
             }
+        } catch (final Exception _ex) {
+            throw new RuntimeException(_ex);
         }
     }
 
-    static class CommandLineOptions {
-        final boolean traceArrayAccess;
-        final boolean traceFieldAccess;
-        final boolean traceMethodArgs;
-        final boolean traceMethodCall;
-        final boolean traceMethodRetValue;
-
-        CommandLineOptions(final boolean traceArrayAccess, final boolean traceFieldAccess,
-                           final boolean traceMethodArgs, final boolean traceMethodCall,
-                           final boolean traceMethodRetValue) {
-            this.traceArrayAccess = traceArrayAccess;
-            this.traceFieldAccess = traceFieldAccess;
-            this.traceMethodArgs = traceMethodArgs;
-            this.traceMethodCall = traceMethodCall;
-            this.traceMethodRetValue = traceMethodRetValue;
-        }
+    record CommandLineOptions(boolean traceArrayAccess, boolean traceFieldAccess, boolean traceMethodArgs,
+                              boolean traceMethodCall, boolean traceMethodRetValue) {
     }
 
     private static class CustomClassLoadingClassWriter extends ClassWriter {

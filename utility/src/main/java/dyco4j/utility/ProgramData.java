@@ -17,16 +17,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class ProgramData {
     // INFO: Refer to ClassNameHelper for info about format of names
-    public final Map<String, String> fieldId2Name = new HashMap<>();
-    public final Map<String, String> shortFieldName2Id = new HashMap<>();
-    public final Map<String, String> methodId2Name = new HashMap<>();
-    public final Map<String, String> shortMethodName2Id = new HashMap<>();
-    public final Map<String, String> class2superClass = new HashMap<>();
+    final Map<String, String> fieldId2Name = new HashMap<>();
+    final Map<String, String> shortFieldName2Id = new HashMap<>();
+    final Map<String, String> methodId2Name = new HashMap<>();
+    final Map<String, String> shortMethodName2Id = new HashMap<>();
+    final Map<String, String> class2SuperClass = new HashMap<>();
 
     public static ProgramData loadData(final Path dataFile) throws IOException {
         if (Files.exists(dataFile)) {
@@ -39,32 +41,62 @@ public final class ProgramData {
 
     public static void saveData(final ProgramData staticData, final Path dataFile) throws IOException {
         if (Files.exists(dataFile))
-            Files.move(dataFile, Paths.get(dataFile.toString() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
+            Files.move(dataFile, Paths.get(dataFile + ".bak"), StandardCopyOption.REPLACE_EXISTING);
 
         try (final Writer _wtr = new FileWriter(dataFile.toFile())) {
             new GsonBuilder().setPrettyPrinting().create().toJson(staticData, _wtr);
         }
     }
 
+    public Map<String, String> getImmutableCopyOfShortFieldName2Id() {
+        return Collections.unmodifiableMap(shortFieldName2Id);
+    }
+
+    public Map<String, String> getImmutableCopyOfShortMethodName2Id() {
+        return Collections.unmodifiableMap(shortMethodName2Id);
+    }
+
+    public Map<String, String> getImmutableCopyOfClass2SuperClass() {
+        return Collections.unmodifiableMap(class2SuperClass);
+    }
+
+    public String addClass2SuperClassMapping(final String className, final String superClassName) {
+        return class2SuperClass.put(className, superClassName);
+    }
+
+    public Optional<String> addNewField(final String shortName, final String name, final String prefix) {
+        return addNewName(shortName, name, prefix, shortFieldName2Id, fieldId2Name);
+    }
+
+    public Optional<String> addNewMethod(final String shortName, final String name, final String prefix) {
+        return addNewName(shortName, name, prefix, shortMethodName2Id, methodId2Name);
+    }
+
+    private static Optional<String> addNewName(final String shortName, final String name, final String prefix,
+                                      final Map<String, String> shortName2Id, final Map<String, String> id2Name) {
+        if (shortName2Id.containsKey(shortName))
+            return Optional.empty();
+
+        final String _id = prefix + shortName2Id.size();
+        shortName2Id.put(shortName, _id);
+        id2Name.put(_id, name);
+        return Optional.of(_id);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof ProgramData))
+        if (!(o instanceof ProgramData _that))
             return false;
 
-        final ProgramData _that = (ProgramData) o;
+        if (!fieldId2Name.equals(_that.fieldId2Name) ||
+                !shortFieldName2Id.equals(_that.shortFieldName2Id) ||
+                !methodId2Name.equals(_that.methodId2Name) ||
+                !shortMethodName2Id.equals(_that.shortMethodName2Id))
+            return false;
 
-        if (!fieldId2Name.equals(_that.fieldId2Name))
-            return false;
-        if (!shortFieldName2Id.equals(_that.shortFieldName2Id))
-            return false;
-        if (!methodId2Name.equals(_that.methodId2Name))
-            return false;
-        if (!shortMethodName2Id.equals(_that.shortMethodName2Id))
-            return false;
-        return class2superClass.equals(_that.class2superClass);
-
+        return class2SuperClass.equals(_that.class2SuperClass);
     }
 
     @Override
@@ -73,7 +105,7 @@ public final class ProgramData {
         result = 31 * result + shortFieldName2Id.hashCode();
         result = 31 * result + methodId2Name.hashCode();
         result = 31 * result + shortMethodName2Id.hashCode();
-        result = 31 * result + class2superClass.hashCode();
+        result = 31 * result + class2SuperClass.hashCode();
         return result;
     }
 }

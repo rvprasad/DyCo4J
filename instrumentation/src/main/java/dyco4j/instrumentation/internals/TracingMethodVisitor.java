@@ -47,24 +47,24 @@ final class TracingMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public final void visitInsn(final int opcode) {
+    public void visitInsn(final int opcode) {
         if (opcode == Opcodes.IRETURN || opcode == Opcodes.LRETURN || opcode == Opcodes.FRETURN ||
                 opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN) {
-            if (this.cv.cmdLineOptions.traceMethodRetValue)
+            if (this.cv.cmdLineOptions.traceMethodRetValue())
                 LoggingHelper.emitLogReturn(this.mv, method.getReturnType());
             LoggingHelper.emitLogMethodExit(this.mv, this.methodId, LoggingHelper.ExitKind.NORMAL);
             super.visitInsn(opcode);
         } else if (opcode == Opcodes.AASTORE || opcode == Opcodes.BASTORE || opcode == Opcodes.CASTORE ||
                 opcode == Opcodes.DASTORE || opcode == Opcodes.FASTORE || opcode == Opcodes.IASTORE ||
                 opcode == Opcodes.LASTORE || opcode == Opcodes.SASTORE) {
-            if (this.cv.cmdLineOptions.traceArrayAccess)
+            if (this.cv.cmdLineOptions.traceArrayAccess())
                 visitArrayStoreInsn(opcode);
             else
                 super.visitInsn(opcode);
         } else if (opcode == Opcodes.AALOAD || opcode == Opcodes.BALOAD || opcode == Opcodes.CALOAD ||
                 opcode == Opcodes.DALOAD || opcode == Opcodes.FALOAD || opcode == Opcodes.IALOAD ||
                 opcode == Opcodes.LALOAD || opcode == Opcodes.SALOAD) {
-            if (this.cv.cmdLineOptions.traceArrayAccess)
+            if (this.cv.cmdLineOptions.traceArrayAccess())
                 visitArrayLoadInsn(opcode);
             else
                 super.visitInsn(opcode);
@@ -73,8 +73,8 @@ final class TracingMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public final void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
-        if (this.cv.cmdLineOptions.traceFieldAccess) {
+    public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
+        if (this.cv.cmdLineOptions.traceFieldAccess()) {
             final Type _fieldType = Type.getType(desc);
             final String _fieldId = this.cv.getFieldId(name, owner, desc);
             final boolean _isFieldStatic = opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC;
@@ -113,7 +113,7 @@ final class TracingMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public final void visitMaxs(final int maxStack, final int maxLocals) {
+    public void visitMaxs(final int maxStack, final int maxLocals) {
         endOutermostExceptionHandler();
         for (final Map.Entry<Label, Label> _e : beginLabel2endLabel.entrySet()) {
             final Label _handlerLabel = new Label();
@@ -129,7 +129,7 @@ final class TracingMethodVisitor extends MethodVisitor {
     @Override
     public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc,
                                 final boolean itf) {
-        if (this.cv.cmdLineOptions.traceMethodCall)
+        if (this.cv.cmdLineOptions.traceMethodCall())
             LoggingHelper.emitLogMethodCall(this.mv, this.cv.getMethodId(name, owner, desc), this.callsiteId++);
         super.visitMethodInsn(opcode, owner, name, desc, itf);
     }
@@ -137,7 +137,7 @@ final class TracingMethodVisitor extends MethodVisitor {
     @Override
     public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm,
                                        final Object... bsmArgs) {
-        if (this.cv.cmdLineOptions.traceMethodCall)
+        if (this.cv.cmdLineOptions.traceMethodCall())
             LoggingHelper.emitLogMethodCall(this.mv,
                     this.cv.getMethodId(name, ClassNameHelper.DYNAMIC_METHOD_OWNER, desc), this.callsiteId++);
         super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
@@ -166,7 +166,7 @@ final class TracingMethodVisitor extends MethodVisitor {
     }
 
     private void emitLogMethodArguments() {
-        if (this.cv.cmdLineOptions.traceMethodArgs) {
+        if (this.cv.cmdLineOptions.traceMethodArgs()) {
             // emit code to trace each arg
             int _position = 0;
             int _localVarIndex = 0;

@@ -14,44 +14,87 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 class ProgramDataTest {
-
-    @Test
-    void writeAndReadNonEmptyDataObject() {
+    private static ProgramData createProgramData() {
         final _tmp1 = new ProgramData()
-        _tmp1.class2superClass['a'] = 'b'
+        _tmp1.class2SuperClass['a'] = 'b'
         _tmp1.fieldId2Name['98'] = 'x1'
         _tmp1.shortFieldName2Id['f2'] = '23'
         _tmp1.methodId2Name['23'] = 'm1'
         _tmp1.shortMethodName2Id['m2'] = '908'
-        final _tmp2 = File.createTempFile("pre", ".json").toPath()
-        ProgramData.saveData(_tmp1, _tmp2)
-        final _tmp3 = ProgramData.loadData(_tmp2)
-        Files.delete(_tmp2)
-        assert _tmp3 == _tmp1
+        return _tmp1
+    }
+
+    @Test
+    void testClassAddition() {
+        final _programData = createProgramData()
+        _programData.addClass2SuperClassMapping('c', 'd')
+        assert _programData.getImmutableCopyOfClass2SuperClass() == ['a': 'b', 'c': 'd']
+    }
+
+    @Test
+    void testFieldAddition() {
+        final _shortField = 'shortField'
+        final _longField = 'longField'
+
+        final _programData = createProgramData()
+        final Optional<String> _fieldId = _programData.addNewField(_shortField, _longField, 'i')
+        assert _fieldId.present
+
+        final _shortFieldName2Id = _programData.getImmutableCopyOfShortFieldName2Id()
+        assert _shortFieldName2Id[_shortField] == _fieldId.get()
+        assert _shortFieldName2Id.size() == 2
+
+        assert _programData.fieldId2Name[_fieldId.get()] == _longField
+    }
+
+    @Test
+    void tesMethodAddition() {
+        final _shortMethod = 'shortMethod'
+        final _longMethod = 'longMethod'
+
+        final _programData = createProgramData()
+        final Optional<String> _methodId = _programData.addNewMethod(_shortMethod, _longMethod, 'i')
+        assert _methodId.present
+
+        final _shortMethodName2Id = _programData.getImmutableCopyOfShortMethodName2Id()
+        assert _shortMethodName2Id[_shortMethod] == _methodId.get()
+        assert _shortMethodName2Id.size() == 2
+
+        assert _programData.methodId2Name[_methodId.get()] == _longMethod
+    }
+
+    @Test
+    void writeAndReadNonEmptyDataObject() {
+        final _programData = createProgramData()
+        final _dataFile = File.createTempFile("pre", ".json").toPath()
+        ProgramData.saveData(_programData, _dataFile)
+        final _tmp3 = ProgramData.loadData(_dataFile)
+        Files.delete(_dataFile)
+        assert _tmp3 == _programData
     }
 
     @Test
     void writeAndReadEmptyDataObject() {
-        final _tmp1 = File.createTempFile("pre", ".json").toPath()
-        final _tmp2 = new ProgramData()
-        ProgramData.saveData(_tmp2, _tmp1)
-        final _tmp3 = ProgramData.loadData(_tmp1)
-        Files.delete(_tmp1)
-        assert _tmp3 == _tmp2
+        final _dataFile = File.createTempFile("pre", ".json").toPath()
+        final _programData = new ProgramData()
+        ProgramData.saveData(_programData, _dataFile)
+        final _tmp3 = ProgramData.loadData(_dataFile)
+        Files.delete(_dataFile)
+        assert _tmp3 == _programData
     }
 
     @Test
     void loadFromEmptyFile() {
-        final _tmp1 = File.createTempFile("pre", ".json").toPath()
-        final _tmp2 = ProgramData.loadData(_tmp1)
-        Files.delete(_tmp1)
-        assert _tmp2 == null
+        final _dataFile = File.createTempFile("pre", ".json").toPath()
+        final _programData = ProgramData.loadData(_dataFile)
+        Files.delete(_dataFile)
+        assert _programData == null
     }
 
     @Test
     void loadFromNonExistentFile() {
-        final _tmp2 = ProgramData.loadData(Paths.get("This cannot exists!"))
-        assert _tmp2 == (new ProgramData())
+        final _programData = ProgramData.loadData(Paths.get("This cannot exists!"))
+        assert _programData == (new ProgramData())
     }
 
     @Test
@@ -59,16 +102,15 @@ class ProgramDataTest {
         final _dataFile = File.createTempFile("pre", ".json").toPath()
         final _bakFile = Paths.get(_dataFile.toString() + ".bak")
 
-        final _tmp1 = new ProgramData()
-        _tmp1.class2superClass['a'] = 'b'
-        ProgramData.saveData(_tmp1, _dataFile)
-        assert Files.exists(_bakFile)
+        final _programData = new ProgramData()
+        _programData.class2SuperClass['a'] = 'b'
+        ProgramData.saveData(_programData, _dataFile)
+        assert Files.exists(_bakFile) && _bakFile.size() == 0
 
-        final _tmp3 = ProgramData.loadData(_dataFile)
-        _tmp3.fieldId2Name['98'] = 'x1'
-        ProgramData.saveData(_tmp3, _dataFile)
+        final _programDataCopy = ProgramData.loadData(_dataFile)
+        _programDataCopy.fieldId2Name['98'] = 'x1'
+        ProgramData.saveData(_programDataCopy, _dataFile)
         assert Files.exists(_bakFile)
-        final _tmp4 = ProgramData.loadData(_bakFile)
-        assert _tmp4 == _tmp1
+        assert ProgramData.loadData(_bakFile) == _programData
     }
 }

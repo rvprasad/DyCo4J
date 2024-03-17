@@ -55,7 +55,7 @@ final class TracingClassVisitor extends ClassVisitor {
     }
 
     String getFieldId(final String name, final String owner, final String desc) {
-        assert this.cmdLineOptions.traceFieldAccess : "Should be invoked only when traceFieldAccess is true";
+        assert this.cmdLineOptions.traceFieldAccess() : "Should be invoked only when traceFieldAccess is true";
         final String _shortName = ClassNameHelper.createShortNameDesc(name, Optional.of(owner), desc);
         final String _id = this.shortFieldName2Id.get(_shortName);
         if (_id == null) {

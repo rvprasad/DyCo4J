@@ -12,7 +12,6 @@ import dyco4j.utility.ClassNameHelper;
 import dyco4j.utility.ProgramData;
 import org.objectweb.asm.*;
 
-import java.util.Map;
 import java.util.Optional;
 
 final class ProgramDataCollectingClassVisitor extends ClassVisitor {
@@ -25,40 +24,40 @@ final class ProgramDataCollectingClassVisitor extends ClassVisitor {
     }
 
     private static void collectMemberInfo(final Optional<Integer> access, final String name, final String desc,
-                                          final Optional<String> owner, final Map<String, String> id2Name,
-                                          final Map<String, String> shortName2Id, final String prefix) {
+                                          final Optional<String> owner, final String prefix,
+                                          final NameAdder adder) {
         final String _shortName = ClassNameHelper.createShortNameDesc(name, owner, desc);
-        if (!shortName2Id.containsKey(_shortName)) {
-            final String _tmp = prefix + String.valueOf(shortName2Id.size());
-            shortName2Id.put(_shortName, _tmp);
-            final Optional<Boolean> _isStatic = access.map(v -> (v & Opcodes.ACC_STATIC) != 0);
-            final Optional<Boolean> _isPublished = access.map(v -> (v & Opcodes.ACC_PRIVATE) == 0);
-            final String _name = ClassNameHelper.createNameDesc(name, owner, desc, _isStatic, _isPublished);
-            id2Name.put(_tmp, _name);
-        }
+        final Optional<Boolean> _isStatic = access.map(v -> (v & Opcodes.ACC_STATIC) != 0);
+        final Optional<Boolean> _isPublished = access.map(v -> (v & Opcodes.ACC_PRIVATE) == 0);
+        final String _name = ClassNameHelper.createNameDesc(name, owner, desc, _isStatic, _isPublished);
+        adder.add(_shortName, _name, prefix);
     }
 
     @Override
     public void visit(final int version, final int access, final String name, final String signature,
                       final String superName, final String[] interfaces) {
         this.name = name;
-        this.programData.class2superClass.put(name, superName);
+        this.programData.addClass2SuperClassMapping(name, superName);
     }
 
     @Override
     public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature,
                                      final String[] exceptions) {
-        collectMemberInfo(Optional.of(access), name, desc, Optional.of(this.name), this.programData.methodId2Name,
-                this.programData.shortMethodName2Id, "m");
+        collectMemberInfo(Optional.of(access), name, desc, Optional.of(this.name), "m",
+                programData::addNewMethod);
         return new ProgramDataCollectionMethodVisitor(super.visitMethod(access, name, desc, signature, exceptions));
     }
 
     @Override
     public FieldVisitor visitField(final int access, final String name, final String desc, final String signature,
                                    final Object value) {
-        collectMemberInfo(Optional.of(access), name, desc, Optional.of(this.name), this.programData.fieldId2Name,
-                this.programData.shortFieldName2Id, "f");
+        collectMemberInfo(Optional.of(access), name, desc, Optional.of(this.name), "f", programData::addNewField);
         return super.visitField(access, name, desc, signature, value);
+    }
+
+    @FunctionalInterface
+    private interface NameAdder {
+        Optional<String> add(String shortName, String name, String prefix);
     }
 
     private class ProgramDataCollectionMethodVisitor extends MethodVisitor {
@@ -78,8 +77,8 @@ final class ProgramDataCollectingClassVisitor extends ClassVisitor {
              */
             final int _access = (opcode & (Opcodes.GETSTATIC | Opcodes.PUTSTATIC)) > 0 ? Opcodes.ACC_STATIC : 0;
             final ProgramData _programData = ProgramDataCollectingClassVisitor.this.programData;
-            collectMemberInfo(Optional.of(_access), name, desc, Optional.of(owner), _programData.fieldId2Name,
-                    _programData.shortFieldName2Id, "f");
+            collectMemberInfo(Optional.of(_access), name, desc, Optional.of(owner), "f",
+                    programData::addNewField);
             super.visitFieldInsn(opcode, owner, name, desc);
         }
 
@@ -88,8 +87,8 @@ final class ProgramDataCollectingClassVisitor extends ClassVisitor {
                                     final boolean itf) {
             final int _access = (opcode & (Opcodes.GETSTATIC | Opcodes.PUTSTATIC)) > 0 ? Opcodes.ACC_STATIC : 0;
             final ProgramData _programData = ProgramDataCollectingClassVisitor.this.programData;
-            collectMemberInfo(Optional.of(_access), name, desc, Optional.of(owner), _programData.methodId2Name,
-                    _programData.shortMethodName2Id, "m");
+            collectMemberInfo(Optional.of(_access), name, desc, Optional.of(owner), "m",
+                    programData::addNewMethod);
             super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
 
@@ -97,8 +96,8 @@ final class ProgramDataCollectingClassVisitor extends ClassVisitor {
         public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm,
                                            final Object... bsmArgs) {
             final ProgramData _programData = ProgramDataCollectingClassVisitor.this.programData;
-            collectMemberInfo(Optional.empty(), name, desc, Optional.empty(), _programData.methodId2Name,
-                    _programData.shortMethodName2Id, "m");
+            collectMemberInfo(Optional.empty(), name, desc, Optional.empty(), "m",
+                    programData::addNewMethod);
             super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         }
     }
