@@ -116,9 +116,9 @@ public final class CLI {
             try {
                 final ClassReader _cr = new ClassReader(Files.readAllBytes(srcPath));
                 final ClassWriter _cw = new CustomClassLoadingClassWriter(_cr, ClassWriter.COMPUTE_FRAMES, _customClassLoader);
-                final Map<String, String> _shortFieldName2Id = _programData.getImmutableCopyOfShortFieldName2Id();
-                final Map<String, String> _shortMethodName2Id = _programData.getImmutableCopyOfShortMethodName2Id();
-                final Map<String, String> _class2superClass =  _programData.getImmutableCopyOfClass2SuperClass();
+                final Map<String, String> _shortFieldName2Id = _programData.getViewOfShortFieldName2Id();
+                final Map<String, String> _shortMethodName2Id = _programData.getViewOfShortMethodName2Id();
+                final Map<String, String> _class2superClass =  _programData.getViewOfClass2SuperClass();
                 final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
                 final ClassVisitor _cv2 =
                         new TracingClassVisitor(_cv1, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,

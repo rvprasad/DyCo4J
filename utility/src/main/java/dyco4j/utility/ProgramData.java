@@ -49,23 +49,23 @@ public final class ProgramData {
         }
     }
 
-    public Map<String, String> getImmutableCopyOfShortFieldName2Id() {
+    public Map<String, String> getViewOfShortFieldName2Id() {
         return Collections.unmodifiableMap(shortFieldName2Id);
     }
 
-    public Map<String, String> getImmutableCopyOfFieldId2Name() {
+    public Map<String, String> getViewOfFieldId2Name() {
         return Collections.unmodifiableMap(fieldId2Name);
     }
 
-    public Map<String, String> getImmutableCopyOfShortMethodName2Id() {
+    public Map<String, String> getViewOfShortMethodName2Id() {
         return Collections.unmodifiableMap(shortMethodName2Id);
     }
 
-    public Map<String, String> getImmutableCopyOfMethodId2Name() {
+    public Map<String, String> getViewOfMethodId2Name() {
         return Collections.unmodifiableMap(methodId2Name);
     }
 
-    public Map<String, String> getImmutableCopyOfClass2SuperClass() {
+    public Map<String, String> getViewOfClass2SuperClass() {
         return Collections.unmodifiableMap(class2SuperClass);
     }
 

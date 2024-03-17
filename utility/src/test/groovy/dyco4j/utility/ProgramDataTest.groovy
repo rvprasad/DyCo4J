@@ -17,10 +17,10 @@ class ProgramDataTest {
     private static ProgramData createProgramData() {
         final _tmp1 = new ProgramData()
         _tmp1.class2SuperClass['a'] = 'b'
-        _tmp1.fieldId2Name['98'] = 'x1'
-        _tmp1.shortFieldName2Id['f2'] = '23'
+        _tmp1.fieldId2Name['98'] = 'f1'
+        _tmp1.shortFieldName2Id['sf1'] = '98'
         _tmp1.methodId2Name['23'] = 'm1'
-        _tmp1.shortMethodName2Id['m2'] = '908'
+        _tmp1.shortMethodName2Id['sm1'] = '23'
         return _tmp1
     }
 
@@ -28,7 +28,7 @@ class ProgramDataTest {
     void testClassAddition() {
         final _programData = createProgramData()
         _programData.addClass2SuperClassMapping('c', 'd')
-        assert _programData.getImmutableCopyOfClass2SuperClass() == ['a': 'b', 'c': 'd']
+        assert _programData.getViewOfClass2SuperClass() == ['a': 'b', 'c': 'd']
     }
 
     @Test
@@ -40,12 +40,11 @@ class ProgramDataTest {
         final Optional<String> _fieldId = _programData.addNewField(_shortField, _longField, 'i')
         assert _fieldId.present
 
-        final _shortFieldName2Id = _programData.getImmutableCopyOfShortFieldName2Id()
-        assert _shortFieldName2Id[_shortField] == _fieldId.get()
-        assert _shortFieldName2Id.size() == 2
+        final _shortFieldName2Id = _programData.getViewOfShortFieldName2Id()
+        assert _shortFieldName2Id == [(_shortField): _fieldId.get(), 'sf1': '98']
 
-        final _fieldId2Name = _programData.getImmutableCopyOfFieldId2Name()
-        assert _fieldId2Name[_fieldId.get()] == _longField
+        final _fieldId2Name = _programData.getViewOfFieldId2Name()
+        assert _fieldId2Name == [(_fieldId.get()): (_longField), '98': 'f1']
     }
 
     @Test
@@ -54,15 +53,14 @@ class ProgramDataTest {
         final _longMethod = 'longMethod'
 
         final _programData = createProgramData()
-        final Optional<String> _methodId = _programData.addNewMethod(_shortMethod, _longMethod, 'i')
+        final Optional<String> _methodId = _programData.addNewMethod(_shortMethod, _longMethod, 'j')
         assert _methodId.present
 
-        final _shortMethodName2Id = _programData.getImmutableCopyOfShortMethodName2Id()
-        assert _shortMethodName2Id[_shortMethod] == _methodId.get()
-        assert _shortMethodName2Id.size() == 2
+        final _shortMethodName2Id = _programData.getViewOfShortMethodName2Id()
+        assert _shortMethodName2Id == [(_shortMethod): _methodId.get(), 'sm1': '23']
 
-        final _methodId2Name= _programData.getImmutableCopyOfMethodId2Name()
-        assert _methodId2Name[_methodId.get()] == _longMethod
+        final _methodId2Name= _programData.getViewOfMethodId2Name()
+        assert _methodId2Name == [(_methodId.get()): (_longMethod), '23': 'm1']
     }
 
     @Test
