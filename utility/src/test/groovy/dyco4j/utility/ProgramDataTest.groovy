@@ -44,7 +44,8 @@ class ProgramDataTest {
         assert _shortFieldName2Id[_shortField] == _fieldId.get()
         assert _shortFieldName2Id.size() == 2
 
-        assert _programData.fieldId2Name[_fieldId.get()] == _longField
+        final _fieldId2Name = _programData.getImmutableCopyOfFieldId2Name()
+        assert _fieldId2Name[_fieldId.get()] == _longField
     }
 
     @Test
@@ -60,7 +61,8 @@ class ProgramDataTest {
         assert _shortMethodName2Id[_shortMethod] == _methodId.get()
         assert _shortMethodName2Id.size() == 2
 
-        assert _programData.methodId2Name[_methodId.get()] == _longMethod
+        final _methodId2Name= _programData.getImmutableCopyOfMethodId2Name()
+        assert _methodId2Name[_methodId.get()] == _longMethod
     }
 
     @Test

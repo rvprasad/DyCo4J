@@ -30,6 +30,7 @@ public final class ProgramData {
     final Map<String, String> shortMethodName2Id = new HashMap<>();
     final Map<String, String> class2SuperClass = new HashMap<>();
 
+    // Returns null if dataFile is empty
     public static ProgramData loadData(final Path dataFile) throws IOException {
         if (Files.exists(dataFile)) {
             try (final Reader _rdr = new FileReader(dataFile.toFile())) {
@@ -52,8 +53,16 @@ public final class ProgramData {
         return Collections.unmodifiableMap(shortFieldName2Id);
     }
 
+    public Map<String, String> getImmutableCopyOfFieldId2Name() {
+        return Collections.unmodifiableMap(fieldId2Name);
+    }
+
     public Map<String, String> getImmutableCopyOfShortMethodName2Id() {
         return Collections.unmodifiableMap(shortMethodName2Id);
+    }
+
+    public Map<String, String> getImmutableCopyOfMethodId2Name() {
+        return Collections.unmodifiableMap(methodId2Name);
     }
 
     public Map<String, String> getImmutableCopyOfClass2SuperClass() {
