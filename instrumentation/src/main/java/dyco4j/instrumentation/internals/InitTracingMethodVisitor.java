@@ -25,7 +25,7 @@ final class InitTracingMethodVisitor extends MethodVisitor {
     private boolean thisIsInitialized;
     private Stack<Object> stackFrame = new Stack<>();
 
-    InitTracingMethodVisitor(final int access, final String name, final TracingMethodVisitor mv) {
+    InitTracingMethodVisitor(final String name, final TracingMethodVisitor mv) {
         super(CLI.ASM_VERSION, mv);
         assert name.equals("<init>");
 

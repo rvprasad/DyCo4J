@@ -49,7 +49,7 @@ final class TracingClassVisitor extends ClassVisitor {
         if (_mv1 != null && shouldInstrumentMethod(name)) {
             final boolean _isInit = name.equals("<init>");
             final TracingMethodVisitor _mv2 = new TracingMethodVisitor(access, name, desc, _mv1, this, !_isInit);
-            return _isInit ? new InitTracingMethodVisitor(access, name, _mv2) : _mv2;
+            return _isInit ? new InitTracingMethodVisitor(name, _mv2) : _mv2;
         } else
             return _mv1;
     }

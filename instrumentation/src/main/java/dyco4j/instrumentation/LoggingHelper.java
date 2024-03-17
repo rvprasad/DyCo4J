@@ -47,7 +47,7 @@ public class LoggingHelper {
             LOG_ARRAY = Method.getMethod(Logger.class.getMethod("logArray", Object.class, Integer.TYPE, String.class,
                     Logger.ArrayAction.class));
             LOG_EXCEPTION = Method.getMethod(Logger.class.getMethod("logException", Throwable.class));
-            LOGGER_INITIALIZER = LoggerInitializer.class.getName().replace("" + ".", "/");
+            LOGGER_INITIALIZER = LoggerInitializer.class.getName().replace(".", "/");
             LOGGER_INITIALIZER_INITIALIZE = Method.getMethod(LoggerInitializer.class.getMethod("initialize"));
         } catch (final NoSuchMethodException | SecurityException _ex) {
             throw new RuntimeException(_ex);
@@ -59,10 +59,6 @@ public class LoggingHelper {
 
     public static void emitConvertToString(final MethodVisitor mv, final Type type) {
         switch (type.getSort()) {
-            case Type.ARRAY:
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString",
-                        "(Ljava/lang/Object;)Ljava/lang/String;" + "", false);
-                break;
             case Type.BOOLEAN:
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString", "(Z)Ljava/lang/String;", false);
                 break;
@@ -87,9 +83,10 @@ public class LoggingHelper {
             case Type.SHORT:
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString", "(S)Ljava/lang/String;", false);
                 break;
+            case Type.ARRAY:
             case Type.OBJECT:
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString",
-                        "(Ljava/lang/Object;)Ljava/lang/String;" + "", false);
+                        "(Ljava/lang/Object;)Ljava/lang/String;", false);
                 break;
             default:
                 throw new RuntimeException("Unknown type" + type.getInternalName());

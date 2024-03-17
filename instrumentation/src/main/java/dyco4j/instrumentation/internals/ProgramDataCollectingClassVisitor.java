@@ -76,9 +76,8 @@ final class ProgramDataCollectingClassVisitor extends ClassVisitor {
              * the instructions that use them.
              */
             final int _access = (opcode & (Opcodes.GETSTATIC | Opcodes.PUTSTATIC)) > 0 ? Opcodes.ACC_STATIC : 0;
-            final ProgramData _programData = ProgramDataCollectingClassVisitor.this.programData;
             collectMemberInfo(Optional.of(_access), name, desc, Optional.of(owner), "f",
-                    programData::addNewField);
+                    ProgramDataCollectingClassVisitor.this.programData::addNewField);
             super.visitFieldInsn(opcode, owner, name, desc);
         }
 
@@ -86,18 +85,16 @@ final class ProgramDataCollectingClassVisitor extends ClassVisitor {
         public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc,
                                     final boolean itf) {
             final int _access = (opcode & (Opcodes.GETSTATIC | Opcodes.PUTSTATIC)) > 0 ? Opcodes.ACC_STATIC : 0;
-            final ProgramData _programData = ProgramDataCollectingClassVisitor.this.programData;
             collectMemberInfo(Optional.of(_access), name, desc, Optional.of(owner), "m",
-                    programData::addNewMethod);
+                    ProgramDataCollectingClassVisitor.this.programData::addNewMethod);
             super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
 
         @Override
         public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm,
                                            final Object... bsmArgs) {
-            final ProgramData _programData = ProgramDataCollectingClassVisitor.this.programData;
             collectMemberInfo(Optional.empty(), name, desc, Optional.empty(), "m",
-                    programData::addNewMethod);
+                    ProgramDataCollectingClassVisitor.this.programData::addNewMethod);
             super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         }
     }

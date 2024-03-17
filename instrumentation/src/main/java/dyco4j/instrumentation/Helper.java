@@ -26,24 +26,25 @@ public class Helper {
 
     public static void processFiles(final Path srcRoot, final Path trgRoot, final Predicate<Path> pathSelector,
                                     final BiConsumer<Path, Path> transformer) throws IOException {
-        final Stream<Path> _srcPaths = Files.walk(srcRoot).filter(pathSelector);
-        _srcPaths.parallel().forEach(_srcPath -> {
-            try {
-                final Path _relativeSrcPath = srcRoot.relativize(_srcPath);
-                final Path _trgPath = trgRoot.resolve(_relativeSrcPath);
-                final Path _parent = _trgPath.getParent();
-                if (!Files.exists(_parent))
-                    Files.createDirectories(_parent);
+        try (final Stream<Path> _srcPaths = Files.walk(srcRoot).filter(pathSelector)) {
+            _srcPaths.parallel().forEach(_srcPath -> {
+                try {
+                    final Path _relativeSrcPath = srcRoot.relativize(_srcPath);
+                    final Path _trgPath = trgRoot.resolve(_relativeSrcPath);
+                    final Path _parent = _trgPath.getParent();
+                    if (!Files.exists(_parent))
+                        Files.createDirectories(_parent);
 
-                if (Files.exists(_trgPath))
-                    LOGGER.info(MessageFormat.format("Overwriting {0}", _trgPath));
-                else
-                    LOGGER.info(MessageFormat.format("Writing {0}", _trgPath));
+                    if (Files.exists(_trgPath))
+                        LOGGER.info(MessageFormat.format("Overwriting {0}", _trgPath));
+                    else
+                        LOGGER.info(MessageFormat.format("Writing {0}", _trgPath));
 
-                transformer.accept(_srcPath, _trgPath);
-            } catch (final IOException _ex) {
-                throw new RuntimeException(_ex);
-            }
-        });
+                    transformer.accept(_srcPath, _trgPath);
+                } catch (final IOException _ex) {
+                    throw new RuntimeException(_ex);
+                }
+            });
+        }
     }
 }
