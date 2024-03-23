@@ -43,9 +43,9 @@ public class LoggingHelper {
             LOG_RETURN = Method.getMethod(Logger.class.getMethod("logReturn", String.class));
             LOG_METHOD_CALL = Method.getMethod(Logger.class.getMethod("logMethodCall", String.class));
             LOG_FIELD = Method.getMethod(Logger.class.getMethod("logField", Object.class, String.class, String.class,
-                    Logger.FieldAction.class));
+                    String.class));
             LOG_ARRAY = Method.getMethod(Logger.class.getMethod("logArray", Object.class, Integer.TYPE, String.class,
-                    Logger.ArrayAction.class));
+                    String.class));
             LOG_EXCEPTION = Method.getMethod(Logger.class.getMethod("logException", Throwable.class));
             LOGGER_INITIALIZER = LoggerInitializer.class.getName().replace(".", "/");
             LOGGER_INITIALIZER_INITIALIZE = Method.getMethod(LoggerInitializer.class.getMethod("initialize"));
@@ -135,9 +135,7 @@ public class LoggingHelper {
     }
 
     public static void emitLogArray(final MethodVisitor mv, final Logger.ArrayAction action) {
-        final Type _a = Type.getType(Logger.ArrayAction.class);
-        final String _name = action.toString();
-        mv.visitFieldInsn(Opcodes.GETSTATIC, _a.getInternalName(), _name, _a.getDescriptor());
+        mv.visitLdcInsn(action.toString());
         emitInvokeLog(mv, LOG_ARRAY);
     }
 
@@ -158,9 +156,7 @@ public class LoggingHelper {
         emitConvertToString(mv, fieldType);
         mv.visitLdcInsn(fieldName);
 
-        final Type _a = Type.getType(Logger.FieldAction.class);
-        final String _name = action.toString();
-        mv.visitFieldInsn(Opcodes.GETSTATIC, _a.getInternalName(), _name, _a.getDescriptor());
+        mv.visitLdcInsn(action.toString());
         emitInvokeLog(mv, LOG_FIELD);
     }
 

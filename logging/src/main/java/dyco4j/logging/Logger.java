@@ -67,8 +67,8 @@ public final class Logger {
         log(METHOD_ARG_TAG, Byte.toString(index), val);
     }
 
-    public static void logArray(final Object array, final int index, final String value, final ArrayAction action) {
-        log(action.toString(), Integer.toString(index), toString(array), value);
+    public static void logArray(final Object array, final int index, final String value, final String action) {
+        log(action, Integer.toString(index), toString(array), value);
     }
 
     public static void logMethodCall(final String methodId) {
@@ -80,8 +80,8 @@ public final class Logger {
     }
 
     public static void logField(final Object receiver, final String fieldValue, final String fieldName,
-                                final FieldAction action) {
-        log(action.toString(), fieldName, receiver == null ? "" : toString(receiver), fieldValue);
+                                final String action) {
+        log(action, fieldName, receiver == null ? "" : toString(receiver), fieldValue);
     }
 
     public static void logMethodEntry(final String methodId) {

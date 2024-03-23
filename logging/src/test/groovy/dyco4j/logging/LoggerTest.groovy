@@ -41,7 +41,7 @@ final class LoggerTest {
         final String[] _array = ["array"]
         final _value = "value"
         final _idx = 1
-        final _action = Logger.ArrayAction.GETA
+        final _action = Logger.ArrayAction.GETA.toString()
         Logger.logArray(_array, _idx, _value, _action)
 
         final _expected = "${getCurrThreadId()},$_action,$_idx,${Logger.toString(_array)},$_value"
@@ -53,7 +53,7 @@ final class LoggerTest {
         final String[] _array = ["array"]
         final _value = "value"
         final _idx = 1
-        final _action = Logger.ArrayAction.PUTA
+        final _action = Logger.ArrayAction.PUTA.toString()
         Logger.logArray(_array, _idx, _value, _action)
 
         final _expected = "${getCurrThreadId()},$_action,$_idx,${Logger.toString(_array)},$_value"
@@ -74,7 +74,7 @@ final class LoggerTest {
         final _object = [:]
         final _fieldValue = "test"
         final _fieldName = "message"
-        final _action = Logger.FieldAction.GETF
+        final _action = Logger.FieldAction.GETF.toString()
         Logger.logField(_object, _fieldValue, _fieldName, _action)
 
         final _expected = "${getCurrThreadId()},$_action,$_fieldName,${Logger.toString(_object)},$_fieldValue"
@@ -85,7 +85,7 @@ final class LoggerTest {
     void testLogFieldForStaticField() {
         final _fieldValue = "test"
         final _fieldName = "message"
-        final _action = Logger.FieldAction.PUTF
+        final _action = Logger.FieldAction.PUTF.toString()
         Logger.logField(null, _fieldValue, _fieldName, _action)
 
         final _expected = "${getCurrThreadId()},$_action,$_fieldName,,$_fieldValue"
