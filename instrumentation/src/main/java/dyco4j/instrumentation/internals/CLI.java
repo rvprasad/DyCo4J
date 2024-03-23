@@ -24,11 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -64,8 +60,10 @@ public final class CLI {
         _options.addOption(Option.builder().longOpt(METHOD_NAME_REGEX_OPTION).hasArg(true).desc(_msg).build());
         _options.addOption(Option.builder().longOpt(TRACE_ARRAY_ACCESS_OPTION).hasArg(false)
                 .desc("Instrument to trace array access.").build());
-        _options.addOption(Option.builder().longOpt(TRACE_FIELD_ACCESS_OPTION).hasArg(false)
-                .desc("Instrument to trace field access.").build());
+        _options.addOption(Option.builder().longOpt(TRACE_FIELD_ACCESS_OPTION).hasArg(true)
+                .desc(MessageFormat.format("Instrument to trace field access: {0}.",
+                        String.join(",", Arrays.stream(AccessOption.values())
+                                .map(Object::toString).toList()))).build());
         _options.addOption(Option.builder().longOpt(TRACE_METHOD_ARGUMENTS_OPTION).hasArg(false)
                 .desc("Instrument to trace method arguments.").build());
         _options.addOption(Option.builder().longOpt(TRACE_METHOD_CALL_OPTION).hasArg(false)
@@ -75,7 +73,7 @@ public final class CLI {
 
         try {
             final CommandLine _cmdLine = new DefaultParser().parse(_options, args);
-            processCommandLine(_cmdLine);
+            process(_cmdLine);
         } catch (final ParseException _ex1) {
             new HelpFormatter().printHelp(CLI.class.getName(), _options);
         }
@@ -86,24 +84,19 @@ public final class CLI {
         _urls.add(new File(cmdLine.getOptionValue(IN_FOLDER_OPTION)).toURI().toURL());
         final String _classpathConfig = cmdLine.getOptionValue(CLASSPATH_CONFIG_OPTION);
         if (_classpathConfig != null) {
-            for (String _s: Files.readAllLines(Paths.get(_classpathConfig))) {
+            for (String _s : Files.readAllLines(Paths.get(_classpathConfig))) {
                 _urls.add(new File(_s).toURI().toURL());
             }
         }
         return new URLClassLoader(_urls.toArray(URL[]::new), ClassLoader.getPlatformClassLoader());
     }
 
-    private static void processCommandLine(final CommandLine cmdLine) throws IOException {
+    private static void process(final CommandLine cmdLine) throws IOException {
         final Path _srcRoot = Paths.get(cmdLine.getOptionValue(IN_FOLDER_OPTION));
         final Path _trgRoot = Paths.get(cmdLine.getOptionValue(OUT_FOLDER_OPTION));
         Helper.copyFiles(_srcRoot, _trgRoot);
 
-        final CommandLineOptions _cmdLineOptions =
-                new CommandLineOptions(cmdLine.hasOption(TRACE_ARRAY_ACCESS_OPTION),
-                        cmdLine.hasOption(TRACE_FIELD_ACCESS_OPTION),
-                        cmdLine.hasOption(TRACE_METHOD_ARGUMENTS_OPTION),
-                        cmdLine.hasOption(TRACE_METHOD_CALL_OPTION),
-                        cmdLine.hasOption(TRACE_METHOD_RETURN_VALUE_OPTION));
+        final CommandLineOptions _cmdLineOptions = getCommandLineOptions(cmdLine);
         final Set<Path> _filenames = getFilenames(_srcRoot);
         final Path _programDataFile = Paths.get(PROGRAM_DATA_FILE_NAME);
         final ProgramData _programData = ProgramData.loadData(_programDataFile);
@@ -118,7 +111,7 @@ public final class CLI {
                 final ClassWriter _cw = new CustomClassLoadingClassWriter(_cr, ClassWriter.COMPUTE_FRAMES, _customClassLoader);
                 final Map<String, String> _shortFieldName2Id = _programData.getViewOfShortFieldName2Id();
                 final Map<String, String> _shortMethodName2Id = _programData.getViewOfShortMethodName2Id();
-                final Map<String, String> _class2superClass =  _programData.getViewOfClass2SuperClass();
+                final Map<String, String> _class2superClass = _programData.getViewOfClass2SuperClass();
                 final ClassVisitor _cv1 = new LoggerInitializingClassVisitor(CLI.ASM_VERSION, _cw);
                 final ClassVisitor _cv2 =
                         new TracingClassVisitor(_cv1, _shortFieldName2Id, _shortMethodName2Id, _class2superClass,
@@ -133,6 +126,22 @@ public final class CLI {
         Helper.processFiles(_srcRoot, _trgRoot, _classFileSelector, _classInstrumenter);
 
         ProgramData.saveData(_programData, _programDataFile);
+    }
+
+    private static CommandLineOptions getCommandLineOptions(CommandLine cmdLine) {
+        final Optional<AccessOption> _traceFieldAccessOption = cmdLine.hasOption(TRACE_FIELD_ACCESS_OPTION) ?
+                Optional.of(AccessOption.valueOf(cmdLine.getOptionValue(TRACE_FIELD_ACCESS_OPTION))) : Optional.empty();
+        if (_traceFieldAccessOption.isPresent()) {
+            final AccessOption _tmp1 = _traceFieldAccessOption.get();
+            if (!_tmp1.equals(AccessOption.with_values) && !_tmp1.equals(AccessOption.without_values)) {
+                throw new IllegalArgumentException(_tmp1 + " is an unrecognized value for " + TRACE_FIELD_ACCESS_OPTION);
+            }
+        }
+        return new CommandLineOptions(cmdLine.hasOption(TRACE_ARRAY_ACCESS_OPTION),
+                _traceFieldAccessOption,
+                cmdLine.hasOption(TRACE_METHOD_ARGUMENTS_OPTION),
+                cmdLine.hasOption(TRACE_METHOD_CALL_OPTION),
+                cmdLine.hasOption(TRACE_METHOD_RETURN_VALUE_OPTION));
     }
 
     private static Set<Path> getFilenames(final Path folder) throws IOException {
@@ -153,17 +162,24 @@ public final class CLI {
         }
     }
 
-    record CommandLineOptions(boolean traceArrayAccess, boolean traceFieldAccess, boolean traceMethodArgs,
-                              boolean traceMethodCall, boolean traceMethodRetValue) {
+    enum AccessOption {
+        with_values,
+        without_values,
+    }
+
+    record CommandLineOptions(boolean traceArrayAccess,
+                              Optional<AccessOption> traceFieldAccess,
+                              boolean traceMethodArgs, boolean traceMethodCall, boolean traceMethodRetValue) {
     }
 
     private static class CustomClassLoadingClassWriter extends ClassWriter {
         private final ClassLoader customClassLoader;
 
-        CustomClassLoadingClassWriter(final ClassReader reader, final int flags, final ClassLoader customClassLoader ) {
+        CustomClassLoadingClassWriter(final ClassReader reader, final int flags, final ClassLoader customClassLoader) {
             super(reader, flags);
             this.customClassLoader = customClassLoader;
         }
+
         @Override
         protected ClassLoader getClassLoader() {
             return customClassLoader;

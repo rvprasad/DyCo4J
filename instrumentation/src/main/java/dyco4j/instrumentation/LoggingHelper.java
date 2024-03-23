@@ -83,8 +83,7 @@ public class LoggingHelper {
             case Type.SHORT:
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString", "(S)Ljava/lang/String;", false);
                 break;
-            case Type.ARRAY:
-            case Type.OBJECT:
+            case Type.ARRAY, Type.OBJECT:
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, LOGGER, "toString",
                         "(Ljava/lang/Object;)Ljava/lang/String;", false);
                 break;
@@ -101,11 +100,7 @@ public class LoggingHelper {
         if (localVarIndex.isPresent()) {
             final int _tmp = localVarIndex.getAsInt();
             switch (argType.getSort()) {
-                case Type.BOOLEAN:
-                case Type.BYTE:
-                case Type.CHAR:
-                case Type.INT:
-                case Type.SHORT:
+                case Type.BOOLEAN, Type.BYTE, Type.CHAR, Type.INT, Type.SHORT:
                     mv.visitVarInsn(Opcodes.ILOAD, _tmp);
                     break;
                 case Type.LONG:
@@ -119,8 +114,7 @@ public class LoggingHelper {
                     mv.visitVarInsn(Opcodes.DLOAD, _tmp);
                     _typeLength++;
                     break;
-                case Type.ARRAY:
-                case Type.OBJECT:
+                case Type.ARRAY, Type.OBJECT:
                     mv.visitVarInsn(Opcodes.ALOAD, _tmp);
                     break;
             }
@@ -144,7 +138,7 @@ public class LoggingHelper {
         LoggingHelper.emitInvokeLog(mv, LoggingHelper.LOG_EXCEPTION);
     }
 
-    public static void emitLogField(final MethodVisitor mv, final String fieldName, final Type fieldType,
+    public static void emitLogFieldWithValues(final MethodVisitor mv, final String fieldName, final Type fieldType,
                                     final Logger.FieldAction action) {
         final int _fieldSort = fieldType.getSort();
         if (_fieldSort == Type.LONG || _fieldSort == Type.DOUBLE) {
@@ -155,7 +149,15 @@ public class LoggingHelper {
 
         emitConvertToString(mv, fieldType);
         mv.visitLdcInsn(fieldName);
+        mv.visitLdcInsn(action.toString());
+        emitInvokeLog(mv, LOG_FIELD);
+    }
 
+    public static void emitLogFieldWithoutValues(final MethodVisitor mv, final String fieldName,
+                                                final Logger.FieldAction action) {
+        mv.visitInsn(Opcodes.ACONST_NULL);
+        mv.visitLdcInsn("");
+        mv.visitLdcInsn(fieldName);
         mv.visitLdcInsn(action.toString());
         emitInvokeLog(mv, LOG_FIELD);
     }

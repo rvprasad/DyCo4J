@@ -80,43 +80,59 @@ final class TracingMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
-        if (!cv.cmdLineOptions.traceFieldAccess()) {
+        if (cv.cmdLineOptions.traceFieldAccess().isEmpty()) {
             super.visitFieldInsn(opcode, owner, name, desc);
             return;
         }
 
+        final CLI.AccessOption _fieldAccessOption = cv.cmdLineOptions.traceFieldAccess().get();
         final Type _fieldType = Type.getType(desc);
         final String _fieldId = cv.getFieldId(name, owner, desc);
         final boolean _isFieldStatic = opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC;
-        if (opcode == Opcodes.GETSTATIC || opcode == Opcodes.GETFIELD) {
-            if (_isFieldStatic)
-                super.visitInsn(Opcodes.ACONST_NULL);
-            else if (thisInitialized)
-                super.visitInsn(Opcodes.DUP);
-            else {
-                super.visitLdcInsn(LoggingHelper.UNINITIALIZED_THIS);
-                super.visitInsn(Opcodes.SWAP);
-            }
+        switch (opcode) {
+            case Opcodes.GETSTATIC, Opcodes.GETFIELD:
+                switch (_fieldAccessOption) {
+                    case CLI.AccessOption.with_values:
+                        if (_isFieldStatic)
+                            super.visitInsn(Opcodes.ACONST_NULL);
+                        else if (thisInitialized)
+                            super.visitInsn(Opcodes.DUP);
+                        else {
+                            super.visitLdcInsn(LoggingHelper.UNINITIALIZED_THIS);
+                            super.visitInsn(Opcodes.SWAP);
+                        }
+                        super.visitFieldInsn(opcode, owner, name, desc);
+                        LoggingHelper.emitLogFieldWithValues(mv, _fieldId, _fieldType, Logger.FieldAction.GETF);
+                        break;
 
-            super.visitFieldInsn(opcode, owner, name, desc);
-            LoggingHelper.emitLogField(mv, _fieldId, _fieldType, Logger.FieldAction.GETF);
-        } else if (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD) {
-            if (_isFieldStatic) {
-                super.visitInsn(Opcodes.ACONST_NULL);
-            } else if (thisInitialized) {
-                LoggingHelper.emitSwapTwoWordsAndOneWord(mv, _fieldType);
-                final int _fieldSort = _fieldType.getSort();
-                if (_fieldSort == Type.LONG || _fieldSort == Type.DOUBLE)
-                    super.visitInsn(Opcodes.DUP_X2);
-                else
-                    super.visitInsn(Opcodes.DUP_X1);
-            } else {
-                super.visitLdcInsn(LoggingHelper.UNINITIALIZED_THIS);
-            }
+                    case CLI.AccessOption.without_values:
+                        super.visitFieldInsn(opcode, owner, name, desc);
+                        LoggingHelper.emitLogFieldWithoutValues(mv, _fieldId, Logger.FieldAction.GETF);
+                }
+                break;
+            case Opcodes.PUTSTATIC, Opcodes.PUTFIELD:
+                switch (_fieldAccessOption) {
+                    case CLI.AccessOption.with_values:
+                        if (_isFieldStatic) {
+                            super.visitInsn(Opcodes.ACONST_NULL);
+                        } else if (thisInitialized) {
+                            LoggingHelper.emitSwapTwoWordsAndOneWord(mv, _fieldType);
+                            final int _fieldSort = _fieldType.getSort();
+                            if (_fieldSort == Type.LONG || _fieldSort == Type.DOUBLE)
+                                super.visitInsn(Opcodes.DUP_X2);
+                            else
+                                super.visitInsn(Opcodes.DUP_X1);
+                        } else {
+                            super.visitLdcInsn(LoggingHelper.UNINITIALIZED_THIS);
+                        }
 
-            LoggingHelper.emitSwapOneWordAndTwoWords(mv, _fieldType);
-            LoggingHelper.emitLogField(mv, _fieldId, _fieldType, Logger.FieldAction.PUTF);
-            super.visitFieldInsn(opcode, owner, name, desc);
+                        LoggingHelper.emitSwapOneWordAndTwoWords(mv, _fieldType);
+                        LoggingHelper.emitLogFieldWithValues(mv, _fieldId, _fieldType, Logger.FieldAction.PUTF);
+                        break;
+                    case CLI.AccessOption.without_values:
+                        LoggingHelper.emitLogFieldWithoutValues(mv, _fieldId, Logger.FieldAction.PUTF);
+                }
+                super.visitFieldInsn(opcode, owner, name, desc);
         }
     }
 

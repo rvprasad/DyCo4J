@@ -20,7 +20,8 @@ class CLITest extends AbstractCLITest {
     static final String IN_FOLDER_OPTION = "--$CLI.IN_FOLDER_OPTION"
     static final String OUT_FOLDER_OPTION = "--$CLI.OUT_FOLDER_OPTION"
     static final String METHOD_NAME_REGEX_OPTION = "--$CLI.METHOD_NAME_REGEX_OPTION"
-    static final String TRACE_FIELD_ACCESS_OPTION = "--$CLI.TRACE_FIELD_ACCESS_OPTION"
+    static final String TRACE_FIELD_ACCESS_WITH_VALUES_OPTION = "--$CLI.TRACE_FIELD_ACCESS_OPTION=$CLI.AccessOption.with_values"
+    static final String TRACE_FIELD_ACCESS_WITHOUT_VALUES_OPTION = "--$CLI.TRACE_FIELD_ACCESS_OPTION=$CLI.AccessOption.without_values"
     static final String TRACE_ARRAY_ACCESS_OPTION = "--$CLI.TRACE_ARRAY_ACCESS_OPTION"
     static final String TRACE_METHOD_ARGUMENTS_OPTION = "--$CLI.TRACE_METHOD_ARGUMENTS_OPTION"
     static final String TRACE_METHOD_RETURN_VALUE_OPTION = "--$CLI.TRACE_METHOD_RETURN_VALUE_OPTION"
@@ -157,11 +158,11 @@ class CLITest extends AbstractCLITest {
     }
 
     @Test
-    void withMethodNameRegexAndTraceFieldAccessOptions() {
+    void withMethodNameRegexAndTraceFieldAccessWithValuesOptions() {
         final _methodNameRegex = ".*exerciseStatic.*"
         assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
                                METHOD_NAME_REGEX_OPTION, _methodNameRegex,
-                               TRACE_FIELD_ACCESS_OPTION]) == [1L, 1L]
+                               TRACE_FIELD_ACCESS_WITH_VALUES_OPTION]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -305,9 +306,9 @@ class CLITest extends AbstractCLITest {
     }
 
     @Test
-    void withTraceArrayAccessAndTraceFieldAccessOptions() {
+    void withTraceArrayAccessAndTraceFieldAccessWithValuesOptions() {
         assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER, TRACE_ARRAY_ACCESS_OPTION,
-                               TRACE_FIELD_ACCESS_OPTION]) == [1L, 1L]
+                               TRACE_FIELD_ACCESS_WITH_VALUES_OPTION]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -339,7 +340,7 @@ class CLITest extends AbstractCLITest {
 
         def _line40 = _traceLines[40].split(',')
         def _line42 = _traceLines[42].split(',')
-        assert (1..3).every { _line40[it] == _line42[it] }
+        assert _line40[1..3] == _line42[1..3]
 
         assert _traceLines[58] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,${INT_TYPE_TAG}29$/
         assert _traceLines[59] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
@@ -484,6 +485,13 @@ class CLITest extends AbstractCLITest {
                                           56: 'java.io.IOException',
                                           61: 'java.lang.IllegalStateException'])
 
+        assertCallEntryCoupling(_traceLines)
+
+        assertCallSitesOccurOnlyOnce(_traceLines[0..-5])
+
+        assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
+        assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
+
         assert _traceLines[42] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[43] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$NULL_VALUE$/
         assert _traceLines[42].split(',')[2] == _traceLines[43].split(',')[2]
@@ -491,19 +499,12 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[91] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,${INT_TYPE_TAG}29$/
         assert _traceLines[92] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,${INT_TYPE_TAG}0$/
         assert _traceLines[91].split(',')[2] == _traceLines[92].split(',')[2]
-
-        assert _traceLines.count { it ==~ /^$METHOD_CALL_TAG,.*/ } == 42
-
-        assertCallSitesOccurOnlyOnce(_traceLines[0..-5])
-
-        assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
-        assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
     }
 
     @Test
-    void withTraceFieldAccessOption() {
+    void withTraceFieldAccessWithValuesOption() {
         assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
-                               TRACE_FIELD_ACCESS_OPTION]) == [1L, 1L]
+                               TRACE_FIELD_ACCESS_WITH_VALUES_OPTION]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -530,15 +531,16 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[40] ==~ /^$GET_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
         def _line38 = _traceLines[38].split(',')
         def _line40 = _traceLines[40].split(',')
-        assert (1..3).every { _line38[it] == _line40[it] }
+        assert _line38[1..3] == _line40[1..3]
 
         assert _traceLines[56] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[27].split(',')[3] == _traceLines[56].split(',')[3]
     }
 
     @Test
-    void withTraceFieldAccessAndTraceMethodArgsOptions() {
-        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER, TRACE_FIELD_ACCESS_OPTION,
+    void withTraceFieldAccessWithValuesAndTraceMethodArgsOptions() {
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               TRACE_FIELD_ACCESS_WITH_VALUES_OPTION,
                                TRACE_METHOD_ARGUMENTS_OPTION]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
@@ -612,9 +614,9 @@ class CLITest extends AbstractCLITest {
     }
 
     @Test
-    void withTraceFieldAccessAndTraceMethodReturnValueOptions() {
+    void withTraceFieldAccessWithValuesAndTraceMethodReturnValueOptions() {
         assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
-                               TRACE_FIELD_ACCESS_OPTION, TRACE_METHOD_RETURN_VALUE_OPTION]) == [1L, 1L]
+                               TRACE_FIELD_ACCESS_WITH_VALUES_OPTION, TRACE_METHOD_RETURN_VALUE_OPTION]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
@@ -650,7 +652,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[47] ==~ /^$GET_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
         final _line45 = _traceLines[45].split(',')
         final _line47 = _traceLines[47].split(',')
-        assert (1..3).every { _line45[it] == _line47[it] }
+        assert _line45[1..3] == _line47[1..3]
 
         assert _traceLines[48] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}t$/
         assert _traceLines[51] ==~ /^$METHOD_RETURN_TAG,${FLOAT_TYPE_TAG}27.0$/
@@ -665,62 +667,26 @@ class CLITest extends AbstractCLITest {
     }
 
     @Test
-    void withTraceFieldAccessAndTraceMethodCallOptions() {
+    void withTraceFieldAccessWithValuesAndTraceMethodCallOptions() {
         assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
-                               TRACE_METHOD_ARGUMENTS_OPTION, TRACE_METHOD_CALL_OPTION]) == [1L, 1L]
+                               TRACE_FIELD_ACCESS_WITH_VALUES_OPTION,
+                               TRACE_METHOD_CALL_OPTION]) == [1L, 1L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
 
-        assertTraceLengthIs(_executionResult, 129)
+        assertTraceLengthIs(_executionResult, 103)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 32, numOfExceptionLogs: 4, numOfCallLogs: 42], _traceLines, 25)
+        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2, numOfCallLogs: 42],
+                _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
-        assertExceptionLogs(_traceLines, [8 : 'java.io.IOException',
-                                          13: 'java.lang.IllegalStateException',
-                                          66: 'java.io.IOException',
-                                          72: 'java.lang.IllegalStateException'])
-
-        assert _traceLines[2] ==~ /^$METHOD_ARG_TAG,0,$ARRAY_TYPE_TAG\d+$/
-
-        assert _traceLines[20] ==~ /^$METHOD_ARG_TAG,0,${INT_TYPE_TAG}9$/
-        assert _traceLines[24] ==~ /^$METHOD_ARG_TAG,0,${CHAR_TYPE_TAG}101$/
-        assert _traceLines[28] ==~ /^$METHOD_ARG_TAG,0,${FLOAT_TYPE_TAG}323.3$/
-        assert _traceLines[32] ==~ /^$METHOD_ARG_TAG,0,${DOUBLE_TYPE_TAG}898.98$/
-        assert _traceLines[36] ==~ /^$METHOD_ARG_TAG,0,${BOOLEAN_TYPE_TAG}t$/
-        assert _traceLines[40] ==~ /^$METHOD_ARG_TAG,0,${STRING_TYPE_TAG}\d+$/
-        assert _traceLines[46] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
-
-        assert _traceLines[55] ==~ /^$METHOD_ARG_TAG,0,$UNINITIALIZED_THIS_REP$/
-        assert _traceLines[56] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
-
-        assert _traceLines[61] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
-        final _objId = _traceLines[61].split(",")[2]
-        assert _traceLines[64] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[70] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-
-        assert _traceLines[76] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[81] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[82] ==~ /^$METHOD_ARG_TAG,1,${INT_TYPE_TAG}9$/
-        assert _traceLines[86] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[87] ==~ /^$METHOD_ARG_TAG,1,${CHAR_TYPE_TAG}101$/
-        assert _traceLines[91] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[92] ==~ /^$METHOD_ARG_TAG,1,${FLOAT_TYPE_TAG}323.3$/
-        assert _traceLines[96] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[97] ==~ /^$METHOD_ARG_TAG,1,${DOUBLE_TYPE_TAG}898.98$/
-        assert _traceLines[101] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[102] ==~ /^$METHOD_ARG_TAG,1,${BOOLEAN_TYPE_TAG}t$/
-        assert _traceLines[106] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[107] ==~ /^$METHOD_ARG_TAG,1,$STRING_TYPE_TAG\d+$/
-        assert _traceLines[113] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[114] ==~ /^$METHOD_ARG_TAG,1,$OBJECT_TYPE_TAG\d+$/
-        assert _traceLines[121] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[122] ==~ /^$METHOD_ARG_TAG,1,${LONG_TYPE_TAG}0$/
-        assert _traceLines[123] ==~ /^$METHOD_ARG_TAG,2,${BYTE_TYPE_TAG}1$/
-        assert _traceLines[124] ==~ /^$METHOD_ARG_TAG,3,${SHORT_TYPE_TAG}2$/
+        assertExceptionLogs(_traceLines, [7 : 'java.io.IOException',
+                                          12: 'java.lang.IllegalStateException',
+                                          57: 'java.io.IOException',
+                                          62: 'java.lang.IllegalStateException'])
 
         assertCallEntryCoupling(_traceLines)
 
@@ -728,6 +694,227 @@ class CLITest extends AbstractCLITest {
 
         assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
         assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
+
+        assert _traceLines[14] ==~ /^$PUT_FIELD,f\d,,${INT_TYPE_TAG}4$/
+        assert _traceLines[17] ==~ /^$GET_FIELD,f\d,,${INT_TYPE_TAG}4$/
+        assert _traceLines[14].split(',')[1] == _traceLines[14].split(',')[1]
+
+        assert _traceLines[44] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
+
+        assert _traceLines[64] ==~ /^$PUT_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
+        assert _traceLines[67] ==~ /^$GET_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
+        def _line64 = _traceLines[64].split(',')
+        def _line67 = _traceLines[67].split(',')
+        assert _line64[1..3] == _line67[1..3]
+
+        assert _traceLines[94] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
+        assert _traceLines[44].split(',')[3] == _traceLines[94].split(',')[3]
+    }
+
+    @Test
+    void withTraceFieldAccessWithoutValuesOption() {
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               TRACE_FIELD_ACCESS_WITHOUT_VALUES_OPTION]) == [1L, 1L]
+
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        assertTraceLengthIs(_executionResult, 61)
+
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
+        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2], _traceLines, 25)
+
+        assertPropertiesAboutExit(_traceLines)
+
+        assertExceptionLogs(_traceLines, [4 : 'java.io.IOException',
+                                          7 : 'java.lang.IllegalStateException',
+                                          33: 'java.io.IOException',
+                                          36: 'java.lang.IllegalStateException'])
+
+        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
+
+        assert _traceLines[27] ==~ /^$GET_FIELD,f\d,,$/
+
+        assert _traceLines[38] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[40] ==~ /^$GET_FIELD,f\d,,$/
+        final _line38 = _traceLines[38].split(',')
+        final _line40 = _traceLines[40].split(',')
+        assert _line38[1] == _line40[1]
+
+        assert _traceLines[56] ==~ /^$GET_FIELD,f\d,,$/
+    }
+
+    @Test
+    void withTraceFieldAccessWithoutValuesAndTraceMethodArgsOptions() {
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               TRACE_FIELD_ACCESS_WITHOUT_VALUES_OPTION,
+                               TRACE_METHOD_ARGUMENTS_OPTION]) == [1L, 1L]
+
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        assertTraceLengthIs(_executionResult, 93)
+
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
+        assertFreqOfLogs([numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2],
+                _traceLines, 25)
+
+        assertPropertiesAboutExit(_traceLines)
+
+        assertExceptionLogs(_traceLines, [5 : 'java.io.IOException',
+                                          8 : 'java.lang.IllegalStateException',
+                                          45: 'java.io.IOException',
+                                          49: 'java.lang.IllegalStateException'])
+
+        assert _traceLines[2] ==~ /^$METHOD_ARG_TAG,0,$ARRAY_TYPE_TAG\d+$/
+
+        assert _traceLines[10] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[12] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[10].split(',')[1] == _traceLines[12].split(',')[1]
+
+        assert _traceLines[15] ==~ /^$METHOD_ARG_TAG,0,${INT_TYPE_TAG}9$/
+        assert _traceLines[18] ==~ /^$METHOD_ARG_TAG,0,${CHAR_TYPE_TAG}101$/
+        assert _traceLines[21] ==~ /^$METHOD_ARG_TAG,0,${FLOAT_TYPE_TAG}323.3$/
+        assert _traceLines[24] ==~ /^$METHOD_ARG_TAG,0,${DOUBLE_TYPE_TAG}898.98$/
+        assert _traceLines[27] ==~ /^$METHOD_ARG_TAG,0,${BOOLEAN_TYPE_TAG}t$/
+        assert _traceLines[30] ==~ /^$METHOD_ARG_TAG,0,${STRING_TYPE_TAG}\d+$/
+        assert _traceLines[33] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
+
+        assert _traceLines[35] ==~ /^$GET_FIELD,f\d,,$/
+
+        assert _traceLines[38] ==~ /^$METHOD_ARG_TAG,0,$UNINITIALIZED_THIS_REP$/
+        assert _traceLines[39] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
+
+        assert _traceLines[42] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
+        final _objId = _traceLines[42].split(",")[2]
+        assert _traceLines[44] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[48] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+
+        assert _traceLines[51] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[53] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[54] ==~ /^$GET_FIELD,f\d,,$/
+        final _line51 = _traceLines[51].split(',')
+        final _line54 = _traceLines[54].split(',')
+        assert _line51[1] == _line54[1]
+
+        assert _traceLines[57] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[58] ==~ /^$METHOD_ARG_TAG,1,${INT_TYPE_TAG}9$/
+        assert _traceLines[61] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[62] ==~ /^$METHOD_ARG_TAG,1,${CHAR_TYPE_TAG}101$/
+        assert _traceLines[65] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[66] ==~ /^$METHOD_ARG_TAG,1,${FLOAT_TYPE_TAG}323.3$/
+        assert _traceLines[69] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[70] ==~ /^$METHOD_ARG_TAG,1,${DOUBLE_TYPE_TAG}898.98$/
+        assert _traceLines[73] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[74] ==~ /^$METHOD_ARG_TAG,1,${BOOLEAN_TYPE_TAG}t$/
+        assert _traceLines[77] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[78] ==~ /^$METHOD_ARG_TAG,1,${STRING_TYPE_TAG}\d+$/
+        assert _traceLines[81] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[82] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
+        assert _traceLines[87] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
+        assert _traceLines[88] ==~ /^$METHOD_ARG_TAG,1,${LONG_TYPE_TAG}0$/
+        assert _traceLines[89] ==~ /^$METHOD_ARG_TAG,2,${BYTE_TYPE_TAG}1$/
+        assert _traceLines[90] ==~ /^$METHOD_ARG_TAG,3,${SHORT_TYPE_TAG}2$/
+
+        assert _traceLines[84] ==~ /^$GET_FIELD,f\d,,$/
+    }
+
+    @Test
+    void withTraceFieldAccessWithoutValuesAndTraceMethodReturnValueOptions() {
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               TRACE_FIELD_ACCESS_WITHOUT_VALUES_OPTION, TRACE_METHOD_RETURN_VALUE_OPTION]) == [1L, 1L]
+
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        assertTraceLengthIs(_executionResult, 75)
+
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
+        assertFreqOfLogs([numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2],
+                _traceLines, 25)
+
+        assertPropertiesAboutExit(_traceLines)
+
+        assertExceptionLogs(_traceLines, [4 : 'java.io.IOException',
+                                          7 : 'java.lang.IllegalStateException',
+                                          40: 'java.io.IOException',
+                                          43: 'java.lang.IllegalStateException'])
+
+        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
+
+        assert _traceLines[12] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}f$/
+        assert _traceLines[15] ==~ /^$METHOD_RETURN_TAG,${FLOAT_TYPE_TAG}27.0$/
+        assert _traceLines[18] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}t$/
+        assert _traceLines[21] ==~ /^$METHOD_RETURN_TAG,${CHAR_TYPE_TAG}323$/
+        assert _traceLines[24] ==~ /^$METHOD_RETURN_TAG,${INT_TYPE_TAG}2694$/
+        assert _traceLines[29] ==~ /^$METHOD_RETURN_TAG,$OBJECT_TYPE_TAG\d+$/
+        assert _traceLines[32] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
+
+        assert _traceLines[34] ==~ /^$GET_FIELD,f\d,,$/
+
+        assert _traceLines[45] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[47] ==~ /^$GET_FIELD,f\d,,$/
+        final _line45 = _traceLines[45].split(',')
+        final _line47 = _traceLines[47].split(',')
+        assert _line45[1] == _line47[1]
+
+        assert _traceLines[48] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}t$/
+        assert _traceLines[51] ==~ /^$METHOD_RETURN_TAG,${FLOAT_TYPE_TAG}27.0$/
+        assert _traceLines[54] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}f$/
+        assert _traceLines[57] ==~ /^$METHOD_RETURN_TAG,${CHAR_TYPE_TAG}323$/
+        assert _traceLines[60] ==~ /^$METHOD_RETURN_TAG,${INT_TYPE_TAG}2694$/
+        assert _traceLines[65] ==~ /^$METHOD_RETURN_TAG,$OBJECT_TYPE_TAG\d+$/
+        assert _traceLines[68] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
+
+        assert _traceLines[70] ==~ /^$GET_FIELD,f\d,,$/
+    }
+
+    @Test
+    void withTraceFieldAccessWithoutValuesAndTraceMethodCallOptions() {
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               TRACE_FIELD_ACCESS_WITHOUT_VALUES_OPTION,
+                               TRACE_METHOD_CALL_OPTION]) == [1L, 1L]
+
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        assertTraceLengthIs(_executionResult, 103)
+
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
+        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2, numOfCallLogs: 42],
+                _traceLines, 25)
+
+        assertPropertiesAboutExit(_traceLines)
+
+        assertExceptionLogs(_traceLines, [7 : 'java.io.IOException',
+                                          12: 'java.lang.IllegalStateException',
+                                          57: 'java.io.IOException',
+                                          62: 'java.lang.IllegalStateException'])
+
+        assertCallEntryCoupling(_traceLines)
+
+        assertCallSitesOccurOnlyOnce(_traceLines[0..-5])
+
+        assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
+        assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
+
+        assert _traceLines[14] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[17] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[14].split(',')[1] == _traceLines[14].split(',')[1]
+
+        assert _traceLines[44] ==~ /^$GET_FIELD,f\d,,$/
+
+        assert _traceLines[64] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[67] ==~ /^$GET_FIELD,f\d,,$/
+        def _line64 = _traceLines[64].split(',')
+        def _line67 = _traceLines[67].split(',')
+        assert _line64[1] == _line67[1]
+
+        assert _traceLines[94] ==~ /^$GET_FIELD,f\d,,$/
     }
 
     @Test

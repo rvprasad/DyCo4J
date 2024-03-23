@@ -76,9 +76,23 @@ class CLIInitializerInstrumentationTest extends AbstractCLITest {
     }
 
     @Test
-    void puttingFieldOnUninitializedThisDoesNotCauseVerifyError() {
+    void puttingFieldOnUninitializedThisDoesNotCauseVerifyErrorWhileTracingFieldAccessWithValues() {
         assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
-                               TRACE_FIELD_ACCESS_OPTION]) == [4L, 0L]
+                               TRACE_FIELD_ACCESS_WITH_VALUES_OPTION]) == [4L, 0L]
+
+        final ExecutionResult _executionResult = executeInstrumentedCode()
+        assert _executionResult.exitCode == 0
+
+        assertTraceLengthIs(_executionResult, 12)
+
+        final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
+        assertFreqOfLogs(numOfPutFieldLogs: 1, _traceLines, 5)
+    }
+
+    @Test
+    void puttingFieldOnUninitializedThisDoesNotCauseVerifyErrorWhileTracingFieldAccessWithoutValues() {
+        assert instrumentCode([IN_FOLDER_OPTION, IN_FOLDER, OUT_FOLDER_OPTION, OUT_FOLDER,
+                               TRACE_FIELD_ACCESS_WITHOUT_VALUES_OPTION]) == [4L, 0L]
 
         final ExecutionResult _executionResult = executeInstrumentedCode()
         assert _executionResult.exitCode == 0
