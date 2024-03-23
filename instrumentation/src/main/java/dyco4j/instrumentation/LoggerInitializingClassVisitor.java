@@ -23,11 +23,11 @@ public final class LoggerInitializingClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature,
                                      final String[] exceptions) {
         final MethodVisitor _mv = super.visitMethod(access, name, desc, signature, exceptions);
-        return _mv == null ? null : new LoggerInitializingMethodVisitor(this.api, _mv, this, name);
+        return _mv == null ? null : new LoggerInitializingMethodVisitor(api, _mv, this, name);
     }
 
     public void visitEnd() {
-        if (!this.isClinitVisited) {
+        if (!isClinitVisited) {
             final org.objectweb.asm.MethodVisitor _mv =
                     super.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
             if (_mv != null) {
@@ -38,6 +38,6 @@ public final class LoggerInitializingClassVisitor extends ClassVisitor {
     }
 
     void clinitVisited() {
-        this.isClinitVisited = true;
+        isClinitVisited = true;
     }
 }

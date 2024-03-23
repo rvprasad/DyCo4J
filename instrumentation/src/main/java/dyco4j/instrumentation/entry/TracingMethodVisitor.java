@@ -28,7 +28,7 @@ final class TracingMethodVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
-        this.isAnnotatedAsTest = desc.matches("Lorg/junit/Test;") ||
+        isAnnotatedAsTest = desc.matches("Lorg/junit/Test;") ||
                 desc.matches("Lorg/junit/After;") || desc.matches("Lorg/junit/Before;") ||
                 desc.matches("Lorg/junit/AfterClass;") ||
                 desc.matches("Lorg/junit/BeforeClass;") ||
@@ -50,14 +50,14 @@ final class TracingMethodVisitor extends MethodVisitor {
     public void visitCode() {
         super.visitCode();
 
-        if (this.shouldInstrument()) {
-            final String _msg = "marker:" + this.cv.getClassName() + "/" + this.name + this.desc;
-            LoggingHelper.emitLogString(this.mv, _msg);
+        if (shouldInstrument()) {
+            final String _msg = "marker:" + cv.getClassName() + "/" + name + desc;
+            LoggingHelper.emitLogString(mv, _msg);
         }
     }
 
     private boolean shouldInstrument() {
-        return this.name.matches(this.cv.getMethodNameRegex()) &&
-                (!this.cv.instrumentOnlyAnnotatedTests() || this.isAnnotatedAsTest);
+        return name.matches(cv.getMethodNameRegex()) &&
+                (!cv.instrumentOnlyAnnotatedTests() || isAnnotatedAsTest);
     }
 }

@@ -34,25 +34,25 @@ final class ProgramDataCollectingClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visit(final int version, final int access, final String name, final String signature,
+    public void visit(final int version, final int access, final String className, final String signature,
                       final String superName, final String[] interfaces) {
-        this.name = name;
-        this.programData.addClass2SuperClassMapping(name, superName);
+        name = className;
+        programData.addClass2SuperClassMapping(className, superName);
     }
 
     @Override
-    public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature,
+    public MethodVisitor visitMethod(final int access, final String methodName, final String desc, final String signature,
                                      final String[] exceptions) {
-        collectMemberInfo(Optional.of(access), name, desc, Optional.of(this.name), "m",
+        collectMemberInfo(Optional.of(access), methodName, desc, Optional.of(name), "m",
                 programData::addNewMethod);
-        return new ProgramDataCollectionMethodVisitor(super.visitMethod(access, name, desc, signature, exceptions));
+        return new ProgramDataCollectionMethodVisitor(super.visitMethod(access, methodName, desc, signature, exceptions));
     }
 
     @Override
-    public FieldVisitor visitField(final int access, final String name, final String desc, final String signature,
+    public FieldVisitor visitField(final int access, final String methodName, final String desc, final String signature,
                                    final Object value) {
-        collectMemberInfo(Optional.of(access), name, desc, Optional.of(this.name), "f", programData::addNewField);
-        return super.visitField(access, name, desc, signature, value);
+        collectMemberInfo(Optional.of(access), methodName, desc, Optional.of(name), "f", programData::addNewField);
+        return super.visitField(access, methodName, desc, signature, value);
     }
 
     @FunctionalInterface

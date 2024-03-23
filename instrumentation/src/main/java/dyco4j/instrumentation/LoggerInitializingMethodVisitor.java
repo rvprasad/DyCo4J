@@ -23,10 +23,10 @@ final class LoggerInitializingMethodVisitor extends MethodVisitor {
 
     @Override
     public final void visitCode() {
-        this.mv.visitCode();
+        mv.visitCode();
 
-        if (this.name.equals("<clinit>")) {
-            this.cv.clinitVisited();
+        if (name.equals("<clinit>")) {
+            cv.clinitVisited();
             LoggingHelper.emitInsnToLoadAndInitializeLogger(mv);
         }
     }

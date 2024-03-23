@@ -62,7 +62,7 @@ class CLITest extends AbstractCLITest {
         traceLines.each {
             if (it ==~ /^$METHOD_ENTRY_TAG,.*/) {
                 _stack.push(_seen)
-                _seen = []
+                _seen.clear()
             } else if (it ==~ /^$METHOD_EXIT_TAG,.*/) {
                 _seen = _stack.pop()
             } else if (it ==~ /^$METHOD_CALL_TAG,.*/) {

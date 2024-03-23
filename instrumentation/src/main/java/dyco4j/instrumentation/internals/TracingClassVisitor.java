@@ -39,7 +39,7 @@ final class TracingClassVisitor extends ClassVisitor {
     public void visit(final int version, final int access, final String name, final String signature,
                       final String superName, final String[] interfaces) {
         super.visit(version, access, name, signature, superName, interfaces);
-        this.className = name;
+        className = name;
     }
 
     @Override
@@ -55,11 +55,11 @@ final class TracingClassVisitor extends ClassVisitor {
     }
 
     String getFieldId(final String name, final String owner, final String desc) {
-        assert this.cmdLineOptions.traceFieldAccess() : "Should be invoked only when traceFieldAccess is true";
+        assert cmdLineOptions.traceFieldAccess() : "Should be invoked only when traceFieldAccess is true";
         final String _shortName = ClassNameHelper.createShortNameDesc(name, Optional.of(owner), desc);
-        final String _id = this.shortFieldName2Id.get(_shortName);
+        final String _id = shortFieldName2Id.get(_shortName);
         if (_id == null) {
-            final String _superClass = this.class2superClass.get(owner);
+            final String _superClass = class2superClass.get(owner);
             if (_superClass == null) {
                 final String _msg = MessageFormat.format("Incomplete information: name={0}, owner={1}, desc={2} " +
                         "_shortName={3}", name, owner, desc, _shortName);
@@ -72,14 +72,14 @@ final class TracingClassVisitor extends ClassVisitor {
 
     String getMethodId(final String name, final String desc) {
         assert shouldInstrumentMethod(name) : "Should be invoked only when the method matches methodNameRegex";
-        return getMethodId(name, this.className, desc);
+        return getMethodId(name, className, desc);
     }
 
     String getMethodId(final String name, final String owner, final String desc) {
         final String _shortName = ClassNameHelper.createShortNameDesc(name, Optional.of(owner), desc);
-        final String _id = this.shortMethodName2Id.get(_shortName);
+        final String _id = shortMethodName2Id.get(_shortName);
         if (_id == null) {
-            final String _superClass = this.class2superClass.get(owner);
+            final String _superClass = class2superClass.get(owner);
             if (_superClass == null)
                 throw new IllegalStateException("Could not find methodId for " + _shortName);
             else
@@ -89,6 +89,6 @@ final class TracingClassVisitor extends ClassVisitor {
     }
 
     private boolean shouldInstrumentMethod(final String name) {
-        return ClassNameHelper.createJavaName(name, this.className).matches(this.methodNameRegex);
+        return ClassNameHelper.createJavaName(name, className).matches(methodNameRegex);
     }
 }

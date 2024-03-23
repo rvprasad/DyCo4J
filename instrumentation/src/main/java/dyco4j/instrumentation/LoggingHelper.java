@@ -231,7 +231,7 @@ public class LoggingHelper {
         EXCEPTIONAL;
 
         public String getAbbreviatedName() {
-            return this.name().substring(0, 1);
+            return name().substring(0, 1);
         }
     }
 }
