@@ -60,7 +60,7 @@ class CLITest extends AbstractCLITest {
 
     private static assertCallSitesOccurOnlyOnce(traceLines) {
         def _seen = []
-        def _stack = []
+        final _stack = []
         traceLines.each {
             if (it ==~ /^$METHOD_ENTRY_TAG,.*/) {
                 _stack.push(_seen)
@@ -104,7 +104,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 55)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -172,14 +172,14 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 5)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfGetArrayLogs: 1, numOfPutArrayLogs: 1], _traceLines, 1)
+        assertFreqOfLogs(numOfGetArrayLogs: 1, numOfPutArrayLogs: 1, _traceLines, 1)
 
         assertCallEntryCoupling(_traceLines)
 
         assertPropertiesAboutExit(_traceLines)
 
-        assert _traceLines[2] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[3] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[2] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[3] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[2].split(',')[2] == _traceLines[3].split(',')[2]
 
         assertAllAndOnlyMatchingMethodsAreTraced(_traceLines, _methodNameRegex)
@@ -198,7 +198,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 5)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfGetFieldLogs: 1, numOfPutFieldLogs: 1], _traceLines, 1)
+        assertFreqOfLogs(numOfGetFieldLogs: 1, numOfPutFieldLogs: 1, _traceLines, 1)
 
         assertCallEntryCoupling(_traceLines)
 
@@ -223,14 +223,14 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 5)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfGetFieldLogs: 1, numOfPutFieldLogs: 1], _traceLines, 1)
+        assertFreqOfLogs(numOfGetFieldLogs: 1, numOfPutFieldLogs: 1, _traceLines, 1)
 
         assertCallEntryCoupling(_traceLines)
 
         assertPropertiesAboutExit(_traceLines)
 
-        assert _traceLines[2] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[3] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[2] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[3] ==~ /^$GET_FIELD,f\d,\*,\*$/
 
         assertAllAndOnlyMatchingMethodsAreTraced(_traceLines, _methodNameRegex)
     }
@@ -248,7 +248,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 30)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 7, numOfExceptionLogs: 2], _traceLines, 10)
+        assertFreqOfLogs(numOfArgLogs: 7, numOfExceptionLogs: 2, _traceLines, 10)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -279,7 +279,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 30)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfReturnLogs: 7, numOfExceptionLogs: 2], _traceLines, 10)
+        assertFreqOfLogs(numOfReturnLogs: 7, numOfExceptionLogs: 2, _traceLines, 10)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -310,7 +310,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 30)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfCallLogs: 25], _traceLines, 2)
+        assertFreqOfLogs(numOfCallLogs: 25, _traceLines, 2)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -340,7 +340,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 59)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -370,8 +370,8 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 65)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfGetFieldLogs: 4,
-                          numOfPutFieldLogs : 2], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfGetFieldLogs: 4,
+                numOfPutFieldLogs: 2, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -392,8 +392,8 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[40] ==~ /^$PUT_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
         assert _traceLines[42] ==~ /^$GET_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
 
-        def _line40 = _traceLines[40].split(',')
-        def _line42 = _traceLines[42].split(',')
+        final _line40 = _traceLines[40].split(',')
+        final _line42 = _traceLines[42].split(',')
         assert _line40[1..3] == _line42[1..3]
 
         assert _traceLines[58] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,${INT_TYPE_TAG}29$/
@@ -415,8 +415,8 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 65)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfGetFieldLogs: 4,
-                          numOfPutFieldLogs : 2], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfGetFieldLogs: 4,
+                numOfPutFieldLogs: 2, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -425,24 +425,24 @@ class CLITest extends AbstractCLITest {
                                           35: 'java.io.IOException',
                                           38: 'java.lang.IllegalStateException'])
 
-        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,\*,\*$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
 
         assert _traceLines[27] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$OBJECT_TYPE_TAG\d+$/
-        assert _traceLines[28] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[28] ==~ /^$GET_FIELD,f\d,\*,\*$/
         assert _traceLines[29] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$NULL_VALUE$/
         assert _traceLines[27].split(',')[2] == _traceLines[29].split(',')[2]
 
-        assert _traceLines[40] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[42] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[40] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[42] ==~ /^$GET_FIELD,f\d,\*,\*$/
 
-        def _line40 = _traceLines[40].split(',')
-        def _line42 = _traceLines[42].split(',')
+        final _line40 = _traceLines[40].split(',')
+        final _line42 = _traceLines[42].split(',')
         assert _line40[1] == _line42[1]
 
         assert _traceLines[58] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,${INT_TYPE_TAG}29$/
-        assert _traceLines[59] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[59] ==~ /^$GET_FIELD,f\d,\*,\*$/
         assert _traceLines[60] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,${INT_TYPE_TAG}0$/
         assert _traceLines[58].split(',')[2] == _traceLines[60].split(',')[2]
     }
@@ -458,7 +458,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 91)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2],
+        assertFreqOfLogs(numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -527,7 +527,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 73)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2],
+        assertFreqOfLogs(numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -573,7 +573,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 101)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfCallLogs: 42],
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfCallLogs: 42,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -610,7 +610,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 59)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -619,12 +619,12 @@ class CLITest extends AbstractCLITest {
                                           32: 'java.io.IOException',
                                           35: 'java.lang.IllegalStateException'])
 
-        assert _traceLines[25] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[26] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[25] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[26] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[25].split(',')[2] == _traceLines[26].split(',')[2]
 
-        assert _traceLines[53] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[54] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[53] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[54] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[53].split(',')[2] == _traceLines[54].split(',')[2]
     }
 
@@ -640,8 +640,8 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 65)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfGetFieldLogs: 4,
-                          numOfPutFieldLogs : 2], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfGetFieldLogs: 4,
+                numOfPutFieldLogs: 2, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -654,22 +654,22 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,${INT_TYPE_TAG}4$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
 
-        assert _traceLines[27] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[27] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[28] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
-        assert _traceLines[29] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[29] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[27].split(',')[2] == _traceLines[29].split(',')[2]
 
         assert _traceLines[40] ==~ /^$PUT_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
         assert _traceLines[42] ==~ /^$GET_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
 
-        def _line40 = _traceLines[40].split(',')
-        def _line42 = _traceLines[42].split(',')
+        final _line40 = _traceLines[40].split(',')
+        final _line42 = _traceLines[42].split(',')
         assert _line40[1..3] == _line42[1..3]
 
-        assert _traceLines[58] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[58] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[59] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[28].split(',')[3] == _traceLines[59].split(',')[3]
-        assert _traceLines[60] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[60] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[58].split(',')[2] == _traceLines[60].split(',')[2]
     }
 
@@ -685,8 +685,8 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 65)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfGetFieldLogs: 4,
-                          numOfPutFieldLogs : 2], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfGetFieldLogs: 4,
+                numOfPutFieldLogs: 2, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -695,25 +695,25 @@ class CLITest extends AbstractCLITest {
                                           35: 'java.io.IOException',
                                           38: 'java.lang.IllegalStateException'])
 
-        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,\*,\*$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
 
-        assert _traceLines[27] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[28] ==~ /^$GET_FIELD,f\d,,$/
-        assert _traceLines[29] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,/
+        assert _traceLines[27] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[28] ==~ /^$GET_FIELD,f\d,\*,\*$/
+        assert _traceLines[29] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[27].split(',')[2] == _traceLines[29].split(',')[2]
 
-        assert _traceLines[40] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[42] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[40] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[42] ==~ /^$GET_FIELD,f\d,\*,\*$/
 
-        def _line40 = _traceLines[40].split(',')
-        def _line42 = _traceLines[42].split(',')
+        final _line40 = _traceLines[40].split(',')
+        final _line42 = _traceLines[42].split(',')
         assert _line40[1] == _line42[1]
 
-        assert _traceLines[58] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[59] ==~ /^$GET_FIELD,f\d,,$/
-        assert _traceLines[60] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[58] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[59] ==~ /^$GET_FIELD,f\d,\*,\*$/
+        assert _traceLines[60] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[58].split(',')[2] == _traceLines[60].split(',')[2]
     }
 
@@ -728,7 +728,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 91)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2],
+        assertFreqOfLogs(numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -748,8 +748,8 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[28] ==~ /^$METHOD_ARG_TAG,0,${STRING_TYPE_TAG}\d+$/
         assert _traceLines[31] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
 
-        assert _traceLines[33] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[34] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[33] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[34] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[33].split(',')[2] == _traceLines[34].split(',')[2]
 
         assert _traceLines[37] ==~ /^$METHOD_ARG_TAG,0,$UNINITIALIZED_THIS_REP$/
@@ -776,8 +776,8 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[78] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
         assert _traceLines[79] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
 
-        assert _traceLines[81] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[82] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[81] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[82] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[81].split(',')[2] == _traceLines[82].split(',')[2]
 
         assert _traceLines[85] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
@@ -797,7 +797,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 73)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2],
+        assertFreqOfLogs(numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -815,8 +815,8 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[27] ==~ /^$METHOD_RETURN_TAG,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[30] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
 
-        assert _traceLines[32] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[33] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[32] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[33] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[32].split(',')[2] == _traceLines[33].split(',')[2]
 
         assert _traceLines[45] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}t$/
@@ -827,8 +827,8 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[62] ==~ /^$METHOD_RETURN_TAG,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[65] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
 
-        assert _traceLines[67] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[68] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[67] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[68] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[67].split(',')[2] == _traceLines[68].split(',')[2]
     }
 
@@ -843,7 +843,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 101)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfCallLogs: 42],
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetArrayLogs: 2, numOfPutArrayLogs: 2, numOfCallLogs: 42,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -860,12 +860,12 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
         assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
 
-        assert _traceLines[42] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[43] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[42] ==~ /^$PUT_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[43] ==~ /^$GET_ARRAY,2,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[42].split(',')[2] == _traceLines[43].split(',')[2]
 
-        assert _traceLines[91] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,$/
-        assert _traceLines[92] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,$/
+        assert _traceLines[91] ==~ /^$PUT_ARRAY,0,$ARRAY_TYPE_TAG\d+,\*$/
+        assert _traceLines[92] ==~ /^$GET_ARRAY,1,$ARRAY_TYPE_TAG\d+,\*$/
         assert _traceLines[91].split(',')[2] == _traceLines[92].split(',')[2]
     }
 
@@ -880,7 +880,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 61)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -897,8 +897,8 @@ class CLITest extends AbstractCLITest {
 
         assert _traceLines[38] ==~ /^$PUT_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
         assert _traceLines[40] ==~ /^$GET_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
-        def _line38 = _traceLines[38].split(',')
-        def _line40 = _traceLines[40].split(',')
+        final _line38 = _traceLines[38].split(',')
+        final _line40 = _traceLines[40].split(',')
         assert _line38[1..3] == _line40[1..3]
 
         assert _traceLines[56] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
@@ -917,7 +917,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 93)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2],
+        assertFreqOfLogs(numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -992,7 +992,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 75)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2],
+        assertFreqOfLogs(numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -1046,7 +1046,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 103)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2, numOfCallLogs: 42],
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2, numOfCallLogs: 42,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -1071,8 +1071,8 @@ class CLITest extends AbstractCLITest {
 
         assert _traceLines[64] ==~ /^$PUT_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
         assert _traceLines[67] ==~ /^$GET_FIELD,f\d,$OBJECT_TYPE_TAG\d+,$STRING_TYPE_TAG\d+$/
-        def _line64 = _traceLines[64].split(',')
-        def _line67 = _traceLines[67].split(',')
+        final _line64 = _traceLines[64].split(',')
+        final _line67 = _traceLines[67].split(',')
         assert _line64[1..3] == _line67[1..3]
 
         assert _traceLines[94] ==~ /^$GET_FIELD,f\d,,$OBJECT_TYPE_TAG\d+$/
@@ -1090,7 +1090,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 61)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -1099,19 +1099,19 @@ class CLITest extends AbstractCLITest {
                                           33: 'java.io.IOException',
                                           36: 'java.lang.IllegalStateException'])
 
-        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,\*,\*$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
 
-        assert _traceLines[27] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[27] ==~ /^$GET_FIELD,f\d,\*,\*$/
 
-        assert _traceLines[38] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[40] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[38] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[40] ==~ /^$GET_FIELD,f\d,\*,\*$/
         final _line38 = _traceLines[38].split(',')
         final _line40 = _traceLines[40].split(',')
         assert _line38[1] == _line40[1]
 
-        assert _traceLines[56] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[56] ==~ /^$GET_FIELD,f\d,\*,\*$/
     }
 
     @Test
@@ -1126,7 +1126,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 93)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2],
+        assertFreqOfLogs(numOfArgLogs: 32, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -1138,8 +1138,8 @@ class CLITest extends AbstractCLITest {
 
         assert _traceLines[2] ==~ /^$METHOD_ARG_TAG,0,$ARRAY_TYPE_TAG\d+$/
 
-        assert _traceLines[10] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[12] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[10] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[12] ==~ /^$GET_FIELD,f\d,\*,\*$/
         assert _traceLines[10].split(',')[1] == _traceLines[12].split(',')[1]
 
         assert _traceLines[15] ==~ /^$METHOD_ARG_TAG,0,${INT_TYPE_TAG}9$/
@@ -1150,7 +1150,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[30] ==~ /^$METHOD_ARG_TAG,0,${STRING_TYPE_TAG}\d+$/
         assert _traceLines[33] ==~ /^$METHOD_ARG_TAG,0,${OBJECT_TYPE_TAG}\d+$/
 
-        assert _traceLines[35] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[35] ==~ /^$GET_FIELD,f\d,\*,\*$/
 
         assert _traceLines[38] ==~ /^$METHOD_ARG_TAG,0,$UNINITIALIZED_THIS_REP$/
         assert _traceLines[39] ==~ /^$METHOD_ARG_TAG,1,${OBJECT_TYPE_TAG}\d+$/
@@ -1160,9 +1160,9 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[44] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
         assert _traceLines[48] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
 
-        assert _traceLines[51] ==~ /^$PUT_FIELD,f\d,,$/
+        assert _traceLines[51] ==~ /^$PUT_FIELD,f\d,\*,\*$/
         assert _traceLines[53] ==~ /^$METHOD_ARG_TAG,0,$_objId$/
-        assert _traceLines[54] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[54] ==~ /^$GET_FIELD,f\d,\*,\*$/
         final _line51 = _traceLines[51].split(',')
         final _line54 = _traceLines[54].split(',')
         assert _line51[1] == _line54[1]
@@ -1186,7 +1186,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[89] ==~ /^$METHOD_ARG_TAG,2,${BYTE_TYPE_TAG}1$/
         assert _traceLines[90] ==~ /^$METHOD_ARG_TAG,3,${SHORT_TYPE_TAG}2$/
 
-        assert _traceLines[84] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[84] ==~ /^$GET_FIELD,f\d,\*,\*$/
     }
 
     @Test
@@ -1200,7 +1200,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 75)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2],
+        assertFreqOfLogs(numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -1210,8 +1210,8 @@ class CLITest extends AbstractCLITest {
                                           40: 'java.io.IOException',
                                           43: 'java.lang.IllegalStateException'])
 
-        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[9] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[11] ==~ /^$GET_FIELD,f\d,\*,\*$/
         assert _traceLines[9].split(',')[1] == _traceLines[11].split(',')[1]
 
         assert _traceLines[12] ==~ /^$METHOD_RETURN_TAG,${BOOLEAN_TYPE_TAG}f$/
@@ -1222,10 +1222,10 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[29] ==~ /^$METHOD_RETURN_TAG,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[32] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
 
-        assert _traceLines[34] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[34] ==~ /^$GET_FIELD,f\d,\*,\*$/
 
-        assert _traceLines[45] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[47] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[45] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[47] ==~ /^$GET_FIELD,f\d,\*,\*$/
         final _line45 = _traceLines[45].split(',')
         final _line47 = _traceLines[47].split(',')
         assert _line45[1] == _line47[1]
@@ -1238,7 +1238,7 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[65] ==~ /^$METHOD_RETURN_TAG,$OBJECT_TYPE_TAG\d+$/
         assert _traceLines[68] ==~ /^$METHOD_RETURN_TAG,$STRING_TYPE_TAG\d+$/
 
-        assert _traceLines[70] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[70] ==~ /^$GET_FIELD,f\d,\*,\*$/
     }
 
     @Test
@@ -1253,7 +1253,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 103)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2, numOfCallLogs: 42],
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfGetFieldLogs: 4, numOfPutFieldLogs: 2, numOfCallLogs: 42,
                 _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
@@ -1270,19 +1270,19 @@ class CLITest extends AbstractCLITest {
         assert _traceLines[-4] ==~ /^$METHOD_CALL_TAG,.*,0$/
         assert _traceLines[-3] ==~ /^$METHOD_CALL_TAG,.*,0,9$/
 
-        assert _traceLines[14] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[17] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[14] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[17] ==~ /^$GET_FIELD,f\d,\*,\*$/
         assert _traceLines[14].split(',')[1] == _traceLines[14].split(',')[1]
 
-        assert _traceLines[44] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[44] ==~ /^$GET_FIELD,f\d,\*,\*$/
 
-        assert _traceLines[64] ==~ /^$PUT_FIELD,f\d,,$/
-        assert _traceLines[67] ==~ /^$GET_FIELD,f\d,,$/
-        def _line64 = _traceLines[64].split(',')
-        def _line67 = _traceLines[67].split(',')
+        assert _traceLines[64] ==~ /^$PUT_FIELD,f\d,\*,\*$/
+        assert _traceLines[67] ==~ /^$GET_FIELD,f\d,\*,\*$/
+        final _line64 = _traceLines[64].split(',')
+        final _line67 = _traceLines[67].split(',')
         assert _line64[1] == _line67[1]
 
-        assert _traceLines[94] ==~ /^$GET_FIELD,f\d,,$/
+        assert _traceLines[94] ==~ /^$GET_FIELD,f\d,\*,\*$/
     }
 
     @Test
@@ -1296,7 +1296,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 87)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 32, numOfExceptionLogs: 4], _traceLines, 25)
+        assertFreqOfLogs(numOfArgLogs: 32, numOfExceptionLogs: 4, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -1355,7 +1355,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 101)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 32, numOfReturnLogs: 14, numOfExceptionLogs: 4], _traceLines, 25)
+        assertFreqOfLogs(numOfArgLogs: 32, numOfReturnLogs: 14, numOfExceptionLogs: 4, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -1428,7 +1428,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 129)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfArgLogs: 32, numOfExceptionLogs: 4, numOfCallLogs: 42], _traceLines, 25)
+        assertFreqOfLogs(numOfArgLogs: 32, numOfExceptionLogs: 4, numOfCallLogs: 42, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -1494,7 +1494,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 69)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfReturnLogs: 14, numOfExceptionLogs: 4], _traceLines, 25)
+        assertFreqOfLogs(numOfReturnLogs: 14, numOfExceptionLogs: 4, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -1531,7 +1531,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 111)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfCallLogs: 42], _traceLines, 25)
+        assertFreqOfLogs(numOfReturnLogs: 14, numOfExceptionLogs: 4, numOfCallLogs: 42, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 
@@ -1575,7 +1575,7 @@ class CLITest extends AbstractCLITest {
         assertTraceLengthIs(_executionResult, 97)
 
         final String[] _traceLines = removeThreadIdFromLog(_executionResult.traceLines)
-        assertFreqOfLogs([numOfExceptionLogs: 4, numOfCallLogs: 42], _traceLines, 25)
+        assertFreqOfLogs(numOfExceptionLogs: 4, numOfCallLogs: 42, _traceLines, 25)
 
         assertPropertiesAboutExit(_traceLines)
 

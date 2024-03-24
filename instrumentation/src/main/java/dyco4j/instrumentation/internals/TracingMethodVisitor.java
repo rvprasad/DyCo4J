@@ -256,7 +256,7 @@ final class TracingMethodVisitor extends MethodVisitor {
                 break;
             case CLI.AccessOption.without_values:
                 super.visitInsn(_popValue);
-                super.visitLdcInsn("");
+                super.visitLdcInsn("*");
         }
 
         LoggingHelper.emitLogArray(mv, puta);

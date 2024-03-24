@@ -84,6 +84,11 @@ public final class Logger {
         log(action, fieldName, receiver == null ? "" : toString(receiver), fieldValue);
     }
 
+    public static void logFieldRaw(final String receiver, final String fieldValue, final String fieldName,
+                                final String action) {
+        log(action, fieldName, receiver == null ? "" : receiver, fieldValue);
+    }
+
     public static void logMethodEntry(final String methodId) {
         log(METHOD_ENTRY_TAG, methodId);
     }

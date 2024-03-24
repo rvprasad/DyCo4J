@@ -76,9 +76,14 @@ final class LoggerTest {
         final _fieldName = "message"
         final _action = Logger.FieldAction.GETF.toString()
         Logger.logField(_object, _fieldValue, _fieldName, _action)
+        final _str = "str"
+        Logger.logFieldRaw(_str, _fieldValue, _fieldName, _action)
 
-        final _expected = "${getCurrThreadId()},$_action,$_fieldName,${Logger.toString(_object)},$_fieldValue"
-        assert _expected == getContent()[1]
+        final _content = getContent()
+        final _expected1 = "${getCurrThreadId()},$_action,$_fieldName,${Logger.toString(_object)},$_fieldValue"
+        assert _expected1 == _content[1]
+        final _expected2 = "${getCurrThreadId()},$_action,$_fieldName,$_str,$_fieldValue"
+        assert _expected2 == _content[2]
     }
 
     @Test
@@ -87,9 +92,13 @@ final class LoggerTest {
         final _fieldName = "message"
         final _action = Logger.FieldAction.PUTF.toString()
         Logger.logField(null, _fieldValue, _fieldName, _action)
+        Logger.logFieldRaw(null, "*", _fieldName, _action)
 
-        final _expected = "${getCurrThreadId()},$_action,$_fieldName,,$_fieldValue"
-        assert _expected == getContent()[1]
+        final _content = getContent()
+        final _expected1 = "${getCurrThreadId()},$_action,$_fieldName,,$_fieldValue"
+        assert _expected1 == _content[1]
+        final _expected2 = "${getCurrThreadId()},$_action,$_fieldName,,*"
+        assert _expected2 == _content[2]
     }
 
     @Test

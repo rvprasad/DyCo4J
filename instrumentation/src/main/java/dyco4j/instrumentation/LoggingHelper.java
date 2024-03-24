@@ -27,6 +27,7 @@ public class LoggingHelper {
     private static final Method LOG_ARRAY;
     private static final Method LOG_EXCEPTION;
     private static final Method LOG_FIELD;
+    private static final Method LOG_FIELD_RAW;
     private static final Method LOG_METHOD_CALL;
     private static final Method LOG_METHOD_ENTRY;
     private static final Method LOG_METHOD_EXIT;
@@ -38,14 +39,17 @@ public class LoggingHelper {
             LOGGER = Logger.class.getName().replace(".", "/");
             LOG_STRING = Method.getMethod(Logger.class.getMethod("log", String.class));
             LOG_METHOD_ENTRY = Method.getMethod(Logger.class.getMethod("logMethodEntry", String.class));
-            LOG_METHOD_EXIT = Method.getMethod(Logger.class.getMethod("logMethodExit", String.class, String.class));
+            LOG_METHOD_EXIT = Method.getMethod(Logger.class.getMethod("logMethodExit", String.class,
+                    String.class));
             LOG_ARGUMENT = Method.getMethod(Logger.class.getMethod("logArgument", Byte.TYPE, String.class));
             LOG_RETURN = Method.getMethod(Logger.class.getMethod("logReturn", String.class));
             LOG_METHOD_CALL = Method.getMethod(Logger.class.getMethod("logMethodCall", String.class));
-            LOG_FIELD = Method.getMethod(Logger.class.getMethod("logField", Object.class, String.class, String.class,
-                    String.class));
-            LOG_ARRAY = Method.getMethod(Logger.class.getMethod("logArray", Object.class, Integer.TYPE, String.class,
-                    String.class));
+            LOG_FIELD = Method.getMethod(Logger.class.getMethod("logField", Object.class, String.class,
+                    String.class, String.class));
+            LOG_FIELD_RAW = Method.getMethod(Logger.class.getMethod("logFieldRaw", String.class, String.class,
+                    String.class, String.class));
+            LOG_ARRAY = Method.getMethod(Logger.class.getMethod("logArray", Object.class, Integer.TYPE,
+                    String.class, String.class));
             LOG_EXCEPTION = Method.getMethod(Logger.class.getMethod("logException", Throwable.class));
             LOGGER_INITIALIZER = LoggerInitializer.class.getName().replace(".", "/");
             LOGGER_INITIALIZER_INITIALIZE = Method.getMethod(LoggerInitializer.class.getMethod("initialize"));
@@ -139,7 +143,7 @@ public class LoggingHelper {
     }
 
     public static void emitLogFieldWithValues(final MethodVisitor mv, final String fieldName, final Type fieldType,
-                                    final Logger.FieldAction action) {
+                                              final Logger.FieldAction action) {
         final int _fieldSort = fieldType.getSort();
         if (_fieldSort == Type.LONG || _fieldSort == Type.DOUBLE) {
             mv.visitInsn(Opcodes.DUP2_X1);
@@ -154,12 +158,12 @@ public class LoggingHelper {
     }
 
     public static void emitLogFieldWithoutValues(final MethodVisitor mv, final String fieldName,
-                                                final Logger.FieldAction action) {
-        mv.visitInsn(Opcodes.ACONST_NULL);
-        mv.visitLdcInsn("");
+                                                 final Logger.FieldAction action) {
+        mv.visitLdcInsn("*");
+        mv.visitLdcInsn("*");
         mv.visitLdcInsn(fieldName);
         mv.visitLdcInsn(action.toString());
-        emitInvokeLog(mv, LOG_FIELD);
+        emitInvokeLog(mv, LOG_FIELD_RAW);
     }
 
     public static void emitLogMethodCall(final MethodVisitor mv, final String methodId, final int callsiteId) {
