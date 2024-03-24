@@ -129,6 +129,7 @@ final class TracingMethodVisitor extends MethodVisitor {
                         LoggingHelper.emitSwapOneWordAndTwoWords(mv, _fieldType);
                         LoggingHelper.emitLogFieldWithValues(mv, _fieldId, _fieldType, Logger.FieldAction.PUTF);
                         break;
+
                     case CLI.AccessOption.without_values:
                         LoggingHelper.emitLogFieldWithoutValues(mv, _fieldId, Logger.FieldAction.PUTF);
                 }
@@ -227,33 +228,7 @@ final class TracingMethodVisitor extends MethodVisitor {
             super.visitInsn(Opcodes.DUP_X2);
         }
 
-        switch (opcode) {
-            case Opcodes.AASTORE:
-                LoggingHelper.emitConvertToString(mv, Type.getObjectType("java/lang/Object"));
-                break;
-            case Opcodes.BASTORE:
-                LoggingHelper.emitConvertToString(mv, Type.BYTE_TYPE);
-                break;
-            case Opcodes.CASTORE:
-                LoggingHelper.emitConvertToString(mv, Type.CHAR_TYPE);
-                break;
-            case Opcodes.FASTORE:
-                LoggingHelper.emitConvertToString(mv, Type.FLOAT_TYPE);
-                break;
-            case Opcodes.IASTORE:
-                LoggingHelper.emitConvertToString(mv, Type.INT_TYPE);
-                break;
-            case Opcodes.SASTORE:
-                LoggingHelper.emitConvertToString(mv, Type.SHORT_TYPE);
-                break;
-            case Opcodes.DASTORE:
-                LoggingHelper.emitConvertToString(mv, Type.DOUBLE_TYPE);
-                break;
-            case Opcodes.LASTORE:
-                LoggingHelper.emitConvertToString(mv, Type.LONG_TYPE);
-                break;
-        }
-
+        LoggingHelper.emitConvertToString(mv, getArrayElementType(opcode));
         LoggingHelper.emitLogArray(mv, Logger.ArrayAction.PUTA);
 
         super.visitInsn(opcode);
@@ -269,34 +244,21 @@ final class TracingMethodVisitor extends MethodVisitor {
         else
             super.visitInsn(Opcodes.DUP_X2);
 
-        switch (opcode) {
-            case Opcodes.AALOAD:
-                LoggingHelper.emitConvertToString(mv, Type.getObjectType("java/lang/Object"));
-                break;
-            case Opcodes.BALOAD:
-                LoggingHelper.emitConvertToString(mv, Type.BYTE_TYPE);
-                break;
-            case Opcodes.CALOAD:
-                LoggingHelper.emitConvertToString(mv, Type.CHAR_TYPE);
-                break;
-            case Opcodes.FALOAD:
-                LoggingHelper.emitConvertToString(mv, Type.FLOAT_TYPE);
-                break;
-            case Opcodes.IALOAD:
-                LoggingHelper.emitConvertToString(mv, Type.INT_TYPE);
-                break;
-            case Opcodes.SALOAD:
-                LoggingHelper.emitConvertToString(mv, Type.SHORT_TYPE);
-                break;
-            case Opcodes.DALOAD:
-                LoggingHelper.emitConvertToString(mv, Type.DOUBLE_TYPE);
-                break;
-            case Opcodes.LALOAD:
-                LoggingHelper.emitConvertToString(mv, Type.LONG_TYPE);
-                break;
-        }
-
+        LoggingHelper.emitConvertToString(mv, getArrayElementType(opcode));
         LoggingHelper.emitLogArray(mv, Logger.ArrayAction.GETA);
     }
 
+    private static Type getArrayElementType(int opcode) {
+        return switch (opcode) {
+            case Opcodes.AALOAD, Opcodes.AASTORE -> Type.getObjectType("java/lang/Object");
+            case Opcodes.BALOAD, Opcodes.BASTORE -> Type.BYTE_TYPE;
+            case Opcodes.CALOAD, Opcodes.CASTORE -> Type.CHAR_TYPE;
+            case Opcodes.FALOAD, Opcodes.FASTORE -> Type.FLOAT_TYPE;
+            case Opcodes.IALOAD, Opcodes.IASTORE -> Type.INT_TYPE;
+            case Opcodes.SALOAD, Opcodes.SASTORE -> Type.SHORT_TYPE;
+            case Opcodes.DALOAD, Opcodes.DASTORE -> Type.DOUBLE_TYPE;
+            case Opcodes.LALOAD, Opcodes.LASTORE -> Type.LONG_TYPE;
+            default -> throw new IllegalStateException("Opcode not related to arrays: " + opcode);
+        };
+    }
 }
