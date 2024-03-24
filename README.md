@@ -21,7 +21,7 @@ about JVM based code.
 ## Use
 
 To illustrate how to use the tools, we will trace the execution of
-[Apache Ant 1.9.7](http://ant.apache.org/).  We will use the source bundle for
+[Apache Ant 1.10.14](http://ant.apache.org/).  We will use the source bundle for
 illustration as they will help illustrate both _entry_ and _instrumentation_
 tools.
 
@@ -30,7 +30,7 @@ tools.
 2. Unpack the source bundle.  We will refer to _apache-ant-1.10.14_ folder as the
    _\<root>_ folder.
 3. Open the terminal and change the folder to _\<root>_ folder.
-4. Build an bootstrapping version of ant by executing `./bootstrap.sh` to
+4. Build a bootstrapping version of ant by executing `./bootstrap.sh` to
 5. Run the tests by executing `./bootstrap/bin/ant test`.
 6. Make note of the number of tests that were executed, passed, failed, and
    skipped along with the time take to run the tests.  This information is
@@ -79,26 +79,31 @@ tools.
    _\<root>/src/etc/testcases/taskdefs/_ folders.
 
 ### Performance
- - **Baseline**: Without any instrumentation, all tests were executed in 2.5
-   minutes. Here's a
-   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-vanilla-summary.png).
- - **Test only**: When test entries were logged, _2,221 events were logged into
-   59 files (21KB) in 2.5 minutes._  Here's a
-   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-entry-instrumented-summary.png) of the test report.
- - **Default instrumentation options**: When method entry and exit were logged,
-   _710,073,781 events were logged into 59 files (75MB) in 5.5 minutes._ Here's a
-   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-default-options-instrumented-summary.png) of the test report.
- - **All options but array access instrumentation option**: When field access,
-   method entry and exit, method args, method return values, and method calls
-   were logged, _3,089,781,963 events were logged into 59 files (3.5GB) in 32 
-   minutes._ Here's a
-   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-all-but-no-array-access-option-instrumented-summary.png) of the test report.
- - **All instrumentation options**: When array access, field access, method entry
-   and exit, method args, method return values, and method calls were logged, 
-   _5,250,074,312 events were logged into 59 files (10GB) in 67 minutes._ Here's a
-   [screenshot](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-impl-all-options-instrumented-summary.png)
-   of the test report.  Interestingly, Bzip related tests contributed the largest
-   increase to execution time (~40 minutes).
+1. **Baseline**: Without any instrumentation, all tests were executed in [2m30s](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-baseline-summary.png).
+2. **Test only**: When test entries were logged, _2,204 events were logged into
+   59 files (<1MB) in [2m19s](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-test-entry-summary.png)._
+3. **Default options**: When method entry and exit were logged,
+   _704,002,578 events were logged into 59 files (~74MB) in [5m41s](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-default-options-summary.png)._
+4. **Method values and field and array access without values**: When method entry 
+   and exit, method args, method return values, method calls, and field and array 
+   access without values were logged, _5,223,800,802 events were logged into 59 
+   files (6.7GB) in [49m43s](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-method-values-field-array-access-without-values-summary.png)._
+5. **Method values and field access with values**: When method entry
+   and exit, method args, method return values, method calls, and field 
+   access with values were logged, _3,089,752,509 events were logged into 59
+   files (3.4GB) in [30m57s](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-method-values-field-access-with-values-summary.png)._
+6. **Method values and array access with values**: When method entry
+   and exit, method args, method return values, method calls, and array
+   access with values were logged, _4,478,498,717 events were logged into 59
+   files (8.3GB) in [53m17s](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-method-values-array-access-with-values-summary.png)._
+7. **Full**: When method entry and exit, method args, method return values, method
+   calls, and field and array access with values were logged, 
+   _5,223,872,394 events were logged into 59 files (10GB) in [64m16s](https://github.com/rvprasad/DyCo4J/blob/master/misc/images/ant-all-options-with-values-summary.png)._
+
+**Note**
+The instrumentation in Bzip related tests contributed most to execution times 
+when field and array accesses were logged. Array accesses contributed more 
+than 50% while field accesses contributed <20%.
 
 ## Known Issues
  - Due to the behavior of JVM that is enforced in response to
