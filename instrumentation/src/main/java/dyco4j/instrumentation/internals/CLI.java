@@ -58,12 +58,12 @@ public final class CLI {
         final String _msg = MessageFormat.format("Regex identifying the methods to be instrumented. Default: {0}.",
                 METHOD_NAME_REGEX);
         _options.addOption(Option.builder().longOpt(METHOD_NAME_REGEX_OPTION).hasArg(true).desc(_msg).build());
-        _options.addOption(Option.builder().longOpt(TRACE_ARRAY_ACCESS_OPTION).hasArg(false)
-                .desc("Instrument to trace array access.").build());
+        _options.addOption(Option.builder().longOpt(TRACE_ARRAY_ACCESS_OPTION).hasArg(true)
+                .desc(MessageFormat.format("Instrument to trace array access: {0}.", accessOptionValuesString()
+                )).build());
         _options.addOption(Option.builder().longOpt(TRACE_FIELD_ACCESS_OPTION).hasArg(true)
-                .desc(MessageFormat.format("Instrument to trace field access: {0}.",
-                        String.join(",", Arrays.stream(AccessOption.values())
-                                .map(Object::toString).toList()))).build());
+                .desc(MessageFormat.format("Instrument to trace field access: {0}.", accessOptionValuesString()
+                )).build());
         _options.addOption(Option.builder().longOpt(TRACE_METHOD_ARGUMENTS_OPTION).hasArg(false)
                 .desc("Instrument to trace method arguments.").build());
         _options.addOption(Option.builder().longOpt(TRACE_METHOD_CALL_OPTION).hasArg(false)
@@ -96,7 +96,12 @@ public final class CLI {
         final Path _trgRoot = Paths.get(cmdLine.getOptionValue(OUT_FOLDER_OPTION));
         Helper.copyFiles(_srcRoot, _trgRoot);
 
-        final CommandLineOptions _cmdLineOptions = getCommandLineOptions(cmdLine);
+        final CommandLineOptions _cmdLineOptions = new CommandLineOptions(
+                getAccessOptionFrom(cmdLine, TRACE_ARRAY_ACCESS_OPTION),
+                getAccessOptionFrom(cmdLine, TRACE_FIELD_ACCESS_OPTION),
+                cmdLine.hasOption(TRACE_METHOD_ARGUMENTS_OPTION),
+                cmdLine.hasOption(TRACE_METHOD_CALL_OPTION),
+                cmdLine.hasOption(TRACE_METHOD_RETURN_VALUE_OPTION));
         final Set<Path> _filenames = getFilenames(_srcRoot);
         final Path _programDataFile = Paths.get(PROGRAM_DATA_FILE_NAME);
         final ProgramData _programData = ProgramData.loadData(_programDataFile);
@@ -128,20 +133,17 @@ public final class CLI {
         ProgramData.saveData(_programData, _programDataFile);
     }
 
-    private static CommandLineOptions getCommandLineOptions(CommandLine cmdLine) {
-        final Optional<AccessOption> _traceFieldAccessOption = cmdLine.hasOption(TRACE_FIELD_ACCESS_OPTION) ?
-                Optional.of(AccessOption.valueOf(cmdLine.getOptionValue(TRACE_FIELD_ACCESS_OPTION))) : Optional.empty();
-        if (_traceFieldAccessOption.isPresent()) {
-            final AccessOption _tmp1 = _traceFieldAccessOption.get();
+    private static Optional<AccessOption> getAccessOptionFrom(final CommandLine cmdLine,
+                                                              final String optionName) {
+        final Optional<AccessOption> _result = cmdLine.hasOption(optionName) ?
+                Optional.of(AccessOption.valueOf(cmdLine.getOptionValue(optionName))) : Optional.empty();
+        if (_result.isPresent()) {
+            final AccessOption _tmp1 = _result.get();
             if (!_tmp1.equals(AccessOption.with_values) && !_tmp1.equals(AccessOption.without_values)) {
-                throw new IllegalArgumentException(_tmp1 + " is an unrecognized value for " + TRACE_FIELD_ACCESS_OPTION);
+                throw new IllegalArgumentException(_tmp1 + " is an unrecognized value for " + optionName);
             }
         }
-        return new CommandLineOptions(cmdLine.hasOption(TRACE_ARRAY_ACCESS_OPTION),
-                _traceFieldAccessOption,
-                cmdLine.hasOption(TRACE_METHOD_ARGUMENTS_OPTION),
-                cmdLine.hasOption(TRACE_METHOD_CALL_OPTION),
-                cmdLine.hasOption(TRACE_METHOD_RETURN_VALUE_OPTION));
+        return _result;
     }
 
     private static Set<Path> getFilenames(final Path folder) throws IOException {
@@ -162,12 +164,17 @@ public final class CLI {
         }
     }
 
+    private static String accessOptionValuesString() {
+        return String.join(",", Arrays.stream(AccessOption.values())
+                .map(Object::toString).toList());
+    }
+
     enum AccessOption {
         with_values,
         without_values,
     }
 
-    record CommandLineOptions(boolean traceArrayAccess,
+    record CommandLineOptions(Optional<AccessOption> traceArrayAccess,
                               Optional<AccessOption> traceFieldAccess,
                               boolean traceMethodArgs, boolean traceMethodCall, boolean traceMethodRetValue) {
     }
