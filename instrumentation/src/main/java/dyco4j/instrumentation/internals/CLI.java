@@ -33,11 +33,12 @@ import java.util.stream.Stream;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class CLI {
-    public static final String PROGRAM_DATA_FILE_NAME = "program_data.json";
+    public static final String PROGRAM_DATA_FILE_NAME = "program-data.json";
     static final int ASM_VERSION = ASM5;
     static final String IN_FOLDER_OPTION = "in-folder";
     static final String OUT_FOLDER_OPTION = "out-folder";
     static final String CLASSPATH_CONFIG_OPTION = "classpath-config";
+    static final String PROGRAM_DATA_OPTION = "program-data";
     static final String METHOD_NAME_REGEX_OPTION = "method-name-regex";
     static final String TRACE_ARRAY_ACCESS_OPTION = "trace-array-access";
     static final String TRACE_FIELD_ACCESS_OPTION = "trace-field-access";
@@ -49,11 +50,14 @@ public final class CLI {
     public static void main(final String[] args) throws IOException {
         final Options _options = new Options();
         _options.addOption(Option.builder().longOpt(IN_FOLDER_OPTION).required().hasArg(true)
-                .desc("Folders containing the classes to be instrumented.").build());
+                .desc("Folder containing the classes to be instrumented.").build());
         _options.addOption(Option.builder().longOpt(OUT_FOLDER_OPTION).required().hasArg(true)
                 .desc("Folder containing the classes (as descendants) with instrumentation.").build());
         _options.addOption(Option.builder().longOpt(CLASSPATH_CONFIG_OPTION).hasArg(true)
                 .desc("File containing class path (1 entry per line) used by classes to be instrumented.")
+                .build());
+        _options.addOption(Option.builder().longOpt(PROGRAM_DATA_OPTION).hasArg(true)
+                .desc("File containing program data to be used/extended.")
                 .build());
         final String _msg = MessageFormat.format("Regex identifying the methods to be instrumented. Default: {0}.",
                 METHOD_NAME_REGEX);
@@ -103,7 +107,8 @@ public final class CLI {
                 cmdLine.hasOption(TRACE_METHOD_CALL_OPTION),
                 cmdLine.hasOption(TRACE_METHOD_RETURN_VALUE_OPTION));
         final Set<Path> _filenames = getFilenames(_srcRoot);
-        final Path _programDataFile = Paths.get(PROGRAM_DATA_FILE_NAME);
+        final Path _programDataFile = Paths.get(cmdLine.hasOption(PROGRAM_DATA_OPTION) ?
+                cmdLine.getOptionValue(PROGRAM_DATA_OPTION) : PROGRAM_DATA_FILE_NAME);
         final ProgramData _programData = ProgramData.loadData(_programDataFile);
         getMemberId2NameMapping(_filenames, _programData);
 
