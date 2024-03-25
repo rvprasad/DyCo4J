@@ -41,14 +41,13 @@ class CLITest extends AbstractCLITest {
     }
 
     private static assertCallEntryCoupling(traceLines) {
-        def _prev = null
-        for (final l in traceLines.tail()) {
-            if (l ==~ /^$METHOD_ENTRY_TAG,.*/ && _prev) {
-                final _tmp1 = _prev.split(',')
-                final _tmp2 = l.split(',')
+        final _ = traceLines.tail().inject(null) { String prev, String line ->
+            if (line ==~ /^$METHOD_ENTRY_TAG,.*/ && prev) {
+                final _tmp1 = prev.split(',')
+                final _tmp2 = line.split(',')
                 assert _tmp1[1] == _tmp2[1] && _tmp1[0] == METHOD_CALL_TAG
             }
-            _prev = l
+            line
         }
     }
 
@@ -59,19 +58,19 @@ class CLITest extends AbstractCLITest {
     }
 
     private static assertCallSitesOccurOnlyOnce(traceLines) {
-        def _seen = []
-        final _stack = []
-        traceLines.each {
-            if (it ==~ /^$METHOD_ENTRY_TAG,.*/) {
+        final _ = traceLines.inject([[], []]) { result, String line ->
+            def (_seen, _stack) = result
+            if (line ==~ /^$METHOD_ENTRY_TAG,.*/) {
                 _stack.push(_seen)
                 _seen.clear()
-            } else if (it ==~ /^$METHOD_EXIT_TAG,.*/) {
+            } else if (line ==~ /^$METHOD_EXIT_TAG,.*/) {
                 _seen = _stack.pop()
-            } else if (it ==~ /^$METHOD_CALL_TAG,.*/) {
-                final _tmp = it.split(',')[2]
+            } else if (line ==~ /^$METHOD_CALL_TAG,.*/) {
+                final _tmp = line.split(',')[2]
                 assert !(_tmp in _seen)
                 _seen.push(_tmp)
             }
+            [_seen, _stack]
         }
     }
 

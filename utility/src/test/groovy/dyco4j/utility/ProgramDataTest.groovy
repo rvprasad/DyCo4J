@@ -59,7 +59,7 @@ class ProgramDataTest {
         final _shortMethodName2Id = _programData.getViewOfShortMethodName2Id()
         assert _shortMethodName2Id == [(_shortMethod): _methodId.get(), 'sm1': '23']
 
-        final _methodId2Name= _programData.getViewOfMethodId2Name()
+        final _methodId2Name = _programData.getViewOfMethodId2Name()
         assert _methodId2Name == [(_methodId.get()): (_longMethod), '23': 'm1']
     }
 

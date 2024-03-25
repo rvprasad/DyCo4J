@@ -27,7 +27,7 @@ final class LoggerInitializerTest {
             if (_in1 != null)
                 _tmp.load(_in1)
         }
-        assert _tmp.getProperty("traceFolder") != null : "traceFolder property not found"
+        assert _tmp.getProperty("traceFolder") != null: "traceFolder property not found"
 
         checkTraceFilesForLogs(_msg)
         LoggerInitializer.initialized = false
@@ -42,7 +42,7 @@ final class LoggerInitializerTest {
         final _srcPropFile = _srcPropFilePath.toFile()
         final _destPropFilePath = _srcPropFilePath.resolveSibling(Paths.get("logging.properties1"))
         final _destPropFile = _destPropFilePath.toFile()
-        assert _srcPropFile.renameTo(_destPropFile) : "property file could not be renamed"
+        assert _srcPropFile.renameTo(_destPropFile): "property file could not be renamed"
 
         LoggerInitializer.initialize()
         final _msg = "test initialize method without properties file"
@@ -50,7 +50,7 @@ final class LoggerInitializerTest {
         Logger.cleanupForTest()
 
         // undo the name change of build/resources/test/dyco4j/instrumentation/logging/logging.properties
-        assert _destPropFile.renameTo(_srcPropFile) : "property file renaming could not be undone."
+        assert _destPropFile.renameTo(_srcPropFile): "property file renaming could not be undone."
 
         checkTraceFilesForLogs(_msg)
         LoggerInitializer.initialized = false
@@ -60,8 +60,8 @@ final class LoggerInitializerTest {
         final _traceFile = LoggerInitializer.traceFile
         try (final _stream = new GZIPInputStream(new FileInputStream(_traceFile))) {
             final _line = _stream.readLines()[1]
-            assert _line ==~ /^\d+,$expectedMessage$/ : "expected log statement not found"
+            assert _line ==~ /^\d+,$expectedMessage$/: "expected log statement not found"
         }
-        assert _traceFile.delete() : "Could not delete trace file"
+        assert _traceFile.delete(): "Could not delete trace file"
     }
 }

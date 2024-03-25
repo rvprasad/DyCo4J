@@ -82,7 +82,7 @@ public final class ProgramData {
     }
 
     private static Optional<String> addNewName(final String shortName, final String name, final String prefix,
-                                      final Map<String, String> shortName2Id, final Map<String, String> id2Name) {
+                                               final Map<String, String> shortName2Id, final Map<String, String> id2Name) {
         if (shortName2Id.containsKey(shortName))
             return Optional.empty();
 

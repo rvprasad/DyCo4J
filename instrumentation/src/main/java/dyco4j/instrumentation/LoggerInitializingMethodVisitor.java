@@ -22,7 +22,7 @@ final class LoggerInitializingMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public final void visitCode() {
+    public void visitCode() {
         mv.visitCode();
 
         if (name.equals("<clinit>")) {

@@ -42,7 +42,7 @@ abstract class AbstractCLITest {
     protected static final GET_FIELD = Logger.FieldAction.GETF.toString()
     protected static final PUT_FIELD = Logger.FieldAction.PUTF.toString()
 
-    private static fixupPath(final pathStr){
+    private static fixupPath(final pathStr) {
         pathStr.replaceAll('\\\\', '/')
     }
 
@@ -67,25 +67,25 @@ abstract class AbstractCLITest {
         deleteFiles(IN_FOLDER, RESOURCE_FILE_REGEX)
     }
 
-    protected static resolveUnderRootFolder(path) {
+    protected static resolveUnderRootFolder(String path) {
         ROOT_FOLDER.resolve(path)
     }
 
-    protected static resolveUnderTestClassFolder(path) {
+    protected static resolveUnderTestClassFolder(Path path) {
         TEST_CLASS_FOLDER.resolve(path)
     }
 
-    protected static assertNestingOfCallsIsValid(traceLines, numOfMethodEntries) {
-        final _stack = []
-        def _cnt = 0
-        for (String l in traceLines) {
-            if (l =~ /$Logger.METHOD_ENTRY_TAG/) {
-                _stack.push(l)
-            } else if (l =~ /$Logger.METHOD_EXIT_TAG/) {
+    protected static assertNestingOfCallsIsValid(List<String> traceLines, int numOfMethodEntries) {
+        def (_stack, _cnt) = traceLines.inject([[], 0]) { result, line ->
+            def (_stack, _cnt) = result
+            if (line =~ /$Logger.METHOD_ENTRY_TAG/) {
+                _stack.push(line)
+            } else if (line =~ /$Logger.METHOD_EXIT_TAG/) {
                 final String _tmp1 = _stack.pop()
-                assert _tmp1.split(',')[1] == l.split(',')[1]
+                assert _tmp1.split(',')[1] == line.split(',')[1]
                 _cnt++
             }
+            [_stack, _cnt]
         }
         assert !_stack
         assert _cnt == numOfMethodEntries: "${traceLines}"
@@ -95,7 +95,7 @@ abstract class AbstractCLITest {
         assert _executionResult.traceLines.size() == _numOfLines
     }
 
-    protected static assertFreqOfLogs(Map freq = [:], String[] traceLines, numOfMethodEntries) {
+    protected static assertFreqOfLogs(Map freq = [:], String[] traceLines, int numOfMethodEntries) {
         // should not raise exception
         Date.parseToStringDate(traceLines[0])
 
@@ -130,24 +130,24 @@ abstract class AbstractCLITest {
     }
 
     protected static assertPropertiesAboutExit(traceLines) {
-        def _prev = null
-        for (final l in traceLines.tail()) {
+        traceLines.tail().inject(null) { String prev, line ->
             // Every exceptional exit is preceded by an exception
-            if (l ==~ /^$Logger.METHOD_EXIT_TAG,.*,E$/ && _prev) {
-                final _tmp1 = _prev.split(',')
+            if (line ==~ /^$Logger.METHOD_EXIT_TAG,.*,E$/ && prev) {
+                final _tmp1 = prev.split(',')
                 assert _tmp1[0] == Logger.METHOD_EXCEPTION_TAG
             }
-            _prev = l
+            line
         }
 
-        _prev = null
-        for (final l in traceLines.tail()) {
+        traceLines.tail().inject(null) { String prev, _l ->
             // Every return should be followed by a normal exit
-            if (l ==~ /^$Logger.METHOD_RETURN_TAG,.*$/) {
-                _prev = l
-            } else if (_prev) {
-                assert l ==~ /^$Logger.METHOD_EXIT_TAG,.*,N$/
-                _prev = null
+            if (_l ==~ /^$Logger.METHOD_RETURN_TAG,.*$/) {
+                _l
+            } else if (prev) {
+                assert _l ==~ /^$Logger.METHOD_EXIT_TAG,.*,N$/
+                null
+            } else {
+                prev
             }
         }
     }

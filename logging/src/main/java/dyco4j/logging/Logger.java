@@ -85,7 +85,7 @@ public final class Logger {
     }
 
     public static void logFieldRaw(final String receiver, final String fieldValue, final String fieldName,
-                                final String action) {
+                                   final String action) {
         log(action, fieldName, receiver == null ? "" : receiver, fieldValue);
     }
 

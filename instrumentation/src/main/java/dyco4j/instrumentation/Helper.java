@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 public class Helper {
     private static final Logger LOGGER = LoggerFactory.getLogger(Helper.class);
+
     private Helper() {
     }
 
