@@ -10,16 +10,17 @@ _java.lang.Class_ instance of _Logger_ class.
 
 Each log statement in a trace file is a comma separated list of values.  It
 starts with the thread id of the logger followed by the log message and an
-optional message frequency (if greater than 1).  The log message will
-conform to one of the following formats.
+optional message frequency (if greater than 1).  Log messages will conform
+to one of the following formats.
 - method entry `en,<method>`
-  - This message will be followed by the set of corresponding method
-    argument messages with the exception in case of constructors.
+  - When method arguments are logged, this message will be followed by a 
+    set of log messages corresponding to the method's arguments except in 
+    case of constructors.
 - method argument `ar,<index>,<value>`
 - method call `ca,<method>,<call-site-id>`
   - call-site-id is local to the caller method.
 - method return `re,<value>`
-  - There will be no value in case of return from void methods.
+  - In case of void methods, there will be no \<value\>.
 - method exception `xp,<value>`
 - method exit `ex,<method>,(N|E)`
   - `N` and `E` denote normal and exceptional exit, respectively.
@@ -43,19 +44,22 @@ prefixes to identify its type.
 - String `s:`
 - Throwable `t:`
 
-True, false, and null values will be represented as `f`, `t`, and `null`.
+True, false, and null values are represented as `f`, `t`, and `null`.
 
-In case of class and instance initialization methods, `o:<uninitThis>` value
-will be logged instead of the object id when logging the receiver before the
-receiver is initialized.
+When field and array access are logged without values, `*` is logged instead 
+of values.
+
+In case of class and instance initialization methods, when logging the 
+receiver before the receiver is initialized, `o:<uninitThis>` value 
+will be logged instead of the receiver's object id .
 
 Logging library can be configured with the following properties specified in
 _logging.properties_ file.
   - _traceFolder_ where the trace files should be written.
   - _bufferLength_ to be used during logging.
 
-This properties file should be available as _dyco4j/logging/logging.properties_
-on the classpath.
+This file should be available as _dyco4j/logging/logging.properties_ on the
+classpath.
 
 - Required Runtime Dependences:
     - [ASM](http://asm.ow2.org/) 9.6
