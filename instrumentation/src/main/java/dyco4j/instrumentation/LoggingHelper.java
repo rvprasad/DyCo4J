@@ -20,6 +20,7 @@ import java.util.OptionalInt;
 
 public class LoggingHelper {
     public static final String UNINITIALIZED_THIS = "<uninitializedThis>";
+    public static final String UNLOGGED_VALUE = "*";
     private static final String LOGGER;
     private static final String LOGGER_INITIALIZER;
     private static final Method LOGGER_INITIALIZER_INITIALIZE;
@@ -159,8 +160,8 @@ public class LoggingHelper {
 
     public static void emitLogFieldWithoutValues(final MethodVisitor mv, final String fieldName,
                                                  final Logger.FieldAction action) {
-        mv.visitLdcInsn("*");
-        mv.visitLdcInsn("*");
+        mv.visitLdcInsn(UNLOGGED_VALUE);
+        mv.visitLdcInsn(UNLOGGED_VALUE);
         mv.visitLdcInsn(fieldName);
         mv.visitLdcInsn(action.toString());
         emitInvokeLog(mv, LOG_FIELD_RAW);
